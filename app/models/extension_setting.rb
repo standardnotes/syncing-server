@@ -1,0 +1,2 @@
+class ExtensionSetting < ApplicationRecord
+end

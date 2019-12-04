@@ -1,0 +1,15 @@
+default: &default
+  key_path: /path/to/key.pem
+  repo_url: https://github.com/standardnotes/syncing-server.git
+  user: ssh_username
+
+staging:
+  <<: *default
+  server: staging.yourdomain.com
+  branch: staging
+  deploy_to: ~/standard-notes-staging-server
+
+production:
+  <<: *default
+  server: yourdomain.com
+  deploy_to: ~/standard-notes-prod-server

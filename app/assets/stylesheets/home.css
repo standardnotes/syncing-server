@@ -1,0 +1,11 @@
+body {
+  padding-top: 20%;
+  text-align: center;
+  font-family: sans-serif;
+}
+p {
+  width: 80%;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: x-large;
+}
