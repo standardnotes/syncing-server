@@ -36,3 +36,9 @@ dump.rdb
 
 # rbenv
 .ruby-version
+
+# vim Swap Files
+*.swp
+
+# Sqlite3 Database Files
+*.sqlite3
