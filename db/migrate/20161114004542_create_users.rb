@@ -1,4 +1,4 @@
-class CreateUsers < ActiveRecord::Migration
+class CreateUsers < ActiveRecord::Migration[5.0]
   def change
     create_table :users, :id => false do |t|
       t.string :uuid, limit: 36, primary_key: true, null: false
