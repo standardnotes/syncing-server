@@ -41,33 +41,7 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 
 ### Environment variables
 
-**SECRET_KEY_BASE**
-
-Rails secret key used only in production environment
-
-**RAILS_ENV**
-
-Rails environment, set it to `production` on production server.
-
-**DB_HOST**
-
-Database host.
-
-**DB_PORT**
-
-Database port. 3306 is standard.
-
-**DB_DATABASE**
-
-Database name.
-
-**DB_USERNAME**
-
-Database username.
-
-**DB_PASSWORD**
-
-Database password.
+See `env.sample`
 
 ### Docker Setup
 

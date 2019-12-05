@@ -109,7 +109,7 @@ class Api::AuthController < Api::ApiController
       user = result[:user]
       user.updated_with_user_agent = request.user_agent
       user.save
-      unless Rails.env == 'development' || Rails.env == 'test'
+      unless ENV['SYNCING_SERVER_EDITION'] == 'community'
         RegistrationJob.perform_later(user.email, user.created_at.to_s)
       end
       render :json => result
