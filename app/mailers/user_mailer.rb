@@ -21,4 +21,10 @@ class UserMailer < ApplicationMailer
 
     mail(to: user.email, subject: "Failed Daily Backup to #{@ext_name}")
   end
+
+  def mfa_disabled(user_id)
+    user = User.find(user_id)
+    mail(to: user.email, subject: "Two-factor authentication has been disabled for your account.")
+  end
+
 end

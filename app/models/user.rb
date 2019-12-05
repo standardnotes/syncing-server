@@ -43,8 +43,10 @@ class User < ApplicationRecord
       email_recovery_enabled = mfa.decoded_content["allowEmailRecovery"] == true
       if email_recovery_enabled || force
         mfa.mark_as_deleted
+        puts "MFA has been disabled."
+        UserMailer.mfa_disabled(self.uuid).deliver_later
       else
-        puts "User has email recovery disabled."
+        puts "Unable to disable MFA; user has email recovery disabled."
       end
     end
   end
