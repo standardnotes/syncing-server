@@ -69,6 +69,26 @@ Database username.
 
 Database password.
 
+### Docker Setup
+
+Docker is the quick and easy way to try out Standard Notes. With two commands you'll be up and running.
+
+#### Standalone Instance
+
+The `Dockerfile` is enough to get you up and running. Once Docker is installed on your system simply run the following commands to get up and running in Development Mode.
+
+```
+$ docker build -t syncing-server .
+$ docker run -d \
+  -p 3000:3000 \
+  --name my-syncing-server \
+  syncing-server
+```
+
+You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
+
+Note: This standalone setup is designed for Development use only. Please use the `docker-compose` method (coming soon) for production instances.
+
 ## License
 
 Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
