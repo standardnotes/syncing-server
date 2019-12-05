@@ -1,6 +1,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Overwrite queue name from application.rb
+  config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'sn_main'
+
   # Code is not reloaded between requests.
   config.cache_classes = true
   MAX_LOG_MEGABYTES = 50
