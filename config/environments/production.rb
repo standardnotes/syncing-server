@@ -1,6 +1,12 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
+  Raven.configure do |config|
+    config.dsn = raven_dsn
+    config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
+  end
 
+  # Overwrite queue name
+  config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'sn_main'
   # Code is not reloaded between requests.
   config.cache_classes = true
   MAX_LOG_MEGABYTES = 50

@@ -10,6 +10,11 @@
 #   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
 #
 
+sqlite: &sqlite
+  adapter: sqlite3
+  pool: 5
+  timeout: 5000
+
 mysql: &mysql
   adapter: mysql2
   encoding: utf8
@@ -20,11 +25,6 @@ mysql: &mysql
   host: <%= ENV['DB_HOST'] %>
   port: <%= ENV['DB_PORT'] %>
   reconnect: true
-
-sqlite: &sqlite
-  adapter: sqlite3
-  pool: <%= ENV.fetch["RAILS_MAX_THREADS"] { 5 } %>
-  timeout: 5000
 
 development:
   <<: *sqlite
@@ -37,11 +37,6 @@ test:
   <<: *sqlite
   database: db/test.sqlite3
 
-# You can use this database configuration with:
-#
-#   production:
-#     url: <%= ENV['DATABASE_URL'] %>
-#
 staging:
   <<: *mysql
 

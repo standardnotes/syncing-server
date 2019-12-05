@@ -10,16 +10,7 @@ module StandardNotes
 
     Shoryuken.logger.level = Logger::FATAL
     config.active_job.queue_adapter = :shoryuken
-    config.action_mailer.deliver_later_queue_name = ENV["SQS_QUEUE"] ? ENV["SQS_QUEUE"] : (Rails.env.production? ? 'sn_main' : 'dev_queue')
-
-    raven_dsn = ENV["RAVEN_DSN"]
-    if raven_dsn
-      Raven.configure do |config|
-        config.dsn = raven_dsn
-        config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
-        config.environments = ['staging', 'production']
-      end
-    end
+    config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'
 
     # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications.
     config.middleware.insert_before 0, Rack::Cors do

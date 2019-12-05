@@ -1,23 +1,27 @@
 source 'https://rubygems.org'
 
 gem 'rails', '5.1.7'
-gem 'mysql2', '>= 0.3.13', '< 0.5'
 gem 'whenever', :require => false
 gem 'shoryuken'
 gem 'secure_headers'
 gem 'jwt'
 gem 'bcrypt'
-gem 'aws-sdk-sqs'
 gem 'rack-cors', :require => 'rack/cors'
 gem 'haml-rails'
 gem 'dotenv-rails'
-gem "sentry-raven"
 gem 'rotp'
 
 # Used for 'respond_to' feature
 gem 'responders', '~> 2.0'
 
+group :staging, :production do
+  gem 'aws-sdk-sqs'
+  gem 'mysql2', '>= 0.3.13', '< 0.5'
+  gem 'sentry-raven'
+end
+
 group :development, :test do
+  gem 'sqlite3'
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
   gem 'spring'

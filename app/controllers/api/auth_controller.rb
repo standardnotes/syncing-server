@@ -109,7 +109,9 @@ class Api::AuthController < Api::ApiController
       user = result[:user]
       user.updated_with_user_agent = request.user_agent
       user.save
-      RegistrationJob.perform_later(user.email, user.created_at.to_s)
+      unless Rails.env == 'development' || Rails.env == 'test'
+        RegistrationJob.perform_later(user.email, user.created_at.to_s)
+      end
       render :json => result
     end
   end

@@ -1,10 +1,15 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  Raven.configure do |config|
+    config.dsn = raven_dsn
+    config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
+  end
+
   # Code is not reloaded between requests.
   config.cache_classes = true
 
-    # Use a different logger for distributed setups.
+  # Use a different logger for distributed setups.
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
 

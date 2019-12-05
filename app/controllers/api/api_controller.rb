@@ -48,6 +48,8 @@ class Api::ApiController < ApplicationController
   end
 
   def set_raven_context
+    return if Rails.env == 'development' || Rails.env == 'test'
+
     if self.current_user
       Raven.user_context(id: self.current_user.uuid)
     end
