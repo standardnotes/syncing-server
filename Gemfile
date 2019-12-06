@@ -17,7 +17,7 @@ gem 'rotp'
 # Used for 'respond_to' feature
 gem 'responders', '~> 2.0'
 
-group :development, :test do
+group :development, :test, :docker_development do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
   gem 'spring'
@@ -28,7 +28,9 @@ group :development, :test do
   # Used by Mailatcher
   gem 'sinatra', github: 'sinatra'
   gem 'mailcatcher'
+end
 
+group :development, :test do
   # Deployment tools
   gem 'capistrano'
   gem 'capistrano-bundler'
@@ -37,4 +39,8 @@ group :development, :test do
   gem 'capistrano-rvm'
   gem 'capistrano-sidekiq'
   gem 'capistrano-shoryuken', github: 'mobitar/capistrano-shoryuken'
+end
+
+group :docker_development do
+  gem 'sqlite3'
 end
