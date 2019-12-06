@@ -18,5 +18,5 @@ RUN gem install bundler && bundle install
 COPY . /syncing-server
 
 # Migrate the DB and start development server
-# RUN rails db:migrate
-# CMD ["rails", "server", "-b", "0.0.0.0"]
+RUN rails db:migrate
+CMD ["rails", "server", "-b", "0.0.0.0"]

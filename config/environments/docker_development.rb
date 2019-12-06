@@ -2,7 +2,6 @@ Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   config.middleware.delete Rack::Lock
-
   # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
   # In the development environment your application's code is reloaded on
@@ -12,10 +11,8 @@ Rails.application.configure do
   config.reload_classes_only_on_change = true
 
   config.logger = ActiveSupport::Logger.new(config.paths['log'].first, 1, 1 * 1024 * 1024)
-
-  require 'custom_log_formatter'
-  config.log_formatter = CustomLogFormatter.new
-  config.logger.formatter = config.log_formatter
+  config.logger = Logger.new(STDOUT)
+  config.logger.level = Logger::INFO
 
   # Do not eager load code on boot.
   config.eager_load = false
