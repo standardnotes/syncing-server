@@ -19,12 +19,8 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 	git clone https://github.com/standardnotes/syncing-server.git
 	```
 
-2. Create a .env file in the project's root directory. Add environment variables (see Environment variables for full listing):
+2. Create a .env file in the project's root directory. See env.sample for required values.
 
-	```
-	DB_HOST=localhost
-	...
-	```
 
 3. Initialize project:
 
@@ -38,10 +34,6 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 	```
 	rails s
 	```
-
-### Environment variables
-
-See `env.sample`
 
 ### Docker Setup
 
@@ -62,7 +54,3 @@ $ docker run -d \
 You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
 
 Note: This standalone setup is designed for Development use only. Please use the `docker-compose` method (coming soon) for production instances.
-
-## License
-
-Licensed under the GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
