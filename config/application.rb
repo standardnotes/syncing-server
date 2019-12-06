@@ -10,7 +10,7 @@ module StandardNotes
 
     Shoryuken.logger.level = Logger::FATAL
     config.active_job.queue_adapter = :shoryuken
-    config.action_mailer.deliver_later_queue_name = ENV["SQS_QUEUE"] ? ENV["SQS_QUEUE"] : (Rails.env.production? ? 'sn_main' : 'dev_queue')
+    config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'
 
     raven_dsn = ENV["RAVEN_DSN"]
     if raven_dsn

@@ -300,6 +300,7 @@ DEPENDENCIES
   shoryuken
   sinatra!
   spring
+  sqlite3
   whenever
 
 BUNDLED WITH
