@@ -61,6 +61,7 @@ class User < ApplicationRecord
       content = ext.decoded_content
       if content && content["subtype"] == "backup.email_archive"
         ext.mark_as_deleted
+        puts "Successfully disabled email backups."
       end
     end
   end
