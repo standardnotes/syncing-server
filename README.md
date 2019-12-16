@@ -53,4 +53,18 @@ $ docker run -d \
 
 You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
 
-Note: This standalone setup is designed for Development use only. Please use the `docker-compose` method (coming soon) for production instances.
+Note: This standalone setup is designed for Development use only. Please use the `docker-compose` method for production instances.
+
+#### Docker Compose
+
+Use the included `docker-compose.yml` file to build Standard Notes with docker-compose. Once your `.env` file has been copied and configured, simply run:
+
+```
+docker-compose up -d
+```
+
+This should load the syncing-server and MySQL database containers and run the necessary migrations. You should then be able to reach the server at `http://localhost:[EXPOSED_PORT]` . For example, if inside of my `.env` file I set "EXPOSED_PORT=7459" I could reach the syncing-server via `http://localhost:7459`
+
+To stop the server, `cd` into this directory again and run `docker-compose down`
+
+Your MySQL Data will be written to your local disk at `/var/lib/mysql` - Be sure to back this up in a production instance.
