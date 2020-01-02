@@ -13,6 +13,8 @@ set :deploy_to, CAP_CONFIG['staging']['deploy_to']
 
 set :shoryuken_queues, [CAP_CONFIG['staging']['sqs_queue']]
 
+set :branch, CAP_CONFIG['staging']['branch']
+
 # role-based syntax
 # ==================
 
