@@ -1,0 +1,6 @@
+{
+  "name": "Standard Notes Syncing Server",
+  "description": "A ready to use syncing server for use with Standard Notes.",
+  "repository": "https://github.com/standardnotes/syncing-server",
+  "keywords": ["standard notes", "encrypted"]
+}
