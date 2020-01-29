@@ -41,7 +41,4 @@ production:
   <<: *default
 
 docker_development:
-  adapter: sqlite3
-  pool: 5
-  timeout: 5000
-  database: db/docker.sqlite3
+  <<: *default
