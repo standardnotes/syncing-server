@@ -6,7 +6,7 @@ ENV RAILS_ENV=docker_development
 # Update System
 RUN apt-get update && \
   apt-get upgrade -y && \
-  apt-get install -y git build-essential libsqlite3-dev libmariadb-dev vim
+  apt-get install -y git build-essential libmariadb-dev vim
 
 # Copy and install Gems
 COPY ./Gemfile      /syncing-server/Gemfile
