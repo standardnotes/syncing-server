@@ -40,7 +40,3 @@ group :development, :test do
   gem 'capistrano-sidekiq'
   gem 'capistrano-shoryuken', github: 'mobitar/capistrano-shoryuken'
 end
-
-group :docker_development do
-  gem 'sqlite3'
-end
