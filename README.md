@@ -68,3 +68,9 @@ This should load the syncing-server and MySQL database containers and run the ne
 To stop the server, `cd` into this directory again and run `docker-compose down`
 
 Your MySQL Data will be written to your local disk at `/var/lib/mysql` - Be sure to back this up in a production instance.
+
+### Heroku
+
+You can deploy your own Standard Notes server with one click on Heroku:
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
