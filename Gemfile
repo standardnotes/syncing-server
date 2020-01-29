@@ -24,10 +24,6 @@ group :development, :test, :docker_development do
   gem 'puma'
   gem 'listen'
   gem 'rspec-rails'
-
-  # Used by Mailatcher
-  gem 'sinatra', github: 'sinatra'
-  gem 'mailcatcher'
 end
 
 group :development, :test do
