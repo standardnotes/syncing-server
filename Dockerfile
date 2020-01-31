@@ -6,7 +6,7 @@ ENV RAILS_ENV=docker_development
 # Update System
 RUN apt-get update && \
   apt-get upgrade -y && \
-  apt-get install -y git build-essential libmariadb-dev vim
+  apt-get install -y git build-essential libmariadb-dev
 
 # Copy and install Gems
 COPY ./Gemfile      /syncing-server/Gemfile
@@ -18,5 +18,4 @@ RUN gem install bundler && bundle install
 COPY . /syncing-server
 
 # Migrate the DB and start development server
-RUN bundle exec rails db:migrate
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+CMD "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
