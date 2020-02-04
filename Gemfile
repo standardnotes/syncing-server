@@ -36,3 +36,7 @@ group :development, :test do
   gem 'capistrano-sidekiq'
   gem 'capistrano-shoryuken', github: 'mobitar/capistrano-shoryuken'
 end
+
+group :test do
+  gem 'simplecov', require: false
+end
