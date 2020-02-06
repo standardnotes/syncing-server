@@ -2,10 +2,6 @@ require 'rails_helper'
 
 RSpec.describe Admin::AdminController, type: :controller do
   describe "POST admin/delete_account" do
-    let(:test_user) {
-      User.new(email: "test@testing.com")
-    }
-
     before(:all) do
       ENV['ADMIN_IPS'] = '192.168.0.1'
       ENV['ADMIN_KEY'] = 'secret_admin_key'
@@ -32,12 +28,20 @@ RSpec.describe Admin::AdminController, type: :controller do
     it "deletes the user if found" do
       controller.request.remote_addr = ENV['ADMIN_IPS']
 
-      post :delete_account, params: { email: test_user.email, admin_key: ENV['ADMIN_KEY'] }
+      user_manager = SyncEngine::V20190520::UserManager.new(User)
+      params = ActionController::Parameters.new({
+        pw_cost: 110000,
+        version: '003'
+      })
+
+      test_registration = user_manager.register("test@testing.com", "123456", params)
+
+      post :delete_account, params: { email: test_registration[:user][:email], admin_key: ENV['ADMIN_KEY'] }
       expect(response).to have_http_status(:ok)
       expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
       expect(JSON.parse(response.body)).to eq({})
 
-      expect(User.where(email: test_user.email)).to_not be_present
+      expect(User.where(email: test_registration[:user][:email])).to_not be_present
     end
   end
 end
