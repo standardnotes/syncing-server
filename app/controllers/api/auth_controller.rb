@@ -87,6 +87,10 @@ class Api::AuthController < Api::ApiController
       return
     end
 
+    if !params[:email] or !params[:password]
+      return self.render_invalid_auth
+    end
+
     result = @user_manager.sign_in(params[:email], params[:password])
     if result[:error]
       self.handle_failed_auth_attempt
@@ -98,6 +102,10 @@ class Api::AuthController < Api::ApiController
   end
 
   def register
+    if !params[:email] or !params[:password]
+      return render :json => { :error => { :message => "Please enter an email and a password to register." } }, :status => 401
+    end
+
     if !params[:version]
       params[:version] = "002"
     end
