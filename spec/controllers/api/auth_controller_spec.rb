@@ -21,6 +21,11 @@ RSpec.describe Api::AuthController, type: :controller do
     ["identifier", "pw_cost", "pw_nonce", "version"].sort
   }
 
+  let(:mfa_item) {
+    mfa_content = { secret: "base32secretkey3232" }
+    Item.new(user_uuid: test_user.uuid, content_type: "SF|MFA", content: "---#{Base64.encode64(JSON.dump(mfa_content))}")
+  }
+
   describe "GET auth/params" do
     context "when the provided email does not belong to a user" do
       it "should return the params" do
@@ -124,6 +129,42 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(parsed_response_body["user"]).to_not be_nil
         expect(parsed_response_body["user"]["email"]).to eq(test_user_credentials[:email])
         expect(parsed_response_body["token"]).to_not be_nil
+      end
+    end
+
+    context "when using MFA" do
+      context "when mfa param key is not provided" do
+        it "sign in should fail" do
+          mfa_item.save
+          post :sign_in, params: test_user_credentials
+  
+          expect(response).to have_http_status(:unauthorized)
+          expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
+          parsed_response_body = JSON.parse(response.body)
+  
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body["error"]).to_not be_nil
+          expect(parsed_response_body["error"]["tag"]).to eq("mfa-required")
+          expect(parsed_response_body["error"]["message"]).to eq("Please enter your two-factor authentication code.")
+          expect(parsed_response_body["error"]["payload"]["mfa_key"]).to eq("mfa_#{mfa_item.uuid}")
+        end
+      end  
+      
+      context "when mfa param key is provided" do
+        it "sign in should fail" do
+          mfa_item.save
+          post :sign_in, params: test_user_credentials.merge({ "mfa_#{mfa_item.uuid}": "000000" })
+  
+          expect(response).to have_http_status(:unauthorized)
+          expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
+          parsed_response_body = JSON.parse(response.body)
+  
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body["error"]).to_not be_nil
+          expect(parsed_response_body["error"]["tag"]).to eq("mfa-invalid")
+          expect(parsed_response_body["error"]["message"]).to eq("The two-factor authentication code you entered is incorrect. Please try again.")
+          expect(parsed_response_body["error"]["payload"]["mfa_key"]).to eq("mfa_#{mfa_item.uuid}")
+        end
       end
     end
   end
@@ -314,6 +355,62 @@ RSpec.describe Api::AuthController, type: :controller do
           expect(parsed_response_body["user"]["email"]).to eq(test_user_credentials[:email])
           expect(parsed_response_body["token"]).to_not be_nil
         end
+      end
+    end
+  end
+
+  describe "authenticate_user" do
+    context "when an invalid Authorization header value is passed" do
+      it "should return unauthorized error" do
+        request.headers['Authorization'] = "invalid-token"
+        post :update, params: { version: "002" }
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body).to_not be_nil
+        expect(parsed_response_body["error"]).to_not be_nil
+        expect(parsed_response_body["error"]["message"]).to eq("Invalid login credentials.")
+      end
+    end
+
+    context "when an invalid token is used" do
+      it "should return unauthorized error" do
+        request.headers['Authorization'] = "bearer xxx"
+
+        post :update, params: { version: "002" }
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body).to_not be_nil
+        expect(parsed_response_body["error"]).to_not be_nil
+        expect(parsed_response_body["error"]["message"]).to eq("Invalid login credentials.")
+      end
+    end
+
+    context "when the user signs in, changes their password and still use their old JWT" do
+      it "should return unauthorized error" do
+        post :sign_in, params: test_user_credentials
+
+        request.headers['Authorization'] = "bearer #{JSON.parse(response.body)["token"]}"
+        post :change_pw, params: { 
+          current_password: test_user_credentials[:password], 
+          new_password: 'new-pwd', 
+          pw_nonce: test_user.pw_nonce 
+        }
+
+        post :update, params: { version: "002" }
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body).to_not be_nil
+        expect(parsed_response_body["error"]).to_not be_nil
+        expect(parsed_response_body["error"]["message"]).to eq("Invalid login credentials.")
       end
     end
   end

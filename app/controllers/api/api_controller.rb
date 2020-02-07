@@ -27,9 +27,9 @@ class Api::ApiController < ApplicationController
     end
 
     claims = SyncEngine::JwtHelper.decode(token) rescue nil
-    user = User.find_by_uuid claims['user_uuid']
+    user = User.find_by_uuid claims['user_uuid'] unless claims.nil?
 
-    if user == nil
+    if user.nil?
       render_invalid_auth
       return
     end
