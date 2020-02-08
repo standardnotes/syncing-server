@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   subject {
-    described_class.new(pw_cost: 11000, version: "003", email: "sn@testing.com")
+    described_class.create(pw_cost: 11000, version: "003", email: "sn@testing.com", encrypted_password: 'encrypted')
   }
 
   describe "serializable_hash" do
@@ -51,6 +51,111 @@ RSpec.describe User, type: :model do
   describe "bytes_to_megabytes" do
     specify do
       expect(subject.bytes_to_megabytes(1000000)).to eq "0.95MB"
+    end
+  end
+
+  describe "total_data_size" do
+    specify do
+      content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
+       ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
+       ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
+
+      for i in 1..256 do
+        item = Item.new(user_uuid: subject.uuid, content: content)
+        item.save
+      end
+      
+      expect(subject.total_data_size).to eq("0.06MB")
+    end
+  end
+
+  describe "items_by_size" do
+    specify do
+      item_contents = Array.new
+
+      item_contents << 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sollicitudin'\
+       ' rutrum diam non rutrum. Aliquam eu malesuada nunc, et tincidunt dolor. Sed blandit odio vitae'\
+       ' lorem tristique luctus. Donec faucibus quam vitae porta tincidunt. Morbi dolor eros, egestas eget'\
+       ' magna eget, volutpat maximus ipsum. Nulla semper dolor dignissim massa molestie egestas. Aenean'\
+       ' dignissim suscipit iaculis. Vestibulum euismod accumsan consequat. Quisque quis dictum eros, sed'\
+       ' vestibulum enim. Etiam ultricies blandit metus.'
+
+      item_contents << 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'\
+       ' Phasellus rutrum vitae magna et blandit. Ut id urna a lorem massa nunc.'
+
+      item_contents << 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
+       ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
+       ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
+
+      items = Array.new
+
+      item_contents.each_with_index do |content, index|
+        item = Item.create(user_uuid: subject.uuid, content: content)
+        items[index] = { content: content, uuid: item.uuid }
+      end
+      
+      items_by_size = subject.items_by_size
+      
+      expect(items_by_size[0][:uuid]).to eq(items[0][:uuid])
+      expect(items_by_size[1][:uuid]).to eq(items[2][:uuid])
+      expect(items_by_size[2][:uuid]).to eq(items[1][:uuid])
+    end
+  end
+
+  describe "export_archive" do
+    specify do
+      content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
+       ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
+       ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
+
+      item = Item.create(user_uuid: subject.uuid, content: content)
+
+      subject.export_archive
+
+      expect(File).to exist("tmp/#{subject.email}-restore.txt")
+    end
+  end
+
+  describe "disable_mfa" do
+    context "when allowEmailRecovery is false" do
+      it "MFA item should not be marked as deleted" do
+        data = { allowEmailRecovery: false }
+        content = "---#{Base64.encode64(JSON.dump(data))}"
+
+        item = Item.create(user_uuid: subject.uuid, content: content, content_type: 'SF|MFA')
+        
+        subject.disable_mfa
+
+        item.reload
+        expect(item.deleted).to be false      
+      end
+    end
+
+    context "when allowEmailRecovery is true" do
+      it "MFA item should be marked as deleted" do
+        data = { allowEmailRecovery: true }
+        content = "---#{Base64.encode64(JSON.dump(data))}"
+
+        item = Item.create(user_uuid: subject.uuid, content: content, content_type: 'SF|MFA')
+        
+        subject.disable_mfa
+
+        item.reload
+        expect(item.deleted).to be true      
+      end
+    end
+  end
+
+  describe "compute_data_signature" do
+    specify do
+      content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
+      ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
+      ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
+
+      Item.create(user_uuid: subject.uuid, content: content, content_type: 'Note')
+      hash = subject.compute_data_signature
+
+      expect(hash).to_not be_nil
     end
   end
 end
