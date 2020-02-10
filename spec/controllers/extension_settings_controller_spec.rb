@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe ExtensionSettingsController, type: :controller do
-  describe "GET mute" do
-    it "set mute_emails to true" do
+  describe 'GET mute' do
+    it 'set mute_emails to true' do
       extension_settings = ExtensionSetting.new
       extension_settings.save
 

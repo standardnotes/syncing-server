@@ -1,18 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  subject {
-    described_class.create(pw_cost: 11000, version: "003", email: "sn@testing.com", encrypted_password: 'encrypted')
-  }
+  subject do
+    described_class.create(pw_cost: 11_000, version: '003', email: 'sn@testing.com', encrypted_password: 'encrypted')
+  end
 
-  describe "serializable_hash" do
-    let(:hash) {
+  describe 'serializable_hash' do
+    let(:hash) do
       subject.serializable_hash
-    }
+    end
 
-    let(:hash_keys) {
-      ["uuid", "email"].sort
-    }
+    let(:hash_keys) do
+      %w[uuid email].sort
+    end
 
     specify do
       expect(hash.count).to eq 2
@@ -20,58 +20,58 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe "auth_params" do
+  describe 'auth_params' do
     specify do
       auth_params = subject.auth_params
       expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier)
     end
 
     specify do
-      subject.pw_nonce = "some nonce"
+      subject.pw_nonce = 'some nonce'
 
       auth_params = subject.auth_params
       expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier, :pw_nonce)
     end
 
     specify do
-      subject.pw_salt = "some salt"
+      subject.pw_salt = 'some salt'
 
       auth_params = subject.auth_params
       expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier, :pw_salt)
     end
 
     specify do
-      subject.pw_func = "some function"
+      subject.pw_func = 'some function'
 
       auth_params = subject.auth_params
       expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier, :pw_func, :pw_alg, :pw_key_size)
     end
   end
 
-  describe "bytes_to_megabytes" do
+  describe 'bytes_to_megabytes' do
     specify do
-      expect(subject.bytes_to_megabytes(1000000)).to eq "0.95MB"
+      expect(subject.bytes_to_megabytes(1_000_000)).to eq '0.95MB'
     end
   end
 
-  describe "total_data_size" do
+  describe 'total_data_size' do
     specify do
       content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
        ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
        ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
 
-      for i in 1..256 do
+      (1..256).each do |_i|
         item = Item.new(user_uuid: subject.uuid, content: content)
         item.save
       end
-      
-      expect(subject.total_data_size).to eq("0.06MB")
+
+      expect(subject.total_data_size).to eq('0.06MB')
     end
   end
 
-  describe "items_by_size" do
+  describe 'items_by_size' do
     specify do
-      item_contents = Array.new
+      item_contents = []
 
       item_contents << 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sollicitudin'\
        ' rutrum diam non rutrum. Aliquam eu malesuada nunc, et tincidunt dolor. Sed blandit odio vitae'\
@@ -87,22 +87,22 @@ RSpec.describe User, type: :model do
        ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
        ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
 
-      items = Array.new
+      items = []
 
       item_contents.each_with_index do |content, index|
         item = Item.create(user_uuid: subject.uuid, content: content)
         items[index] = { content: content, uuid: item.uuid }
       end
-      
+
       items_by_size = subject.items_by_size
-      
+
       expect(items_by_size[0][:uuid]).to eq(items[0][:uuid])
       expect(items_by_size[1][:uuid]).to eq(items[2][:uuid])
       expect(items_by_size[2][:uuid]).to eq(items[1][:uuid])
     end
   end
 
-  describe "export_archive" do
+  describe 'export_archive' do
     specify do
       content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
        ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
@@ -116,37 +116,37 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe "disable_mfa" do
-    context "when allowEmailRecovery is false" do
-      it "MFA item should not be marked as deleted" do
+  describe 'disable_mfa' do
+    context 'when allowEmailRecovery is false' do
+      it 'MFA item should not be marked as deleted' do
         data = { allowEmailRecovery: false }
         content = "---#{Base64.encode64(JSON.dump(data))}"
 
         item = Item.create(user_uuid: subject.uuid, content: content, content_type: 'SF|MFA')
-        
+
         subject.disable_mfa
 
         item.reload
-        expect(item.deleted).to be false      
+        expect(item.deleted).to be false
       end
     end
 
-    context "when allowEmailRecovery is true" do
-      it "MFA item should be marked as deleted" do
+    context 'when allowEmailRecovery is true' do
+      it 'MFA item should be marked as deleted' do
         data = { allowEmailRecovery: true }
         content = "---#{Base64.encode64(JSON.dump(data))}"
 
         item = Item.create(user_uuid: subject.uuid, content: content, content_type: 'SF|MFA')
-        
+
         subject.disable_mfa
 
         item.reload
-        expect(item.deleted).to be true      
+        expect(item.deleted).to be true
       end
     end
   end
 
-  describe "compute_data_signature" do
+  describe 'compute_data_signature' do
     specify do
       content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
       ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
