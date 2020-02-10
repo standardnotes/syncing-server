@@ -81,7 +81,7 @@ class Api::ItemsController < Api::ApiController
   def backup
     ext = current_user.items.find(params[:uuid])
     content = ext.decoded_content
-    if content && content["subtype"] == nil
+    if content && content["subtype"].nil?
       items = current_user.items.to_a
       if items && items.length > 0
         post_to_extension(content["url"], items, ext)
