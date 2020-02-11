@@ -158,4 +158,23 @@ RSpec.describe User, type: :model do
       expect(hash).to_not be_nil
     end
   end
+
+  describe 'perform_email_backup' do
+    specify do
+      expect(subject.perform_email_backup).to_not be_nil
+    end
+  end
+
+  describe 'disable_email_backups' do
+    specify do
+      data = { subtype: 'backup.email_archive' }
+      Item.create(user_uuid: subject[:uuid], content: "---#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
+
+      extension_item = subject.items.where(content_type: 'SF|Extension', deleted: false).first
+      subject.disable_email_backups
+
+      extension_item.reload
+      expect(extension_item.deleted).to be true
+    end
+  end
 end
