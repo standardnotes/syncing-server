@@ -18,6 +18,9 @@ RSpec.describe Api::ItemsController, type: :controller do
 
     data = { frequency: 'daily', url: 'http://test.com' }
     Item.create(user_uuid: registration[:user][:uuid], content: "---#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
+
+    data = { frequency: 'realtime', url: 'http://test.com' }
+    Item.create(user_uuid: registration[:user][:uuid], content: "---#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
   end
 
   let(:test_user) do
@@ -53,7 +56,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
           @controller = Api::ItemsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
-          post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520' }
+          post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: [test_items] }
 
           expect(response).to have_http_status(:ok)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
