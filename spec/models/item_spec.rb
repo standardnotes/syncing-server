@@ -94,11 +94,10 @@ RSpec.describe Item, type: :model do
       subject.content = invalid_content
       expect(subject.perform_associated_job).to be_nil
 
-      subject.content = backup_email_archive_content
-      expect(subject.perform_associated_job).to receive(:backup_data)
-
       subject.content = perform_later_content
-      expect(subject.perform_associated_job).to receive(:perform_later)
+      expect {
+        subject.perform_associated_job
+      }.to have_enqueued_job(ExtensionJob)
     end
   end
 end
