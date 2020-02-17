@@ -1,20 +1,18 @@
 require 'rails_helper'
 
 RSpec.describe Api::AuthController, type: :controller do
-  test_user_credentials = { email: 'test@email-sn.org', password: '123456' }
-
-  before(:each) do
-    user_manager = SyncEngine::V20190520::UserManager.new(User)
-    params = ActionController::Parameters.new(
-      pw_cost: 110_000,
-      version: '003'
-    )
-
-    user_manager.register(test_user_credentials[:email], test_user_credentials[:password], params)
-  end
+  test_password = '123456'
 
   let(:test_user) do
-    User.where(email: test_user_credentials[:email]).first
+    build(:user, password: test_password)
+  end
+
+  before(:each) do
+    test_user.save
+  end
+  
+  let(:test_user_credentials) do
+    { email: test_user.email, password: test_password }
   end
 
   let(:auth_params_keys) do
@@ -22,8 +20,7 @@ RSpec.describe Api::AuthController, type: :controller do
   end
 
   let(:mfa_item) do
-    mfa_content = { secret: 'base32secretkey3232' }
-    Item.new(user_uuid: test_user.uuid, content_type: 'SF|MFA', content: "---#{Base64.encode64(JSON.dump(mfa_content))}")
+    create(:item, :mfa_type, user_uuid: test_user.uuid)
   end
 
   describe 'GET auth/params' do
