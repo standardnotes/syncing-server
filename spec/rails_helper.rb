@@ -5,7 +5,7 @@ SimpleCov.start :rails do
   add_filter %r{/lib/custom_log_formatter.rb}
   add_filter %r{/app/mailers}
 
-  # Remove 'Lubraries' tab
+  # Remove 'Libraries' tab
   groups.delete('Libraries')
 end
 
@@ -31,7 +31,7 @@ require 'rspec/rails'
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 #
-# Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 
 # Checks for pending migration and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
