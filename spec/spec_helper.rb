@@ -102,8 +102,7 @@ RSpec.configure do |config|
   original_stdout = $stdout
 
   config.before(:all) do
-    $stderr = File.open(File::NULL, 'w')
-    $stdout = File.open(File::NULL, 'w')
+    $stderr = $stdout = File.open(File::NULL, 'w') unless ENV['RSPEC_ENABLE_CONSOLE_OUTPUT']
   end
 
   config.after(:all) do
