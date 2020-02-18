@@ -48,7 +48,16 @@ RSpec.describe Api::ItemsController, type: :controller do
 
           @controller = Api::ItemsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
-          post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: [test_items] }
+
+          test_items[0].deleted = true
+          test_items[1].content = 'Updated note.'
+          items_param = test_items.to_a.map(&:serializable_hash)
+          
+          new_item_uuid = SecureRandom.uuid
+          new_item = attributes_for(:item, :note_type, uuid: new_item_uuid, user_uuid: test_user.uuid, content: 'New item')
+          items_param.push(new_item)
+
+          post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
           expect(response).to have_http_status(:ok)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -70,7 +79,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
           @controller = Api::ItemsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
-          post :sync, params: { sync_token: '', cursor_token: '', limit: 5 }
+          post :sync, params: { sync_token: '', cursor_token: '', limit: 5, items: [test_items] }
 
           expect(response).to have_http_status(:ok)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
