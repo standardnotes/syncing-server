@@ -1,30 +1,22 @@
 require 'rails_helper'
 
 RSpec.describe Api::ItemsController, type: :controller do
-  test_user_credentials = { email: 'test@email-sn.org', password: '123456' }
-
-  before(:each) do
-    user_manager = SyncEngine::V20190520::UserManager.new(User)
-    params = ActionController::Parameters.new(
-      pw_cost: 110_000,
-      version: '003'
-    )
-
-    registration = user_manager.register(test_user_credentials[:email], test_user_credentials[:password], params)
-
-    [*1..10].each do |note_number|
-      Item.create(user_uuid: registration[:user][:uuid], content: "Note ##{note_number}", content_type: 'Note')
-    end
-
-    data = { frequency: 'daily', url: 'http://test.com' }
-    Item.create(user_uuid: registration[:user][:uuid], content: "---#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
-
-    data = { frequency: 'realtime', url: 'http://test.com' }
-    Item.create(user_uuid: registration[:user][:uuid], content: "---#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
-  end
+  test_password = '123456'
 
   let(:test_user) do
-    User.where(email: test_user_credentials[:email]).first
+    build(:user, password: test_password)
+  end
+
+  before(:each) do
+    test_user.save
+
+    create_list(:item, 10, :note_type, user_uuid: test_user.uuid, content: 'This is a test note.')
+    create(:item, :backup_daily, user_uuid: test_user.uuid)
+    create(:item, :backup_realtime, user_uuid: test_user.uuid)
+  end
+
+  let(:test_user_credentials) do
+    { email: test_user.email, password: test_password }
   end
 
   let(:test_items) do
