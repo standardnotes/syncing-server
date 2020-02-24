@@ -49,7 +49,7 @@ $ docker run -d \
 
 You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
 
-Note: `:warning:` This standalone setup is designed for development use only. Please use the `docker-compose` method below for production instances. `:warning:`
+Note: :warning: This standalone setup is designed for development use only. Please use the `docker-compose` method below for production instances.
 
 ### Docker compose
 
