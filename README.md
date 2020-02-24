@@ -87,19 +87,14 @@ You can run your own Standard Notes server on a Raspberry Pi using `docker-compo
 	sudo apt install -y libffi-dev libssl-dev
 	```
 
-1. Install `python` and `python-pip`:
+1. Install `python3` and `python3-pip`:
 	```
-	sudo apt install -y python python-pip
-	```
-
-1. Remove `python-configparser`:
-	```
-	sudo apt remove python-configparser
+	sudo apt install -y python3 python3-pip
 	```
 
 1. Install `docker-compose`:
 	```
-	sudo pip install docker-compose
+	sudo pip3 install docker-compose
 	```
 
 1. Setup your `.env` file and run:
