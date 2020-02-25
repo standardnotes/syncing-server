@@ -1,9 +1,6 @@
 # Standard Notes Syncing Server
 
-### Running your own server
 You can run your own Standard Notes server and use it with any Standard Notes app. This allows you to have 100% control of your data. This server is built with Ruby on Rails and can be deployed in minutes.
-
-#### Getting started
 
 **Requirements**
 
@@ -11,7 +8,7 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 - Rails 5
 - MySQL 5.6+ database
 
-**Instructions**
+### Getting started
 
 1. Clone the project:
 
@@ -19,29 +16,28 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 	git clone https://github.com/standardnotes/syncing-server.git
 	```
 
-2. Create a .env file in the project's root directory. See env.sample for required values.
+1. Create a `.env` file in the project's root directory. See [env.sample](env.sample) for required values.
 
-
-3. Initialize project:
+1. Initialize the project:
 
 	```
 	bundle install
-	rails db:create db:migrate
+	bundle exec rails db:create db:migrate
 	```
 
-4. Start the server:
+1. Start the server:
 
 	```
-	rails s
+	bundle exec rails server
 	```
 
-### Docker Setup
+## Docker setup
 
 Docker is the quick and easy way to try out Standard Notes. With two commands you'll be up and running.
 
-#### Standalone Instance
+### Standalone instance
 
-The `Dockerfile` is enough to get you up and running. Once Docker is installed on your system simply run the following commands to get up and running in Development Mode.
+The `Dockerfile` is enough to get you up and running. Once Docker is installed on your system simply run the following commands to get up and running in development mode:
 
 ```
 $ docker build -t syncing-server .
@@ -53,11 +49,11 @@ $ docker run -d \
 
 You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
 
-Note: This standalone setup is designed for Development use only. Please use the `docker-compose` method for production instances.
+Note: :warning: This standalone setup is designed for development use only. Please use the `docker-compose` method below for production instances.
 
-#### Docker Compose
+### Docker compose
 
-Use the included `docker-compose.yml` file to build Standard Notes with docker-compose. Once your `.env` file has been copied and configured, simply run:
+Use the included [docker-compose.yml](docker-compose.yml) file to build Standard Notes with `docker-compose`. Once your `.env` file has been copied and configured, simply run:
 
 ```
 docker-compose up -d
@@ -86,11 +82,43 @@ To disable the registration of new user accounts, follow these instructions.
 
 4. Run `docker-compose build --no-cache app` to rebuild the app
 
-5. Run `docker-compose up` 
-		
+5. Run `docker-compose up`
 
 ### Heroku
 
 You can deploy your own Standard Notes server with one click on Heroku:
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+## Raspberry Pi
+
+You can run your own Standard Notes server on a Raspberry Pi using `docker-compose`.
+
+**Requirements**
+
+- A Raspberry Pi running Raspbian OS
+- Docker (you can install it using the [convenience script](https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script))
+
+### Getting started
+
+1. Install `libffi` and `libssl` dependencies:
+	```
+	sudo apt install -y libffi-dev libssl-dev
+	```
+
+1. Install `python3` and `python3-pip`:
+	```
+	sudo apt install -y python3 python3-pip
+	```
+
+1. Install `docker-compose`:
+	```
+	sudo pip3 install docker-compose
+	```
+
+1. Setup your `.env` file and run:
+	```
+	docker-compose -f docker-compose.yml -f docker-compose.raspberry-pi.yml up -d
+	```
+
+*Tested on a **Raspberry Pi 4 Model B***

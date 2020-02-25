@@ -1,0 +1,11 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      args:
+        optimize_for_raspberry_pi: "true"
+    environment: 
+      RAILS_ENV: raspberry_pi
+  db:
+    image: tobi312/rpi-mariadb

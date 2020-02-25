@@ -7,15 +7,17 @@ services:
     command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
     env_file: .env
     restart: unless-stopped
+    environment:
+      DB_HOST: db
     ports:
       - ${EXPOSED_PORT}:3000
   db:
     image: mysql:5.7
     environment:
-        MYSQL_DATABASE: '${DB_DATABASE}'
-        MYSQL_USER: '${DB_USERNAME}'
-        MYSQL_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
     expose:
       - '3306'
     restart: unless-stopped
