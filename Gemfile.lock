@@ -198,7 +198,7 @@ GEM
     rspec-support (3.9.0)
     ruby_parser (3.14.0)
       sexp_processor (~> 4.9)
-    secure_headers (6.1.1)
+    secure_headers (6.3.0)
     sentry-raven (2.12.0)
       faraday (>= 0.7.6, < 1.0)
     sexp_processor (4.13.0)
