@@ -31,7 +31,7 @@ RSpec.describe Item, type: :model do
   describe 'decoded_content' do
     let(:valid_content) do
       data = { test: 'hello world!' }
-      "---#{Base64.encode64(JSON.dump(data))}"
+      "002#{Base64.encode64(JSON.dump(data))}"
     end
 
     it 'should return nil if content is nil' do
@@ -53,11 +53,11 @@ RSpec.describe Item, type: :model do
   describe 'is_daily_backup_extension' do
     let(:valid_content) do
       data = { frequency: 'daily' }
-      "---#{Base64.encode64(JSON.dump(data))}"
+      "002#{Base64.encode64(JSON.dump(data))}"
     end
 
     let(:invalid_content) do
-      "---#{Base64.encode64(JSON.dump('data'))}"
+      "002#{Base64.encode64(JSON.dump('data'))}"
     end
 
     specify do
@@ -77,17 +77,17 @@ RSpec.describe Item, type: :model do
   describe 'perform_associated_job' do
     let(:invalid_content) do
       data = { test: 'hello world!' }
-      "---#{Base64.encode64(JSON.dump(data))}"
+      "002#{Base64.encode64(JSON.dump(data))}"
     end
 
     let(:backup_email_archive_content) do
       data = { subtype: 'backup.email_archive' }
-      "---#{Base64.encode64(JSON.dump(data))}"
+      "002#{Base64.encode64(JSON.dump(data))}"
     end
 
     let(:perform_later_content) do
       data = { frequency: 'daily', url: 'http://test.com' }
-      "---#{Base64.encode64(JSON.dump(data))}"
+      "002#{Base64.encode64(JSON.dump(data))}"
     end
 
     specify do

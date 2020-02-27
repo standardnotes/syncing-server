@@ -1,5 +1,5 @@
 def encode_content(content)
-  "---#{Base64.encode64(JSON.dump(content))}"
+  "002#{Base64.encode64(JSON.dump(content))}"
 end
 
 FactoryBot.define do

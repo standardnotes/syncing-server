@@ -102,7 +102,9 @@ RSpec.configure do |config|
   original_stdout = $stdout
 
   config.before(:all) do
-    $stderr = $stdout = File.open(File::NULL, 'w') unless ENV['RSPEC_ENABLE_CONSOLE_OUTPUT']
+    if ENV['RSPEC_ENABLE_CONSOLE_OUTPUT'].to_s.downcase == 'true'
+      $stderr = $stdout = File.open(File::NULL, 'w')
+    end
   end
 
   config.after(:all) do

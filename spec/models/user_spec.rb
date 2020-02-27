@@ -120,7 +120,7 @@ RSpec.describe User, type: :model do
     context 'when allowEmailRecovery is false' do
       it 'MFA item should not be marked as deleted' do
         data = { allowEmailRecovery: false }
-        content = "---#{Base64.encode64(JSON.dump(data))}"
+        content = "002#{Base64.encode64(JSON.dump(data))}"
 
         item = Item.create(user_uuid: subject.uuid, content: content, content_type: 'SF|MFA')
 
@@ -134,7 +134,7 @@ RSpec.describe User, type: :model do
     context 'when allowEmailRecovery is true' do
       it 'MFA item should be marked as deleted' do
         data = { allowEmailRecovery: true }
-        content = "---#{Base64.encode64(JSON.dump(data))}"
+        content = "002#{Base64.encode64(JSON.dump(data))}"
 
         item = Item.create(user_uuid: subject.uuid, content: content, content_type: 'SF|MFA')
 
@@ -168,7 +168,7 @@ RSpec.describe User, type: :model do
   describe 'disable_email_backups' do
     specify do
       data = { subtype: 'backup.email_archive' }
-      Item.create(user_uuid: subject[:uuid], content: "---#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
+      Item.create(user_uuid: subject[:uuid], content: "002#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
 
       extension_item = subject.items.where(content_type: 'SF|Extension', deleted: false).first
       subject.disable_email_backups
