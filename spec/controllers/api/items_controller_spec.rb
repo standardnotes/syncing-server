@@ -66,9 +66,18 @@ RSpec.describe Api::ItemsController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['retrieved_items']).to_not be_nil
-          expect(parsed_response_body['saved_items']).to_not be_nil
           expect(parsed_response_body['sync_token']).to_not be_nil
           expect(parsed_response_body).to have_key('cursor_token')
+
+          saved_items = parsed_response_body['saved_items']
+          expect(saved_items).to_not be_nil
+
+          expect(saved_items.count).to be_equal(items_param.count)
+
+          saved_items = saved_items.each { |hash| ['created_at', 'updated_at'].each { |key| hash.delete(key) } }
+          items_param = items_param.each { |hash| ['created_at', 'updated_at'].each { |key| hash.delete(key) } }
+
+          expect(saved_items.first).to match_array(items_param.first)
         end
       end
 
