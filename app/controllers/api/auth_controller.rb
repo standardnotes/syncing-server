@@ -175,7 +175,7 @@ class Api::AuthController < Api::ApiController
     return {
       identifier: email,
       pw_cost: 110000,
-      pw_nonce: Digest::SHA2.hexdigest(email + ENV['SECRET_KEY_BASE']),
+      pw_nonce: Digest::SHA2.hexdigest(email.concat(Rails.application.secrets.secret_key_base)),
       version: "003"
     }
   end
