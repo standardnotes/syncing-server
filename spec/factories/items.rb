@@ -10,6 +10,8 @@ FactoryBot.define do
 
     trait :note_type do
       content_type { 'Note' }
+      created_at { DateTime.now }
+      updated_at { DateTime.now }
     end
 
     trait :mfa_type do

@@ -42,42 +42,194 @@ RSpec.describe Api::ItemsController, type: :controller do
 
     context 'when signed in' do
       context 'when using api version 20190520' do
-        it 'should return results' do
-          @controller = Api::AuthController.new
-          post :sign_in, params: test_user_credentials
+        context 'and modifying note contents' do
+          it 'should return results matching the new changes' do
+            @controller = Api::AuthController.new
+            post :sign_in, params: test_user_credentials
 
-          @controller = Api::ItemsController.new
-          request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
-          test_items[0].deleted = true
-          test_items[1].content = 'Updated note.'
-          items_param = test_items.to_a.map(&:serializable_hash)
-          
-          new_item_uuid = SecureRandom.uuid
-          new_item = attributes_for(:item, :note_type, uuid: new_item_uuid, user_uuid: test_user.uuid, content: 'New item')
-          items_param.push(new_item)
+            # Serializing the items into an array of hashes
+            items_param = test_items.limit(5).to_a.map(&:serializable_hash)
+            items_param[0]['content'] = 'This is the new content.'
+            items_param[1]['content'] = 'And this too.'
 
-          post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
-          expect(response).to have_http_status(:ok)
-          expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+            expect(response).to have_http_status(:ok)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
 
-          parsed_response_body = JSON.parse(response.body)
+            parsed_response_body = JSON.parse(response.body)
 
-          expect(parsed_response_body).to_not be_nil
-          expect(parsed_response_body['retrieved_items']).to_not be_nil
-          expect(parsed_response_body['sync_token']).to_not be_nil
-          expect(parsed_response_body).to have_key('cursor_token')
+            expect(parsed_response_body).to_not be_nil
+            expect(parsed_response_body['retrieved_items']).to_not be_nil
+            expect(parsed_response_body['sync_token']).to_not be_nil
+            expect(parsed_response_body).to have_key('cursor_token')
 
-          saved_items = parsed_response_body['saved_items']
-          expect(saved_items).to_not be_nil
+            saved_items = parsed_response_body['saved_items']
+            expect(saved_items).to_not be_nil
 
-          expect(saved_items.count).to be_equal(items_param.count)
+            expect(saved_items.count).to be_equal(items_param.count)
 
-          saved_items = saved_items.each { |hash| ['created_at', 'updated_at'].each { |key| hash.delete(key) } }
-          items_param = items_param.each { |hash| ['created_at', 'updated_at'].each { |key| hash.delete(key) } }
+            saved_items.map! do |hash| 
+              # Delete created_at and updated_at keys
+              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
 
-          expect(saved_items.first).to match_array(items_param.first)
+              # Replace '' with nil
+              hash.each do |key, value|
+                hash[key] = nil if value == ''
+              end
+              
+              # Convert string keys to symbols
+              hash.transform_keys(&:to_sym)
+            end
+
+            items_param.map! do |hash| 
+              # Delete created_at and updated_at keys
+              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+
+              # Convert string keys to symbols
+              hash.transform_keys(&:to_sym)
+            end
+
+            expect(saved_items).to match_array(items_param)
+          end
+        end
+
+        context 'and deleting items' do
+          it 'should return results matching the new changes' do
+            @controller = Api::AuthController.new
+            post :sign_in, params: test_user_credentials
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+
+            # Serializing the items into an array of hashes
+            items_param = test_items.limit(3).to_a.map(&:serializable_hash)
+            items_param[0]['deleted'] = true
+
+            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+
+            expect(response).to have_http_status(:ok)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+
+            parsed_response_body = JSON.parse(response.body)
+
+            expect(parsed_response_body).to_not be_nil
+            expect(parsed_response_body['retrieved_items']).to_not be_nil
+            expect(parsed_response_body['sync_token']).to_not be_nil
+            expect(parsed_response_body).to have_key('cursor_token')
+
+            saved_items = parsed_response_body['saved_items']
+            expect(saved_items).to_not be_nil
+
+            expect(saved_items.count).to be_equal(items_param.count)
+
+            saved_items.map! do |hash| 
+              # Delete created_at and updated_at keys
+              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+
+              # Replace '' with nil
+              hash.each do |key, value|
+                hash[key] = nil if value == ''
+              end
+              
+              # Convert string keys to symbols
+              hash.transform_keys(&:to_sym)
+            end
+
+            items_param.map! do |hash| 
+              # Delete created_at and updated_at keys
+              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+
+              # Convert string keys to symbols
+              hash.transform_keys(&:to_sym)
+            end
+
+            expect(saved_items[0][:uuid]).to match(items_param[0][:uuid])
+            expect(saved_items[0][:user_uuid]).to match(items_param[0][:user_uuid])
+            expect(saved_items[0][:content]).to be_nil
+            expect(saved_items[0][:content_type]).to match(items_param[0][:content_type])
+            expect(saved_items[0][:deleted]).to be true
+
+            expect(saved_items[1]).to match(items_param[1])
+            expect(saved_items[2]).to match(items_param[2])
+          end
+        end
+
+        context 'and syncing items along with new ones' do
+          it 'should return results matching the new changes' do
+            @controller = Api::AuthController.new
+            post :sign_in, params: test_user_credentials
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+
+            # Serializing the items into an array of hashes
+            items_param = test_items.limit(3).to_a.map(&:serializable_hash)
+            
+            # Updating an existing item
+            items_param[0]['deleted'] = true
+            items_param[1]['content'] = 'Updated note #1.'
+            items_param[2]['content'] = 'Updated note #2.'
+
+            # Creating an item
+            new_item_uuid = SecureRandom.uuid
+            new_item = build(:item, :note_type, uuid: new_item_uuid, user_uuid: test_user.uuid, content: 'New item.')
+            new_item.created_at = new_item.updated_at = DateTime.now
+
+            new_item = [new_item].to_a.map(&:serializable_hash)[0]
+            items_param.push(new_item)
+
+            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+
+            expect(response).to have_http_status(:ok)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+
+            parsed_response_body = JSON.parse(response.body)
+
+            expect(parsed_response_body).to_not be_nil
+            expect(parsed_response_body['retrieved_items']).to_not be_nil
+            expect(parsed_response_body['sync_token']).to_not be_nil
+            expect(parsed_response_body).to have_key('cursor_token')
+
+            saved_items = parsed_response_body['saved_items']
+            expect(saved_items).to_not be_nil
+
+            expect(saved_items.count).to be_equal(items_param.count)
+
+            saved_items.map! do |hash| 
+              # Delete created_at and updated_at keys
+              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+
+              # Replace '' with nil
+              hash.each do |key, value|
+                hash[key] = nil if value == ''
+              end
+              
+              # Convert string keys to symbols
+              hash.transform_keys(&:to_sym)
+            end
+
+            items_param.map! do |hash| 
+              # Delete created_at and updated_at keys
+              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+
+              # Convert string keys to symbols
+              hash.transform_keys(&:to_sym)
+            end
+
+            expect(saved_items[0][:uuid]).to match(items_param[0][:uuid])
+            expect(saved_items[0][:user_uuid]).to match(items_param[0][:user_uuid])
+            expect(saved_items[0][:content]).to be_nil
+            expect(saved_items[0][:content_type]).to match(items_param[0][:content_type])
+            expect(saved_items[0][:deleted]).to be true
+
+            expect(saved_items[1]).to match(items_param[1])
+            expect(saved_items[2]).to match(items_param[2])
+            expect(saved_items[3]).to match(items_param[3])
+          end
         end
       end
 
