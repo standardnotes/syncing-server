@@ -72,22 +72,22 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_items.count).to be_equal(items_param.count)
 
-            saved_items.map! do |hash| 
+            saved_items.map! do |hash|
               # Delete created_at and updated_at keys
-              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+              %w[created_at updated_at].each { |key| hash.delete(key) }
 
               # Replace '' with nil
               hash.each do |key, value|
                 hash[key] = nil if value == ''
               end
-              
+
               # Convert string keys to symbols
               hash.transform_keys(&:to_sym)
             end
 
-            items_param.map! do |hash| 
+            items_param.map! do |hash|
               # Delete created_at and updated_at keys
-              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+              %w[created_at updated_at].each { |key| hash.delete(key) }
 
               # Convert string keys to symbols
               hash.transform_keys(&:to_sym)
@@ -126,22 +126,22 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_items.count).to be_equal(items_param.count)
 
-            saved_items.map! do |hash| 
+            saved_items.map! do |hash|
               # Delete created_at and updated_at keys
-              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+              %w[created_at updated_at].each { |key| hash.delete(key) }
 
               # Replace '' with nil
               hash.each do |key, value|
                 hash[key] = nil if value == ''
               end
-              
+
               # Convert string keys to symbols
               hash.transform_keys(&:to_sym)
             end
 
-            items_param.map! do |hash| 
+            items_param.map! do |hash|
               # Delete created_at and updated_at keys
-              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+              %w[created_at updated_at].each { |key| hash.delete(key) }
 
               # Convert string keys to symbols
               hash.transform_keys(&:to_sym)
@@ -168,7 +168,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             # Serializing the items into an array of hashes
             items_param = test_items.limit(3).to_a.map(&:serializable_hash)
-            
+
             # Updating an existing item
             items_param[0]['deleted'] = true
             items_param[1]['content'] = 'Updated note #1.'
@@ -182,7 +182,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             new_item = [new_item].to_a.map(&:serializable_hash)[0]
             items_param.push(new_item)
 
-            sync_token = Base64.encode64("2:" + "#{DateTime.now.to_f}")
+            sync_token = Base64.encode64('2:' + DateTime.now.to_f.to_s)
             post :sync, params: { sync_token: sync_token, limit: 5, api: '20190520', items: items_param }
 
             expect(response).to have_http_status(:ok)
@@ -200,22 +200,22 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_items.count).to be_equal(items_param.count)
 
-            saved_items.map! do |hash| 
+            saved_items.map! do |hash|
               # Delete created_at and updated_at keys
-              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+              %w[created_at updated_at].each { |key| hash.delete(key) }
 
               # Replace '' with nil
               hash.each do |key, value|
                 hash[key] = nil if value == ''
               end
-              
+
               # Convert string keys to symbols
               hash.transform_keys(&:to_sym)
             end
 
-            items_param.map! do |hash| 
+            items_param.map! do |hash|
               # Delete created_at and updated_at keys
-              ['created_at', 'updated_at'].each { |key| hash.delete(key) }
+              %w[created_at updated_at].each { |key| hash.delete(key) }
 
               # Convert string keys to symbols
               hash.transform_keys(&:to_sym)

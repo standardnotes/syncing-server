@@ -95,9 +95,9 @@ RSpec.describe Item, type: :model do
       expect(subject.perform_associated_job).to be_nil
 
       subject.content = perform_later_content
-      expect {
+      expect do
         subject.perform_associated_job
-      }.to have_enqueued_job(ExtensionJob)
+      end.to have_enqueued_job(ExtensionJob)
     end
   end
 end

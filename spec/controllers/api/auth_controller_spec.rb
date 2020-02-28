@@ -10,7 +10,7 @@ RSpec.describe Api::AuthController, type: :controller do
   before(:each) do
     test_user.save
   end
-  
+
   let(:test_user_credentials) do
     { email: test_user.email, password: test_password }
   end
