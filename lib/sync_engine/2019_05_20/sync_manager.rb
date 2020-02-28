@@ -5,7 +5,7 @@ module SyncEngine
       def sync(item_hashes, options, request)
         in_sync_token = options[:sync_token]
         in_cursor_token = options[:cursor_token]
-        limit = options[:limit]
+        limit = options[:limit].to_i
         content_type = options[:content_type] # optional, only return items of these type if present
 
         retrieved_items, cursor_token = _sync_get(in_sync_token, in_cursor_token, limit, content_type).to_a

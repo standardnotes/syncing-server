@@ -109,7 +109,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             items_param = test_items.limit(3).to_a.map(&:serializable_hash)
             items_param[0]['deleted'] = true
 
-            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+            post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
             expect(response).to have_http_status(:ok)
             expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -182,7 +182,8 @@ RSpec.describe Api::ItemsController, type: :controller do
             new_item = [new_item].to_a.map(&:serializable_hash)[0]
             items_param.push(new_item)
 
-            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+            sync_token = Base64.encode64("2:" + "#{DateTime.now.to_f}")
+            post :sync, params: { sync_token: sync_token, limit: 5, api: '20190520', items: items_param }
 
             expect(response).to have_http_status(:ok)
             expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
