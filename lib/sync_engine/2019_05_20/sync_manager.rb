@@ -121,7 +121,7 @@ module SyncEngine
 
       def _sync_get(sync_token, input_cursor_token, limit, content_type)
         cursor_token = nil
-        if limit == nil
+        if limit.nil? || limit < 1
           limit = 100000
         end
 
