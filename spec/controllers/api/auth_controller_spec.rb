@@ -34,7 +34,7 @@ RSpec.describe Api::AuthController, type: :controller do
         parsed_response_body = JSON.parse(response.body)
 
         expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys)
-        expect(parsed_response_body['identifier']).to eq 'test@email.com'
+        expect(parsed_response_body['identifier']).to eq 'test@email.com'.concat(Rails.application.secrets.secret_key_base)
         expect(parsed_response_body['pw_cost']).to_not be_nil
         expect(parsed_response_body['pw_nonce']).to_not be_nil
         expect(parsed_response_body['version']).to_not be_nil
