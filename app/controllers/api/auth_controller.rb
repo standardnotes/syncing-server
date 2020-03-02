@@ -87,7 +87,7 @@ class Api::AuthController < Api::ApiController
       return
     end
 
-    if !params[:email] or !params[:password]
+    if !params[:email] || !params[:password]
       return self.render_invalid_auth
     end
 
@@ -102,7 +102,7 @@ class Api::AuthController < Api::ApiController
   end
 
   def register
-    if !params[:email] or !params[:password]
+    if !params[:email] || !params[:password]
       return render :json => { :error => { :message => "Please enter an email and a password to register." } }, :status => 401
     end
 
