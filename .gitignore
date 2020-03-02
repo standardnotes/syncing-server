@@ -45,3 +45,6 @@ dump.rdb
 
 # Coverage results
 /coverage
+
+# byebug history
+.byebug_history
