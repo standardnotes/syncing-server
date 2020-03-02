@@ -102,7 +102,7 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe 'export_archive' do
+  describe 'download_backup' do
     specify do
       content = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque euismod'\
        ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
@@ -110,7 +110,7 @@ RSpec.describe User, type: :model do
 
       item = Item.create(user_uuid: subject.uuid, content: content)
 
-      subject.export_archive
+      subject.download_backup
 
       expect(File).to exist("tmp/#{subject.email}-restore.txt")
     end
