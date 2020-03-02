@@ -96,4 +96,19 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
+
+  # Suppress console output during RSpec tests
+  original_stderr = $stderr
+  original_stdout = $stdout
+
+  config.before(:all) do
+    if ENV['RSPEC_ENABLE_CONSOLE_OUTPUT'].to_s.downcase == 'false'
+      $stderr = $stdout = File.open(File::NULL, 'w')
+    end
+  end
+
+  config.after(:all) do
+    $stderr = original_stderr
+    $stdout = original_stdout
+  end
 end

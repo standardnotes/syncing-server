@@ -123,7 +123,7 @@ module SyncEngine
 
         items = items.sort_by{|m| m.updated_at}
 
-        if items.count > limit
+        if !items.empty? && items.count > limit
           items = items.slice(0, limit)
           date = items.last.updated_at
           cursor_token = sync_token_from_datetime(date)

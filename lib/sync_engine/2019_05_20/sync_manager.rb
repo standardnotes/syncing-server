@@ -5,7 +5,7 @@ module SyncEngine
       def sync(item_hashes, options, request)
         in_sync_token = options[:sync_token]
         in_cursor_token = options[:cursor_token]
-        limit = options[:limit]
+        limit = options[:limit].to_i
         content_type = options[:content_type] # optional, only return items of these type if present
 
         retrieved_items, cursor_token = _sync_get(in_sync_token, in_cursor_token, limit, content_type).to_a
@@ -121,7 +121,7 @@ module SyncEngine
 
       def _sync_get(sync_token, input_cursor_token, limit, content_type)
         cursor_token = nil
-        if limit == nil
+        if limit.nil? || limit < 1
           limit = 100000
         end
 
@@ -147,7 +147,7 @@ module SyncEngine
 
         items = items.sort_by{|m| m.updated_at}
 
-        if items.count > limit
+        if !items.empty? && items.count > limit
           items = items.slice(0, limit)
           date = items.last.updated_at
           cursor_token = sync_token_from_datetime(date)

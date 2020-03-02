@@ -42,3 +42,9 @@ dump.rdb
 
 # Sqlite3 Database Files
 *.sqlite3
+
+# Coverage results
+/coverage
+
+# byebug history
+.byebug_history
