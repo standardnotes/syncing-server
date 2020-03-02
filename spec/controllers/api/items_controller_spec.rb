@@ -42,6 +42,41 @@ RSpec.describe Api::ItemsController, type: :controller do
 
     context 'when signed in' do
       context 'when using api version 20190520' do
+        context 'and no items are sent to be updated' do
+          it 'should return existing items' do
+            @controller = Api::AuthController.new
+            post :sign_in, params: test_user_credentials
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+
+            post :sync, params: { api: '20190520', content_type: 'Note' }
+
+            expect(response).to have_http_status(:ok)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+
+            parsed_response_body = JSON.parse(response.body)
+
+            expect(parsed_response_body).to_not be_nil
+            expect(parsed_response_body['retrieved_items']).to_not be_nil
+            expect(parsed_response_body['sync_token']).to_not be_nil
+            expect(parsed_response_body).to have_key('cursor_token')
+
+            saved_items = parsed_response_body['saved_items']
+            expect(saved_items.count).to be_equal(0)
+
+            retrieved_items = parsed_response_body['retrieved_items']
+            note_items = test_items.where(content_type: 'Note')
+            expect(retrieved_items.count).to be_equal(note_items.count)
+
+            retrieved_items = serialize_to_hash(retrieved_items)
+            note_items = note_items.to_a.map(&:serializable_hash)
+            
+            note_items = serialize_to_hash(note_items)
+            expect(retrieved_items).to match_array(note_items)
+          end
+        end
+
         context 'and modifying note contents' do
           it 'should return results matching the new changes' do
             @controller = Api::AuthController.new
@@ -72,27 +107,9 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_items.count).to be_equal(items_param.count)
 
-            saved_items.map! do |hash|
-              # Delete created_at and updated_at keys
-              %w[created_at updated_at].each { |key| hash.delete(key) }
+            saved_items = serialize_to_hash(saved_items)
 
-              # Replace '' with nil
-              hash.each do |key, value|
-                hash[key] = nil if value == ''
-              end
-
-              # Convert string keys to symbols
-              hash.transform_keys(&:to_sym)
-            end
-
-            items_param.map! do |hash|
-              # Delete created_at and updated_at keys
-              %w[created_at updated_at].each { |key| hash.delete(key) }
-
-              # Convert string keys to symbols
-              hash.transform_keys(&:to_sym)
-            end
-
+            items_param = serialize_to_hash(items_param)
             expect(saved_items).to match_array(items_param)
           end
         end
@@ -126,26 +143,8 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_items.count).to be_equal(items_param.count)
 
-            saved_items.map! do |hash|
-              # Delete created_at and updated_at keys
-              %w[created_at updated_at].each { |key| hash.delete(key) }
-
-              # Replace '' with nil
-              hash.each do |key, value|
-                hash[key] = nil if value == ''
-              end
-
-              # Convert string keys to symbols
-              hash.transform_keys(&:to_sym)
-            end
-
-            items_param.map! do |hash|
-              # Delete created_at and updated_at keys
-              %w[created_at updated_at].each { |key| hash.delete(key) }
-
-              # Convert string keys to symbols
-              hash.transform_keys(&:to_sym)
-            end
+            saved_items = serialize_to_hash(saved_items)
+            items_param = serialize_to_hash(items_param)
 
             expect(saved_items[0][:uuid]).to match(items_param[0][:uuid])
             expect(saved_items[0][:user_uuid]).to match(items_param[0][:user_uuid])
@@ -200,26 +199,8 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_items.count).to be_equal(items_param.count)
 
-            saved_items.map! do |hash|
-              # Delete created_at and updated_at keys
-              %w[created_at updated_at].each { |key| hash.delete(key) }
-
-              # Replace '' with nil
-              hash.each do |key, value|
-                hash[key] = nil if value == ''
-              end
-
-              # Convert string keys to symbols
-              hash.transform_keys(&:to_sym)
-            end
-
-            items_param.map! do |hash|
-              # Delete created_at and updated_at keys
-              %w[created_at updated_at].each { |key| hash.delete(key) }
-
-              # Convert string keys to symbols
-              hash.transform_keys(&:to_sym)
-            end
+            saved_items = serialize_to_hash(saved_items)
+            items_param = serialize_to_hash(items_param)
 
             expect(saved_items[0][:uuid]).to match(items_param[0][:uuid])
             expect(saved_items[0][:user_uuid]).to match(items_param[0][:user_uuid])
