@@ -42,3 +42,6 @@ production:
 
 docker_development:
   <<: *default
+
+raspberry_pi:
+  <<: *default
