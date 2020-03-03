@@ -108,7 +108,7 @@ RSpec.describe User, type: :model do
        ' nulla iaculis lacus consectetur, nec feugiat libero pellentesque. Vestibulum tincidunt'\
        ' tempor accumsan. Phasellus sed imperdiet libero. Proin ultrices vehicula nulla, vitae cras amet.'
 
-      item = Item.create(user_uuid: subject.uuid, content: content)
+      Item.create(user_uuid: subject.uuid, content: content)
 
       subject.download_backup
 
@@ -168,7 +168,8 @@ RSpec.describe User, type: :model do
   describe 'disable_email_backups' do
     specify do
       data = { subtype: 'backup.email_archive' }
-      Item.create(user_uuid: subject[:uuid], content: "002#{Base64.encode64(JSON.dump(data))}", content_type: 'SF|Extension')
+      item_content = "002#{Base64.encode64(JSON.dump(data))}"
+      Item.create(user_uuid: subject[:uuid], content: item_content, content_type: 'SF|Extension')
 
       extension_item = subject.items.where(content_type: 'SF|Extension', deleted: false).first
       subject.disable_email_backups

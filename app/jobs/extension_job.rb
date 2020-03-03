@@ -4,15 +4,15 @@ class ExtensionJob < ApplicationJob
 
   def perform(params)
     user = User.find_by_uuid(params[:user_id])
-    return if user == nil
+    return if user.nil?
 
     if params[:auth_params_op]
 
     else
-      if params[:item_ids]
-        items = user.items.find(params[:item_ids])
+      items = if params[:item_ids]
+        user.items.find(params[:item_ids])
       else
-        items = user.items.where(:deleted => false).to_a
+        user.items.where(deleted: false).to_a
       end
     end
 
@@ -23,8 +23,8 @@ class ExtensionJob < ApplicationJob
       uri = URI.parse(url)
       http = Net::HTTP.new(uri.host, uri.port)
       req = Net::HTTP::Post.new(uri.request_uri, 'Content-Type' => 'application/json')
-      req.body = {:items => items, :auth_params => auth_params}.to_json
-      http.use_ssl = (uri.scheme == "https")
+      req.body = { items: items, auth_params: auth_params }.to_json
+      http.use_ssl = (uri.scheme == 'https')
     rescue
       puts "Error creating ExtensionJob request with params #{params}."
       return
@@ -32,9 +32,9 @@ class ExtensionJob < ApplicationJob
 
     response = http.request(req)
 
-    if !response.code.starts_with?("2")
+    unless response.code.starts_with?('2')
       extension_id = params[:extension_id]
-      settings = ExtensionSetting.find_or_create_by(:extension_id => extension_id)
+      settings = ExtensionSetting.find_or_create_by(extension_id: extension_id)
       if settings.mute_emails
         return
       end
@@ -42,7 +42,7 @@ class ExtensionJob < ApplicationJob
       # Dont send emails for realtime backups, only daily
       ext = Item.find(extension_id)
       content = ext.decoded_content
-      if !content || content["frequency"] == "realtime"
+      if !content || content['frequency'] == 'realtime'
         return
       end
 

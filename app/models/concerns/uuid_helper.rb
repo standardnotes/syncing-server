@@ -5,6 +5,7 @@ module UuidHelper
   end
 
   private
+
   def assign_uuid
     self.uuid = SecureRandom.uuid if uuid.blank?
   end

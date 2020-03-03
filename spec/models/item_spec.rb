@@ -50,7 +50,7 @@ RSpec.describe Item, type: :model do
     end
   end
 
-  describe 'is_daily_backup_extension' do
+  describe 'daily_backup_extension' do
     let(:valid_content) do
       data = { frequency: 'daily' }
       "002#{Base64.encode64(JSON.dump(data))}"
@@ -63,14 +63,14 @@ RSpec.describe Item, type: :model do
     specify do
       subject.content_type = 'Note'
       subject.content = nil
-      expect(subject.is_daily_backup_extension).to be false
+      expect(subject.daily_backup_extension?).to be false
 
       subject.content_type = 'SF|Extension'
       subject.content = valid_content
-      expect(subject.is_daily_backup_extension).to be true
+      expect(subject.daily_backup_extension?).to be true
 
       subject.content = invalid_content
-      expect(subject.is_daily_backup_extension).to be false
+      expect(subject.daily_backup_extension?).to be false
     end
   end
 

@@ -110,7 +110,8 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(response).to have_http_status(:locked)
         expect(parsed_response_body).to_not be_nil
         expect(parsed_response_body['error']).to_not be_nil
-        expect(parsed_response_body['error']['message']).to eq('Too many successive login requests. Please try your request again later.')
+        expect(parsed_response_body['error']['message']).to eq('Too many successive login requests. '\
+          'Please try your request again later.')
       end
     end
 
@@ -159,7 +160,9 @@ RSpec.describe Api::AuthController, type: :controller do
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['error']).to_not be_nil
           expect(parsed_response_body['error']['tag']).to eq('mfa-invalid')
-          expect(parsed_response_body['error']['message']).to eq('The two-factor authentication code you entered is incorrect. Please try again.')
+          expect(parsed_response_body['error']['message']).to eq('The two-factor authentication code '\
+            'you entered is incorrect. Please try again.')
+
           expect(parsed_response_body['error']['payload']['mfa_key']).to eq("mfa_#{mfa_item.uuid}")
         end
       end
@@ -278,7 +281,8 @@ RSpec.describe Api::AuthController, type: :controller do
 
         expect(parsed_response_body).to_not be_nil
         expect(parsed_response_body['error']).to_not be_nil
-        expect(parsed_response_body['error']['message']).to eq('Your current password is required to change your password. Please update your application if you do not see this option.')
+        expect(parsed_response_body['error']['message']).to eq('Your current password is required '\
+          'to change your password. Please update your application if you do not see this option.')
       end
     end
 
@@ -295,7 +299,8 @@ RSpec.describe Api::AuthController, type: :controller do
 
         expect(parsed_response_body).to_not be_nil
         expect(parsed_response_body['error']).to_not be_nil
-        expect(parsed_response_body['error']['message']).to eq('The change password request is missing new auth parameters. Please try again.')
+        expect(parsed_response_body['error']['message']).to eq('The change password request is '\
+          'missing new auth parameters. Please try again.')
       end
     end
 
@@ -308,7 +313,7 @@ RSpec.describe Api::AuthController, type: :controller do
           post :change_pw, params: {
             current_password: 'not-the-current-password',
             new_password: 'new-pwd',
-            pw_nonce: test_user.pw_nonce
+            pw_nonce: test_user.pw_nonce,
           }
 
           expect(response).to have_http_status(:unauthorized)
@@ -317,7 +322,8 @@ RSpec.describe Api::AuthController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['error']).to_not be_nil
-          expect(parsed_response_body['error']['message']).to eq('The current password you entered is incorrect. Please try again.')
+          expect(parsed_response_body['error']['message']).to eq('The current password you '\
+            'entered is incorrect. Please try again.')
         end
       end
 
@@ -329,7 +335,7 @@ RSpec.describe Api::AuthController, type: :controller do
           post :change_pw, params: {
             current_password: test_user_credentials[:password],
             new_password: 'new-pwd',
-            pw_nonce: test_user.pw_nonce
+            pw_nonce: test_user.pw_nonce,
           }
 
           expect(response).to have_http_status(:ok)
@@ -396,7 +402,7 @@ RSpec.describe Api::AuthController, type: :controller do
         post :change_pw, params: {
           current_password: test_user_credentials[:password],
           new_password: 'new-pwd',
-          pw_nonce: test_user.pw_nonce
+          pw_nonce: test_user.pw_nonce,
         }
 
         post :update, params: { version: '002' }
