@@ -4,7 +4,7 @@ class Api::AuthController < Api::ApiController
   before_action do
     # current_user can still be nil by here.
     user = User.find_by_email(params[:email])
-    if user&.locked_until && user.locked_until.future?
+    if user&.locked_until&.future?
       render json: {
         error: {
           message: 'Too many successive login requests. '\
@@ -22,43 +22,45 @@ class Api::AuthController < Api::ApiController
     user.items.where(content_type: 'SF|MFA', deleted: false).first
   end
 
-  def verify_mfa(_email)
+  def verify_mfa
     mfa = mfa_for_email(params[:email])
 
-    if !mfa.nil?
-      mfa_content = mfa.decoded_content
-      mfa_param_key = "mfa_#{mfa.uuid}"
-      if params[mfa_param_key]
-        # Client has provided mfa value
-        received_code = params[mfa_param_key]
-        totp = ROTP::TOTP.new(mfa_content['secret'])
-        unless totp.verify(received_code)
-          # Invalid MFA, abort login
-          render json: {
-            error: {
-              tag: 'mfa-invalid',
-              message: 'The two-factor authentication code you entered is incorrect. '\
-                'Please try again.',
-              payload: { mfa_key: mfa_param_key },
-            },
-          }, status: 401
-          false
-        end
-      else
-        # Client needs to provide mfa value
-        render json: {
-          error: {
-            tag: 'mfa-required',
-            message: 'Please enter your two-factor authentication code.',
-            payload: { mfa_key: mfa_param_key },
-          },
-        }, status: 401
+    if mfa.nil?
+      return true
+    end
 
-        false
-      end
-    else
-      # mfa is nil
-      true
+    mfa_content = mfa.decoded_content
+    mfa_param_key = "mfa_#{mfa.uuid}"
+
+    unless params[mfa_param_key]
+      # Client needs to provide mfa value
+      render json: {
+        error: {
+          tag: 'mfa-required',
+          message: 'Please enter your two-factor authentication code.',
+          payload: { mfa_key: mfa_param_key },
+        },
+      }, status: 401
+
+      return false
+    end
+
+    # Client has provided mfa value
+    received_code = params[mfa_param_key]
+    totp = ROTP::TOTP.new(mfa_content['secret'])
+
+    unless totp.verify(received_code)
+      # Invalid MFA, abort login
+      render json: {
+        error: {
+          tag: 'mfa-invalid',
+          message: 'The two-factor authentication code you entered is incorrect. '\
+            'Please try again.',
+          payload: { mfa_key: mfa_param_key },
+        },
+      }, status: 401
+
+      false
     end
   end
 
@@ -88,7 +90,7 @@ class Api::AuthController < Api::ApiController
   end
 
   def sign_in
-    if verify_mfa(params[:email]) == false
+    if verify_mfa == false
       # error responses are handled by the verify_mfa method
       return
     end
@@ -194,7 +196,7 @@ class Api::AuthController < Api::ApiController
   end
 
   def auth_params
-    if verify_mfa(params[:email]) == false
+    if verify_mfa == false
       # error responses are handled by the verify_mfa method
       return
     end
