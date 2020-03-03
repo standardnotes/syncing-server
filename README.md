@@ -31,6 +31,18 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 	bundle exec rails server
 	```
 
+### Tests
+
+`syncing-server` uses [RSpec](http://rspec.info) for tests.
+
+To execute all of the test specs, run the following command at the root of the project directory:
+
+```bash
+bundle exec rspec
+```
+
+Code coverage report is available within the `coverage` directory.
+
 ## Docker setup
 
 Docker is the quick and easy way to try out Standard Notes. With two commands you'll be up and running.
