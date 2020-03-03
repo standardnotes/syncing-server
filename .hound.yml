@@ -1,0 +1,4 @@
+ruby:
+  config_file: .rubocop.yml
+  version: 0.78.0
+fail_on_violations: true

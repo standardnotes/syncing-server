@@ -3,7 +3,7 @@
 namespace :items do
   desc 'Perform daily backup jobs'
 
-  task :perform_daily_backup_jobs => :environment do
+  task perform_daily_backup_jobs: :environment do
     items = Item.where(content_type: 'SF|Extension', deleted: false)
     items.each do |item|
       content = item.decoded_content

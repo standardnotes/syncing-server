@@ -1,16 +1,15 @@
 class Admin::AdminController < ApplicationController
-
   before_action do
-    allowed_ips = ENV["ADMIN_IPS"].split(",")
+    allowed_ips = ENV['ADMIN_IPS'].split(',')
     is_authorized_ip = allowed_ips.include?(request.ip) && allowed_ips.include?(request.remote_ip)
     if is_authorized_ip
       admin_key = params[:admin_key]
-      env_admin_key = ENV["ADMIN_KEY"]
+      env_admin_key = ENV['ADMIN_KEY']
       if !admin_key || !env_admin_key || !ActiveSupport::SecurityUtils.secure_compare(admin_key, env_admin_key)
-        render :json => {}, :status => 401
+        render json: {}, status: 401
       end
     else
-      render :json => {}, :status => 401
+      render json: {}, status: 401
     end
   end
 
@@ -24,7 +23,6 @@ class Admin::AdminController < ApplicationController
       user.delete
     end
 
-    render :json => {}, :status => 200
+    render json: {}, status: 200
   end
-
 end

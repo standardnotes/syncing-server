@@ -71,7 +71,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             retrieved_items = serialize_to_hash(retrieved_items)
             note_items = note_items.to_a.map(&:serializable_hash)
-            
+
             note_items = serialize_to_hash(note_items)
             expect(retrieved_items).to match_array(note_items)
           end
