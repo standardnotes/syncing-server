@@ -4,6 +4,7 @@ class Item < ApplicationRecord
   def serializable_hash(options = {})
     allowed_options = [
       'uuid',
+      'items_key_id',
       'enc_item_key',
       'content',
       'content_type',

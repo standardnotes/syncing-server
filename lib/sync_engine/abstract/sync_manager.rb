@@ -8,7 +8,7 @@ module SyncEngine
     end
 
     def sync_fields
-      @sync_fields || [:content, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
+      @sync_fields || [:content, :items_key_id, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
     end
 
     def destroy_items(uuids)
