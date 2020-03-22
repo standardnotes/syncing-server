@@ -9,7 +9,7 @@ class Api::ApiController < ApplicationController
 
   before_action do
     request.env['HTTP_ACCEPT_ENCODING'] = 'gzip'
-    self.user_manager = SyncEngine::V20190520::UserManager.new(User)
+    self.user_manager = SyncEngine::V20200115::UserManager.new(User)
   end
 
   protected

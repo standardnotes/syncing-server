@@ -28,6 +28,12 @@ class User < ApplicationRecord
     params
   end
 
+  ##
+  # Returns the items key associated with this user
+  def items_keys
+    items.where(content_type: 'SN|ItemsKey')
+  end
+
   def download_backup
     data = {
       items: items.where(deleted: false),
