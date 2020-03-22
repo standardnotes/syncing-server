@@ -15,8 +15,9 @@ module SyncEngine
         if in_sync_token.nil?
           # If it's the first sync request, front-load all exisitng items keys
           # so that the client can decrypt incoming items without having to wait
-          items_keys = @user.items_keys.to_a
-          retrieved_items.unshift(*items_keys)
+          @user.items_keys.each do |items_key|
+            retrieved_items.unshift(items_key) unless retrieved_items.include?(items_key)
+          end
         end
 
         unless saved_items.empty?
