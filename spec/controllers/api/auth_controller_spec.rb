@@ -213,6 +213,32 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(parsed_response_body['token']).to_not be_nil
       end
     end
+
+    context 'when providing an email address that contains uppercased letters' do
+      it 'should register using the lowercased email address' do
+        new_user_email = 'NEW-User@SN-EMAIL.Org'
+        post :register, params: { email: new_user_email, password: '123456' }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body).to_not be_nil
+        expect(parsed_response_body['user']).to_not be_nil
+        expect(parsed_response_body['user']['email']).to eq(new_user_email.downcase)
+        expect(parsed_response_body['token']).to_not be_nil
+
+        post :register, params: { email: 'New-user@Sn-Email.Org', password: '123456' }
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body).to_not be_nil
+        expect(parsed_response_body['error']).to_not be_nil
+        expect(parsed_response_body['error']['message']).to eq('This email is already registered.')
+      end
+    end
   end
 
   describe 'POST auth/update' do
