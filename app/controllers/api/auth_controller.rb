@@ -1,5 +1,6 @@
 class Api::AuthController < Api::ApiController
   skip_before_action :authenticate_user, except: [:change_pw, :update]
+  before_action :can_register, only: [:register]
 
   before_action do
     # current_user can still be nil by here.
@@ -216,5 +217,19 @@ class Api::AuthController < Api::ApiController
       pw_nonce: Digest::SHA2.hexdigest(email + Rails.application.secrets.secret_key_base),
       version: '003',
     }
+  end
+
+  private
+
+  def can_register
+    registration_disabled = ENV['DISABLE_USER_REGISTRATION'].to_s.downcase == 'true'
+
+    if registration_disabled
+      render json: {
+        error: {
+          message: 'User registration is currently not allowed.',
+        },
+      }, status: 401
+    end
   end
 end
