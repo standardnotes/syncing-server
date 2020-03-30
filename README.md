@@ -33,7 +33,7 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 
 ### Tests
 
-`syncing-server` uses [RSpec](http://rspec.info) for tests.
+The `syncing-server` uses [RSpec](http://rspec.info) for tests.
 
 To execute all of the test specs, run the following command at the root of the project directory:
 
@@ -42,6 +42,11 @@ bundle exec rspec
 ```
 
 Code coverage report is available within the `coverage` directory.
+
+### Disabling new user registrations
+
+1. Set the `DISABLE_USER_REGISTRATION` environment variable to `true`
+1. Restart the `syncing-server`
 
 ## Docker setup
 
@@ -76,25 +81,6 @@ This should load the syncing-server and MySQL database containers and run the ne
 To stop the server, `cd` into this directory again and run `docker-compose down`
 
 Your MySQL Data will be written to your local disk at `/var/lib/mysql` - Be sure to back this up in a production instance.
-
-### Disable new account registrations
-To disable the registration of new user accounts, follow these instructions.
-
-**Docker Compose**
-1. Edit the file `config/routes.rb`
-
-2. Comment out the following lines and save the file
-	```
-	post "auth" => "api/auth#register"
-	```
-	```
-	post "auth" => "auth#register"`
-	```
-3. Run `docker-compose down` top stop all containers
-
-4. Run `docker-compose build --no-cache app` to rebuild the app
-
-5. Run `docker-compose up`
 
 ### Heroku
 
