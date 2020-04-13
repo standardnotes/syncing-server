@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # forward non-namespaced routes to api namespace
   get 'auth/params' => "api/auth#auth_params"
   post "auth/sign_in" => "api/auth#sign_in"
+  post "auth/sign_out" => "api/auth#sign_out"
   post "auth" => "api/auth#register"
   post "auth/update" => "api/auth#update"
   post "auth/change_pw" => "api/auth#change_pw"
@@ -18,6 +19,12 @@ Rails.application.routes.draw do
 
   delete "items" => "api/items#destroy"
   resources "items", :controller => "api/items"
+
+  # sessions management
+  post "session/refresh" => "api/sessions#refresh"
+  get "sessions/active" => "api/sessions#active_sessions"
+  delete "session" => "api/sessions#delete"
+  delete "session/all" => "api/sessions#delete_all"
 
   # legacy support for clients which hardcoded the "api" path to the base url (iOS)
   namespace :api, defaults: {format: :json} do

@@ -30,11 +30,12 @@ The [SNJS library](https://github.com/standardnotes/snjs/blob/64e4e65c7660b9758e
 | api_version    | string    | The server API version used to create the session |
 | access_token   | string    | The access token used to authenticate requests    |
 | refresh_token  | string    | The refresh token used to extend tokens           |
+| expire_at      | datetime  | The expiration time of the session                |
 | created_at     | datetime  | Date and time of creation of the session          |
 | updated_at     | datetime  | Last updated date and time of the session         |
 
 - Each `session` includes the API version they were created with. This way we can deny sessions for a given API version if we detect a vulnerability with that version in the future
-- `access_token` and `refresh_token` tokens are prefixed with `A_` and `R_`, repectively
+- `access_token` and `refresh_token` tokens are both generated using [`ActiveRecord::SecureToken`](https://api.rubyonrails.org/classes/ActiveRecord/SecureToken/ClassMethods.html#method-i-has_secure_token)
 - Sessions are created in the following cases:
   - When a user signs in
   - When a user registers a new account
@@ -91,6 +92,7 @@ Tokens can be obtained every time the user performs the following actions:
 
 1. When a user signs in
 1. When a user registers an account
+1. When the tokens are refreshed
 
 #### Refreshing tokens
 

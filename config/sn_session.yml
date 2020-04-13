@@ -1,0 +1,21 @@
+default: &default
+  access_token_expiration_time: <%= 60.days %>
+  refresh_token_expiration_time: <%= 1.years %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+staging:
+  <<: *default
+
+production:
+  <<: *default
+
+docker_development:
+  <<: *default
+
+raspberry_pi:
+  <<: *default

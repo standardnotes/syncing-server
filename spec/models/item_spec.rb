@@ -19,11 +19,11 @@ RSpec.describe Item, type: :model do
     end
 
     let(:hash_keys) do
-      %w[uuid auth_hash content content_type created_at deleted enc_item_key updated_at].sort
+      %w[uuid auth_hash content content_type created_at deleted enc_item_key updated_at items_key_id].sort
     end
 
     specify do
-      expect(hash.count).to eq 8
+      expect(hash.count).to eq hash_keys.count
       expect(hash.keys.sort).to contain_exactly(*hash_keys)
     end
   end

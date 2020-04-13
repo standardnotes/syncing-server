@@ -91,5 +91,8 @@ module StandardNotes
       :enable_starttls_auto => true # detects and uses STARTTLS
     }
 
+    # Custom configuration
+    config.x.auth = config_for(:sn_auth).symbolize_keys
+    config.x.session = config_for(:sn_session).symbolize_keys
   end
 end

@@ -14,7 +14,6 @@ module SyncEngine
       decoded_token = JWT.decode(token, secret_key_base, true, algorithm: 'HS256')[0]
       HashWithIndifferentAccess.new(decoded_token)
     rescue StandardError => e
-      puts e
       nil
     end
   end

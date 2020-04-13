@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'aws-sdk-sqs'
 gem 'bcrypt'
+gem 'device_detector'
 gem 'dotenv-rails'
 gem 'haml-rails'
 gem 'jwt'
