@@ -3,10 +3,13 @@ class Api::ItemsController < Api::ApiController
     unless @sync_manager
       version = params[:api]
       @sync_manager =
-        if version == '20190520'
+        if !version
+          SyncEngine::V20161215::SyncManager.new(current_user)
+        elsif version == '20190520'
           SyncEngine::V20190520::SyncManager.new(current_user)
         else
-          SyncEngine::V20161215::SyncManager.new(current_user)
+          # Default to latest
+          SyncEngine::V20190520::SyncManager.new(current_user)
         end
     end
     @sync_manager
