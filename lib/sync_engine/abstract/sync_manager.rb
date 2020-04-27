@@ -28,6 +28,7 @@ module SyncEngine
       parts = decoded.rpartition(':')
       timestamp_string = parts.last
       version = parts.first
+
       if version == '1'
         date = DateTime.strptime(timestamp_string, '%s')
       elsif version == '2'

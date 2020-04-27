@@ -10,8 +10,9 @@ class Api::AuthController < Api::ApiController
           message: 'Too many successive login requests. '\
             'Please try your request again later.',
         },
-      }, status: 423
+      }, status: :locked
     end
+
     @user_manager = user_manager
   end
 
@@ -24,10 +25,7 @@ class Api::AuthController < Api::ApiController
 
   def verify_mfa
     mfa = mfa_for_email(params[:email])
-
-    if mfa.nil?
-      return true
-    end
+    return true if mfa.nil?
 
     mfa_content = mfa.decoded_content
     mfa_param_key = "mfa_#{mfa.uuid}"
@@ -40,8 +38,7 @@ class Api::AuthController < Api::ApiController
           message: 'Please enter your two-factor authentication code.',
           payload: { mfa_key: mfa_param_key },
         },
-      }, status: 401
-
+      }, status: :unauthorized
       return false
     end
 
@@ -58,10 +55,11 @@ class Api::AuthController < Api::ApiController
             'Please try again.',
           payload: { mfa_key: mfa_param_key },
         },
-      }, status: 401
-
-      false
+      }, status: :unauthorized
+      return false
     end
+
+    false
   end
 
   def handle_successful_auth_attempt
@@ -88,7 +86,7 @@ class Api::AuthController < Api::ApiController
   end
 
   def sign_in
-    if verify_mfa == false
+    unless verify_mfa
       # error responses are handled by the verify_mfa method
       return
     end
@@ -97,10 +95,11 @@ class Api::AuthController < Api::ApiController
       return render_invalid_auth
     end
 
-    result = @user_manager.sign_in(params[:email], params[:password], params[:api_version], request.user_agent)
+    result = @user_manager.sign_in(params[:email], params[:password], params[:api], request.user_agent)
+
     if result[:error]
       handle_failed_auth_attempt
-      render json: result, status: 401
+      render json: result, status: :unauthorized
     else
       handle_successful_auth_attempt
       render json: result
@@ -109,11 +108,12 @@ class Api::AuthController < Api::ApiController
 
   def register
     if !params[:email] || !params[:password]
-      return render json: {
+      render json: {
         error: {
           message: 'Please enter an email and a password to register.',
         },
-      }, status: 401
+      }, status: :unauthorized
+      return
     end
 
     unless params[:version]
@@ -121,17 +121,21 @@ class Api::AuthController < Api::ApiController
     end
 
     result = @user_manager.register(params[:email], params[:password], params, request.user_agent)
+
     if result[:error]
-      render json: result, status: 401
-    else
-      user = result[:user]
-      user.updated_with_user_agent = request.user_agent
-      user.save
-      if ENV['AWS_REGION']
-        RegistrationJob.perform_later(user.email, user.created_at.to_s)
-      end
-      render json: result
+      render json: result, status: :unauthorized
+      return
     end
+
+    user = result[:user]
+    user.updated_with_user_agent = request.user_agent
+    user.save
+
+    if ENV['AWS_REGION']
+      RegistrationJob.perform_later(user.email, user.created_at.to_s)
+    end
+
+    render json: result
   end
 
   def change_pw
@@ -141,8 +145,17 @@ class Api::AuthController < Api::ApiController
           message: 'Your current password is required to change your password. '\
             'Please update your application if you do not see this option.',
         },
-      }, status: 401
+      }, status: :unauthorized
+      return
+    end
 
+    unless params[:new_password]
+      render json: {
+        error: {
+          message: 'You new password is required to change your password. '\
+            'Please try again.',
+        },
+      }, status: :unauthorized
       return
     end
 
@@ -152,32 +165,32 @@ class Api::AuthController < Api::ApiController
           message: 'The change password request is missing new auth parameters. '\
             'Please try again.',
         },
-      }, status: 401
-
+      }, status: :unauthorized
       return
     end
 
     # Verify current password first
     valid_credentials = @user_manager.verify_credentials(current_user.email, params[:current_password])
+
     unless valid_credentials
       handle_failed_auth_attempt
+
       render json: {
         error: {
           message: 'The current password you entered is incorrect. '\
             'Please try again.',
         },
-      }, status: 401
-
+      }, status: :unauthorized
       return
     end
 
     handle_successful_auth_attempt
 
     current_user.updated_with_user_agent = request.user_agent
-
     result = @user_manager.change_pw(current_user, params[:new_password], params)
+
     if result[:error]
-      render json: result, status: 401
+      render json: result, status: :unauthorized
     else
       render json: result
     end
@@ -187,15 +200,24 @@ class Api::AuthController < Api::ApiController
     current_user.updated_with_user_agent = request.user_agent
     result = @user_manager.update(current_user, params)
     if result[:error]
-      render json: result, status: 401
+      render json: result, status: :unauthorized
     else
       render json: result
     end
   end
 
   def auth_params
-    if verify_mfa == false
+    unless verify_mfa
       # error responses are handled by the verify_mfa method
+      return
+    end
+
+    unless params[:email]
+      render json: {
+        error: {
+          message: 'Please provide an email address.',
+        },
+      }, status: :bad_request
       return
     end
 
@@ -210,7 +232,7 @@ class Api::AuthController < Api::ApiController
   def pseudo_auth_params(email)
     {
       identifier: email,
-      pw_cost: 110000,
+      pw_cost: 110_000,
       pw_nonce: Digest::SHA2.hexdigest(email + Rails.application.secrets.secret_key_base),
       version: '003',
     }
@@ -218,7 +240,6 @@ class Api::AuthController < Api::ApiController
 
   def sign_out
     current_session&.destroy
-
     render json: {}, status: :no_content
   end
 end

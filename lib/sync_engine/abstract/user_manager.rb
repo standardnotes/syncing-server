@@ -25,7 +25,7 @@ module SyncEngine
       else
         user = @user_class.new(email: email, encrypted_password: hash_password(password))
         user.update!(registration_params(params))
-        create_session(user, params[:api_version], user_agent)
+        create_session(user, params[:api], user_agent)
       end
     end
 
@@ -115,7 +115,7 @@ module SyncEngine
       session = Session.new(user_uuid: user.uuid, api_version: api_version, user_agent: user_agent)
 
       unless session.save
-        return { error: { message: 'Could not create a session.', status: :bad_request } }
+        return { error: { message: 'Could not create a session.', status: 400 } }
       end
 
       tokens = {

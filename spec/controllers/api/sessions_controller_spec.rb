@@ -16,7 +16,7 @@ RSpec.describe Api::SessionsController, type: :controller do
   end
 
   let(:test_user_004_credentials) do
-    { email: test_user_004.email, password: test_password, api_version: '20200115' }
+    { email: test_user_004.email, password: test_password, api: '20200115' }
   end
 
   describe 'GET sessions/active' do
@@ -269,7 +269,7 @@ RSpec.describe Api::SessionsController, type: :controller do
           request.headers['Authorization'] = "bearer #{access_token}"
 
           # Registering another test user, so multiple sessions from multiple users exist...
-          another_test_user = build(:user, password: test_password, version: '004')
+          build(:user, password: test_password, version: '004')
 
           current_user_sessions = test_user_004.sessions
 
@@ -432,9 +432,12 @@ RSpec.describe Api::SessionsController, type: :controller do
               expect(parsed_response_body).to_not be_nil
               expect(parsed_response_body['access_token']).to_not be_nil
               expect(parsed_response_body['access_token']['value']).to_not be_nil
+              expect(parsed_response_body['access_token']['value']).to_not eq(access_token)
               expect(parsed_response_body['access_token']['expire_at']).to_not be_nil
+
               expect(parsed_response_body['refresh_token']).to_not be_nil
               expect(parsed_response_body['refresh_token']['value']).to_not be_nil
+              expect(parsed_response_body['refresh_token']['value']).to_not eq(refresh_token)
               expect(parsed_response_body['refresh_token']['expire_at']).to_not be_nil
             end.to change(Session, :count).by(0)
 

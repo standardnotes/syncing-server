@@ -10,13 +10,16 @@ class Session < ApplicationRecord
   def serializable_hash(options = {})
     allowed_options = [
       'uuid',
-      'device_info',
       'api_version',
       'created_at',
       'updated_at',
     ]
 
-    super(options.merge(only: allowed_options))
+    allowed_methods = [
+      'device_info',
+    ]
+
+    super(options.merge(only: allowed_options, methods: allowed_methods))
   end
 
   def access_token_expire_at
@@ -33,7 +36,7 @@ class Session < ApplicationRecord
     set_expire_at
   end
 
-  def is_expired?
+  def expired?
     expire_at < DateTime.now
   end
 

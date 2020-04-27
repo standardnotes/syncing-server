@@ -41,12 +41,12 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    if authentication[:type] == 'jwt' && params[:api_version].to_i >= 20190520 && user.supports_sessions?
+    if authentication[:type] == 'jwt' && params[:api].to_i >= 20190520 && user.supports_sessions?
       render_invalid_auth
       return
     end
 
-    if authentication[:type] == 'session_token' && authentication[:session].is_expired?
+    if authentication[:type] == 'session_token' && authentication[:session].expired?
       render json: {
         error: {
           tag: 'expired-access-token',
@@ -77,6 +77,7 @@ class Api::ApiController < ApplicationController
     if current_user
       Raven.user_context(id: current_user.uuid)
     end
+
     Raven.extra_context(params: params.to_unsafe_h, url: request.url)
   end
 
@@ -85,7 +86,7 @@ class Api::ApiController < ApplicationController
   end
 
   def render_invalid_auth
-    render json: { error: { tag: 'invalid-auth', message: 'Invalid login credentials.' } }, status: 401
+    render json: { error: { tag: 'invalid-auth', message: 'Invalid login credentials.' } }, status: :unauthorized
   end
 
   private
