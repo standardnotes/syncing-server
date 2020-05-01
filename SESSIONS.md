@@ -137,14 +137,9 @@ Here's how to refresh tokens:
     1. The provided `refresh_token` is valid. If so, a new pair of tokens is generated and the following JSON response is returned:
         ```json
         {
-          "access_token": {
-            "value": "A_xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-            "expiration": "2020-03-01T00:00:00.000Z"
-          },
-          "refresh_token": {
-            "value": "R_xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-            "expiration": "2021-01-01T00:00:00.000Z"
-          }
+          "access_token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+          "expire_at": 1583020800,
+          "refresh_token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
         }
         ```
     1. The provided `refresh_token` is invalid. If so, the following JSON response is returned:
