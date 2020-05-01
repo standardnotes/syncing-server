@@ -23,21 +23,25 @@ class Session < ApplicationRecord
   end
 
   def access_token_expire_at
-    expire_at - refresh_token_expiration_time + access_token_expiration_time
+    (expire_at - refresh_token_expiration_time + access_token_expiration_time).to_i
   end
 
   def refresh_token_expire_at
-    expire_at
+    expire_at.to_i
   end
 
   def regenerate_tokens
+    return false if self.expired?
+
     regenerate_access_token
     regenerate_refresh_token
     set_expire_at
+
+    return true
   end
 
   def expired?
-    expire_at < DateTime.now
+    refresh_token_expire_at < DateTime.now.to_i
   end
 
   def device_info

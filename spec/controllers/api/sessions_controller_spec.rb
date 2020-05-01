@@ -431,14 +431,14 @@ RSpec.describe Api::SessionsController, type: :controller do
 
               expect(parsed_response_body).to_not be_nil
               expect(parsed_response_body['access_token']).to_not be_nil
-              expect(parsed_response_body['access_token']['value']).to_not be_nil
-              expect(parsed_response_body['access_token']['value']).to_not eq(access_token)
-              expect(parsed_response_body['access_token']['expire_at']).to_not be_nil
+              expect(parsed_response_body['access_token']).to_not eq(access_token)
+
+              expect(parsed_response_body['expire_at']).to_not be_nil
+              expect(parsed_response_body['expire_at']).to be_an(Numeric)
+              expect(parsed_response_body['expire_at']).to be > 0
 
               expect(parsed_response_body['refresh_token']).to_not be_nil
-              expect(parsed_response_body['refresh_token']['value']).to_not be_nil
-              expect(parsed_response_body['refresh_token']['value']).to_not eq(refresh_token)
-              expect(parsed_response_body['refresh_token']['expire_at']).to_not be_nil
+              expect(parsed_response_body['refresh_token']).to_not eq(access_token)
             end.to change(Session, :count).by(0)
 
             # Tokens should be renewed...

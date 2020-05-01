@@ -64,17 +64,20 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    session.regenerate_tokens
+    unless session.regenerate_tokens
+      render json: {
+        error: {
+          tag: 'expired-refresh-token',
+          message: 'The refresh token is expired.',
+        },
+      }, status: :bad_request
+      return
+    end
 
     render json: {
-      access_token: {
-        value: session.access_token,
-        expire_at: session.access_token_expire_at,
-      },
-      refresh_token: {
-        value: session.refresh_token,
-        expire_at: session.refresh_token_expire_at,
-      },
+      access_token: session.access_token,
+      expire_at: session.access_token_expire_at,
+      refresh_token: session.refresh_token,
     }
   end
 

@@ -118,18 +118,13 @@ module SyncEngine
         return { error: { message: 'Could not create a session.', status: 400 } }
       end
 
-      tokens = {
-        access_token: {
-          value: session.access_token,
-          expire_at: session.access_token_expire_at,
-        },
-        refresh_token: {
-          value: session.refresh_token,
-          expire_at: session.refresh_token_expire_at,
-        },
+      session_response = {
+        access_token: session.access_token,
+        expire_at: session.access_token_expire_at,
+        refresh_token: session.refresh_token,
       }
 
-      { user: user, token: tokens[:access_token][:value], tokens: tokens }
+      { user: user, token: session.access_token, session: session_response }
     end
   end
 end
