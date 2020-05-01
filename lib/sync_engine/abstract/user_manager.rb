@@ -119,7 +119,6 @@ module SyncEngine
       end
 
       session_response = {
-        access_token: session.access_token,
         expire_at: session.access_token_expire_at,
         refresh_token: session.refresh_token,
       }
