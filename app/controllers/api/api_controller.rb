@@ -46,7 +46,7 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    if authentication[:type] == 'session_token' && authentication[:session].expired?
+    if authentication[:type] == 'session_token' && authentication[:session].expired_access_token?
       render json: {
         error: {
           tag: 'expired-access-token',

@@ -40,8 +40,12 @@ class Session < ApplicationRecord
     return true
   end
 
+  def expired_access_token?
+    access_token_expire_at < DateTime.now.to_i
+  end
+
   def expired?
-    refresh_token_expire_at < DateTime.now.to_i
+    expire_at < DateTime.now
   end
 
   def device_info

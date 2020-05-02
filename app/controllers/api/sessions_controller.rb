@@ -1,11 +1,8 @@
 class Api::SessionsController < Api::ApiController
   respond_to :json
 
-  before_action do
-    if current_session.nil?
-      render_unsupported_account_version
-    end
-  end
+  skip_before_action :authenticate_user, only: [:refresh]
+  before_action :require_valid_session, except: [:refresh]
 
   def active_sessions
     sessions = current_user.active_sessions
@@ -16,7 +13,7 @@ class Api::SessionsController < Api::ApiController
 
   def delete
     unless params[:uuid]
-      render json: { error: { message: 'Please provide the session UUID.' } }, status: :bad_request
+      render json: { error: { message: 'Please provide the session identifier.' } }, status: :bad_request
       return
     end
 
@@ -28,7 +25,7 @@ class Api::SessionsController < Api::ApiController
     session = current_user.sessions.where(uuid: params[:uuid]).first
 
     unless session
-      render json: { error: { message: 'No session exist with the provided UUID.' } }, status: :bad_request
+      render json: { error: { message: 'No session exist with the provided identifier.' } }, status: :bad_request
       return
     end
 
@@ -43,22 +40,25 @@ class Api::SessionsController < Api::ApiController
   end
 
   def refresh
-    unless params[:refresh_token]
+    unless params[:user_uuid] || params[:access_token] || params[:refresh_token]
       render json: {
         error: {
-          message: 'Please provide the refresh token.',
+          message: 'Please provide all required parameters.',
         },
       }, status: :bad_request
       return
     end
 
-    session = current_user.sessions.where('refresh_token = ?', params[:refresh_token]).first
+    session = Session.where(
+      'user_uuid = ? AND access_token = ? AND refresh_token = ?',
+      params[:user_uuid], params[:access_token], params[:refresh_token]
+    ).first
 
     unless session
       render json: {
         error: {
-          tag: 'invalid-refresh-token',
-          message: 'The refresh token is not valid.',
+          tag: 'invalid-parameters',
+          message: 'The provided parameters are not valid.',
         },
       }, status: :bad_request
       return
@@ -68,7 +68,7 @@ class Api::SessionsController < Api::ApiController
       render json: {
         error: {
           tag: 'expired-refresh-token',
-          message: 'The refresh token is expired.',
+          message: 'The refresh token has expired.',
         },
       }, status: :bad_request
       return
@@ -82,6 +82,12 @@ class Api::SessionsController < Api::ApiController
   end
 
   private
+
+  def require_valid_session
+    if current_session.nil?
+      render_unsupported_account_version
+    end
+  end
 
   def render_unsupported_account_version
     render json: {

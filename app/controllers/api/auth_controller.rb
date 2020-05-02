@@ -222,11 +222,13 @@ class Api::AuthController < Api::ApiController
     end
 
     auth_params = @user_manager.auth_params(params[:email])
+
     if !auth_params
       render json: pseudo_auth_params(params[:email])
-    else
-      render json: @user_manager.auth_params(params[:email])
+      return
     end
+
+    render json: auth_params
   end
 
   def pseudo_auth_params(email)
