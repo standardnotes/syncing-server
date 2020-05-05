@@ -37,6 +37,8 @@ class Session < ApplicationRecord
     regenerate_refresh_token
     set_expire_at
 
+    self.save
+
     return true
   end
 
