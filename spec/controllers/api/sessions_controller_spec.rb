@@ -377,7 +377,6 @@ RSpec.describe Api::SessionsController, type: :controller do
 
         expect do
           post :refresh, params: { 
-            user_uuid: test_user_004.uuid,
             access_token: access_token,
             refresh_token: refresh_token
           }
@@ -388,15 +387,16 @@ RSpec.describe Api::SessionsController, type: :controller do
           parsed_response_body = JSON.parse(response.body)
 
           expect(parsed_response_body).to_not be_nil
-          expect(parsed_response_body['access_token']).to_not be_nil
-          expect(parsed_response_body['access_token']).to_not eq(access_token)
+          expect(parsed_response_body['token']).to_not be_nil
+          expect(parsed_response_body['token']).to_not eq(access_token)
 
-          expect(parsed_response_body['expire_at']).to_not be_nil
-          expect(parsed_response_body['expire_at']).to be_an(Numeric)
-          expect(parsed_response_body['expire_at']).to be > 0
+          expect(parsed_response_body['session']).to_not be_nil
+          expect(parsed_response_body['session']['expire_at']).to_not be_nil
+          expect(parsed_response_body['session']['expire_at']).to be_an(Numeric)
+          expect(parsed_response_body['session']['expire_at']).to be > 0
 
-          expect(parsed_response_body['refresh_token']).to_not be_nil
-          expect(parsed_response_body['refresh_token']).to_not eq(access_token)
+          expect(parsed_response_body['session']['refresh_token']).to_not be_nil
+          expect(parsed_response_body['session']['refresh_token']).to_not eq(access_token)
         end.to change(Session, :count).by(0)
 
         # Tokens should be renewed...

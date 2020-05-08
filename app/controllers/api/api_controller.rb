@@ -52,7 +52,7 @@ class Api::ApiController < ApplicationController
           tag: 'expired-access-token',
           message: 'The provided access token has expired.',
         },
-      }, status: :unauthorized
+      }, status: 498
 
       return
     end

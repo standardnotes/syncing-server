@@ -98,7 +98,7 @@ Tokens can be obtained every time the user performs the following actions:
 
 When an expired `access_token` is provided in the `Authorization` HTTP header, the following JSON response is returned:
 
-HTTP Status Code: `401 Unauthorized`
+HTTP Status Code: `498 Token expired/invalid`
 
 ```json
 {
@@ -137,9 +137,11 @@ Here's how to refresh tokens:
     1. The provided `refresh_token` is valid. If so, a new pair of tokens is generated and the following JSON response is returned:
         ```json
         {
-          "access_token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-          "expire_at": 1583020800,
-          "refresh_token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+          "token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+          "session": {
+            "expire_at": 1583020800,
+            "refresh_token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+          }
         }
         ```
     1. The provided `refresh_token` is invalid. If so, the following JSON response is returned:

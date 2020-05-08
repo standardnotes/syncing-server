@@ -40,7 +40,7 @@ class Api::SessionsController < Api::ApiController
   end
 
   def refresh
-    unless params[:user_uuid] || params[:access_token] || params[:refresh_token]
+    unless params[:access_token] || params[:refresh_token]
       render json: {
         error: {
           message: 'Please provide all required parameters.',
@@ -50,8 +50,8 @@ class Api::SessionsController < Api::ApiController
     end
 
     session = Session.where(
-      'user_uuid = ? AND access_token = ? AND refresh_token = ?',
-      params[:user_uuid], params[:access_token], params[:refresh_token]
+      'access_token = ? AND refresh_token = ?',
+      params[:access_token], params[:refresh_token]
     ).first
 
     unless session
