@@ -31,15 +31,14 @@ class Session < ApplicationRecord
   end
 
   def regenerate_tokens
-    return false if self.expired?
+    return false if expired?
 
     regenerate_access_token
     regenerate_refresh_token
     set_expire_at
 
-    self.save
-
-    return true
+    save
+    true
   end
 
   def expired_access_token?
@@ -71,12 +70,6 @@ class Session < ApplicationRecord
   end
 
   def access_token_expiration_time
-    test_expiration_time = ENV['ACCESS_TOKEN_EXPIRE_SECONDS'].to_i
-
-    if Rails.env.test? && test_expiration_time > 0
-      return test_expiration_time.seconds
-    end
-
     config[:access_token_expiration_time].seconds
   end
 
