@@ -1,5 +1,6 @@
 class Api::AuthController < Api::ApiController
-  skip_before_action :authenticate_user, except: [:change_pw, :update, :sign_out]
+  skip_before_action :authenticate_user, except: [:change_pw, :update]
+  before_action :authenticate_user_for_sign_out, only: [:sign_out]
 
   before_action do
     # current_user can still be nil by here.
@@ -92,7 +93,7 @@ class Api::AuthController < Api::ApiController
     end
 
     if !params[:email] || !params[:password]
-      return render_invalid_auth
+      return render_invalid_auth_error
     end
 
     result = @user_manager.sign_in(params[:email], params[:password], params[:api], request.user_agent)
@@ -223,7 +224,7 @@ class Api::AuthController < Api::ApiController
 
     auth_params = @user_manager.auth_params(params[:email])
 
-    if !auth_params
+    unless auth_params
       render json: pseudo_auth_params(params[:email])
       return
     end

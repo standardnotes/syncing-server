@@ -1,4 +1,6 @@
 class Session < ApplicationRecord
+  belongs_to :user, foreign_key: 'user_uuid'
+
   validates :user_agent, length: { in: 0..255, allow_nil: true }
   validates :api_version, inclusion: { in: %w(20200115) }
 
