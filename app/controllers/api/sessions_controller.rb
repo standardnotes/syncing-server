@@ -77,9 +77,9 @@ class Api::SessionsController < Api::ApiController
     render json: {
       session: {
         expire_at: session.access_token_expire_at,
-        refresh_token: session.refresh_token
+        refresh_token: session.refresh_token,
       },
-      token: session.access_token
+      token: session.access_token,
     }
   end
 

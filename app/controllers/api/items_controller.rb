@@ -102,11 +102,11 @@ class Api::ItemsController < Api::ApiController
 
     case version
     when '20200115'
-      return SyncEngine::V20200115::SyncManager.new(current_user)
+      SyncEngine::V20200115::SyncManager.new(current_user)
     when '20190520'
-      return SyncEngine::V20190520::SyncManager.new(current_user)
+      SyncEngine::V20190520::SyncManager.new(current_user)
     else
-      return SyncEngine::V20190520::SyncManager.new(current_user)
+      SyncEngine::V20190520::SyncManager.new(current_user)
     end
   end
 end

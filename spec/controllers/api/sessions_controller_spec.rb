@@ -303,10 +303,10 @@ RSpec.describe Api::SessionsController, type: :controller do
 
     context 'with invalid parameters' do
       it 'should fail' do
-        post :refresh, params: { 
+        post :refresh, params: {
           user_uuid: 'not-a-real-uuid',
           access_token: 'not-a-real-access-token',
-          refresh_token: 'not-a-real-refresh-token'
+          refresh_token: 'not-a-real-refresh-token',
         }
 
         expect(response).to have_http_status(:bad_request)
@@ -337,10 +337,10 @@ RSpec.describe Api::SessionsController, type: :controller do
         refresh_token = current_session.refresh_token
 
         expect do
-          post :refresh, params: { 
+          post :refresh, params: {
             user_uuid: test_user_004.uuid,
             access_token: access_token,
-            refresh_token: refresh_token 
+            refresh_token: refresh_token,
           }
 
           expect(response).to have_http_status(:bad_request)
@@ -376,9 +376,9 @@ RSpec.describe Api::SessionsController, type: :controller do
         refresh_token = current_session.refresh_token
 
         expect do
-          post :refresh, params: { 
+          post :refresh, params: {
             access_token: access_token,
-            refresh_token: refresh_token
+            refresh_token: refresh_token,
           }
 
           expect(response).to have_http_status(:ok)

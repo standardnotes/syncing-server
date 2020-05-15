@@ -8,11 +8,11 @@ FactoryBot.define do
     initialize_with do
       user_manager = SyncEngine::V20200115::UserManager.new(User)
 
-      case version
+      api_version = case version
       when '004'
-        api_version = '20200115'
+        '20200115'
       else
-        api_version = '20190520'
+        '20190520'
       end
 
       params = ActionController::Parameters.new(pw_cost: 110_000, api: api_version, version: version)
