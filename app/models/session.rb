@@ -44,7 +44,7 @@ class Session < ApplicationRecord
   end
 
   def expired_access_token?
-    access_token_expire_at < DateTime.now.to_i
+    access_token_expire_at < datetime_ms
   end
 
   def expired?
@@ -77,5 +77,9 @@ class Session < ApplicationRecord
 
   def set_expire_at
     self.expire_at = DateTime.now + refresh_token_expiration_time
+  end
+
+  def datetime_ms
+    DateTime.now.strftime('%Q').to_i
   end
 end
