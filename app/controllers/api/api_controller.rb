@@ -42,6 +42,11 @@ class Api::ApiController < ApplicationController
       return
     end
 
+    if authentication[:type] == 'session_token' && authentication[:session].expired?
+      render_invalid_auth_error
+      return
+    end
+
     if authentication[:type] == 'session_token' && authentication[:session].expired_access_token?
       render_expired_token_error
       return
