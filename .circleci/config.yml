@@ -1,0 +1,67 @@
+version: 2.1
+orbs:
+  ruby: circleci/ruby@1.0.0
+  aws-ecr: circleci/aws-ecr@6.8.2
+  aws-ecs: circleci/aws-ecs@1.1.0
+jobs:
+  build-and-test:
+    docker:
+        - image: circleci/ruby:2.6.5-stretch-node
+        - image: circleci/mysql:8.0.4
+          command: [--default-authentication-plugin=mysql_native_password]
+          environment:
+            MYSQL_ROOT_PASSWORD: changeme123
+            MYSQL_DATABASE: standard_notes_db
+            MYSQL_USER: std_notes_user
+            MYSQL_PASSWORD: changeme123
+    executor: ruby/default
+    steps:
+      - checkout
+      - run:
+          name: Copy sample configuration
+          command: cp env.sample .env
+      - run:
+          name: Install MySQL client
+          command: sudo apt install -y mysql-client
+      - run:
+          name: Waiting for MySQL to be ready
+          command: |
+            for i in `seq 1 10`;
+              do
+                nc -z 127.0.0.1 3306 && echo Success && exit 0
+                echo -n .
+                sleep 1
+              done
+            echo Failed waiting for MySQL && exit 1
+      - ruby/install-deps
+      - run:
+          name: Initialize Database
+          command: bundle exec rails db:create db:migrate
+      - run:
+          name: Run Tests
+          command: bundle exec rspec
+
+workflows:
+    build-and-test:
+      jobs:
+        - build-and-test:
+            filters:
+              branches:
+                only: circleci
+        - aws-ecr/build-and-push-image:
+            requires:
+              - build-and-test
+            repo: "${AWS_ECR_REPOSITORY}"
+            tag: "latest,${CIRCLE_SHA1}"
+            filters:
+                branches:
+                  only: circleci
+        - aws-ecs/deploy-service-update:
+            requires:
+              - aws-ecr/build-and-push-image
+            family: "syncing-server-dev"
+            cluster-name: "dev"
+            container-image-name-updates: "container=syncing-server-dev,tag=${CIRCLE_SHA1}"
+            filters:
+                branches:
+                  only: circleci
