@@ -44,10 +44,7 @@ jobs:
 workflows:
     build-and-test:
       jobs:
-        - build-and-test:
-            filters:
-              branches:
-                only: circleci
+        - build-and-test
         - aws-ecr/build-and-push-image:
             requires:
               - build-and-test
@@ -55,7 +52,7 @@ workflows:
             tag: "latest,${CIRCLE_SHA1}"
             filters:
                 branches:
-                  only: circleci
+                  only: master
         - aws-ecs/deploy-service-update:
             requires:
               - aws-ecr/build-and-push-image
@@ -64,4 +61,4 @@ workflows:
             container-image-name-updates: "container=syncing-server-dev,tag=${CIRCLE_SHA1}"
             filters:
                 branches:
-                  only: circleci
+                  only: master
