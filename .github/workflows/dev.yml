@@ -71,6 +71,6 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: syncing-service-dev
+        service: syncing-server-dev
         cluster: dev
         wait-for-service-stability: true
