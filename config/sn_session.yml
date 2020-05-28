@@ -8,6 +8,7 @@ development:
 test:
   <<: *default
   access_token_expiration_time: <%= 2.seconds %>
+  refresh_token_expiration_time: <%= 6.seconds %>
 
 staging:
   <<: *default
