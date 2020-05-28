@@ -34,6 +34,10 @@ class User < ApplicationRecord
       auth_params: auth_params,
     }
     body = JSON.pretty_generate(data.as_json({}))
+
+    # Create the tmp directory if it doesn't exist
+    Dir.mkdir('tmp') unless Dir.exist?('tmp')
+
     File.open("tmp/#{email}-restore.txt", 'w') { |file| file.write(body) }
   end
 
