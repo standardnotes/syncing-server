@@ -25,7 +25,7 @@ class Api::SessionsController < Api::ApiController
     session = current_user.sessions.where(uuid: params[:uuid]).first
 
     unless session
-      render json: { error: { message: 'No session exist with the provided identifier.' } }, status: :bad_request
+      render json: { error: { message: 'No session exists with the provided identifier.' } }, status: :bad_request
       return
     end
 
