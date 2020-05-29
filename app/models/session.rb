@@ -67,7 +67,7 @@ class Session < ApplicationRecord
       session: {
         expire_at: access_token_expire_at,
         refresh_token: refresh_token,
-        valid_until: refresh_token_expire_at
+        valid_until: refresh_token_expire_at,
       },
       token: access_token,
     }
