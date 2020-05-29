@@ -217,6 +217,22 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(parsed_response_body['token']).to_not be_nil
       end
     end
+
+    context 'when registration is disabled' do
+      it 'register should fail' do
+        ENV['DISABLE_USER_REGISTRATION'] = 'true'
+
+        post :register
+
+        expect(response).to have_http_status(:unauthorized)
+        expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body).to_not be_nil
+        expect(parsed_response_body['error']).to_not be_nil
+        expect(parsed_response_body['error']['message']).to eq('User registration is currently not allowed.')
+      end
+    end
   end
 
   describe 'POST auth/update' do

@@ -1,6 +1,7 @@
 class Api::AuthController < Api::ApiController
   skip_before_action :authenticate_user, except: [:change_pw, :update]
   before_action :authenticate_user_for_sign_out, only: [:sign_out]
+  before_action :can_register, only: [:register]
 
   before_action do
     # current_user can still be nil by here.
@@ -244,5 +245,17 @@ class Api::AuthController < Api::ApiController
   def sign_out
     current_session&.destroy
     render json: {}, status: :no_content
+  private
+
+  def can_register
+    registration_disabled = ENV['DISABLE_USER_REGISTRATION'].to_s.downcase == 'true'
+
+    if registration_disabled
+      render json: {
+        error: {
+          message: 'User registration is currently not allowed.',
+        },
+      }, status: 401
+    end
   end
 end

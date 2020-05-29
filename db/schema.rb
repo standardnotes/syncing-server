@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20200410020904) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "last_user_agent"
     t.index ["content_type"], name: "index_items_on_content_type"
+    t.index ["deleted"], name: "index_items_on_deleted"
     t.index ["updated_at"], name: "index_items_on_updated_at"
     t.index ["user_uuid", "content_type"], name: "index_items_on_user_uuid_and_content_type"
     t.index ["user_uuid", "updated_at", "created_at"], name: "index_items_on_user_uuid_and_updated_at_and_created_at"
