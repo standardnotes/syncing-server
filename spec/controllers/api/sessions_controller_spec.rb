@@ -22,7 +22,7 @@ RSpec.describe Api::SessionsController, type: :controller do
   describe 'GET sessions/active' do
     context 'when not signed in' do
       it 'should return unauthorized error' do
-        get :active_sessions
+        get :index
 
         expect(response).to have_http_status(:unauthorized)
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -45,7 +45,7 @@ RSpec.describe Api::SessionsController, type: :controller do
           @controller = Api::SessionsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
-          get :active_sessions
+          get :index
 
           expect(response).to have_http_status(:bad_request)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -67,7 +67,7 @@ RSpec.describe Api::SessionsController, type: :controller do
           @controller = Api::SessionsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
-          get :active_sessions
+          get :index
 
           expect(response).to have_http_status(:ok)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -75,10 +75,9 @@ RSpec.describe Api::SessionsController, type: :controller do
           parsed_response_body = JSON.parse(response.body)
 
           expect(parsed_response_body).to_not be_nil
-          expect(parsed_response_body['active_sessions']).to_not be_nil
 
           # It should contain the current session
-          expect(parsed_response_body['active_sessions'].any? { |session| session['current'] == true }).to be_truthy
+          expect(parsed_response_body.any? { |session| session['current'] == true }).to be_truthy
         end
       end
     end
@@ -191,7 +190,7 @@ RSpec.describe Api::SessionsController, type: :controller do
 
               expect(parsed_response_body).to_not be_nil
               expect(parsed_response_body['error']).to_not be_nil
-              expect(parsed_response_body['error']['message']).to eq('No session exist with the provided identifier.')
+              expect(parsed_response_body['error']['message']).to eq('No session exists with the provided identifier.')
             end.to change(Session, :count).by(0)
           end
         end

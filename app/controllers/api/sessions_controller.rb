@@ -4,11 +4,11 @@ class Api::SessionsController < Api::ApiController
   skip_before_action :authenticate_user, only: [:refresh]
   before_action :require_valid_session, except: [:refresh]
 
-  def active_sessions
+  def index
     sessions = current_user.active_sessions
     sessions.each { |session| session[:current] = current_session.uuid == session['uuid'] }
 
-    render json: { active_sessions: sessions }
+    render json: sessions
   end
 
   def delete

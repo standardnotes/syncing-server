@@ -22,7 +22,7 @@ Rails.application.routes.draw do
 
   # sessions management
   post "session/refresh" => "api/sessions#refresh"
-  get "sessions/active" => "api/sessions#active_sessions"
+  get "sessions" => "api/sessions#index"
   delete "session" => "api/sessions#delete"
   delete "session/all" => "api/sessions#delete_all"
 
