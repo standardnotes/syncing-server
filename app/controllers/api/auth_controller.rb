@@ -257,7 +257,7 @@ class Api::AuthController < Api::ApiController
         error: {
           message: 'User registration is currently not allowed.',
         },
-      }, status: 401
+      }, status: :unauthorized
     end
   end
 end
