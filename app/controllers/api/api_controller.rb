@@ -13,6 +13,12 @@ class Api::ApiController < ApplicationController
     self.user_manager = SyncEngine::V20200115::UserManager.new(User)
   end
 
+  class InvalidApiVersion < StandardError
+    def message
+      "Invalid API version."
+    end
+  end
+
   private
 
   def authenticate_user
