@@ -245,6 +245,8 @@ class Api::AuthController < Api::ApiController
   def sign_out
     current_session&.destroy
     render json: {}, status: :no_content
+  end
+
   private
 
   def can_register
