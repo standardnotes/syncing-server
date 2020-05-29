@@ -238,7 +238,7 @@ class Api::AuthController < Api::ApiController
       identifier: email,
       pw_cost: 110_000,
       pw_nonce: Digest::SHA2.hexdigest(email + Rails.application.secrets.secret_key_base),
-      version: '003',
+      version: '004',
     }
   end
 
