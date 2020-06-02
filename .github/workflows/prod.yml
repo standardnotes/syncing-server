@@ -2,8 +2,7 @@ name: Prod
 
 on:
   push:
-    tags:
-      - v1.*
+    branches: [ master ]
 
 jobs:
   test:
@@ -47,7 +46,7 @@ jobs:
         name: standardnotes/syncing-server
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest,${{ github.sha }}"
+        tags: "stable,${{ github.sha }}"
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -73,5 +72,5 @@ jobs:
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: syncing-server-prod
-        cluster: dev
+        cluster: prod
         wait-for-service-stability: true
