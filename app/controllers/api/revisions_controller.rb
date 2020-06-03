@@ -6,8 +6,8 @@ class Api::RevisionsController < Api::ApiController
   end
 
   def index
-    item = current_user.items.where(uuid: params[:item_id]).first
+    item = current_user.items.find(params[:item_id])
 
-    render json: item.get_revision_history(User::REVISIONS_RETENTION_DAYS)
+    render json: item&.get_revision_history(User::REVISIONS_RETENTION_DAYS)
   end
 end
