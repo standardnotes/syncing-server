@@ -121,17 +121,18 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             # Serializing the items into an array of hashes
             items_param = test_items.limit(1).to_a.map(&:serializable_hash)
-            items_param[0]['content'] = 'This is the new content.'
 
+            items_param[0]['content'] = 'This is the new content.'
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
+            sleep 1
             items_param[0]['content'] = 'This is yet another new content.'
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
             item = Item.where(uuid: items_param[0]['uuid']).first
 
             revisions = item.revisions
-            expect(revisions.count).to equal(3)
+            expect(revisions.count).to eq(3)
             expect(revisions[0].content).to eq('This is yet another new content.')
             expect(revisions[1].content).to eq('This is the new content.')
           end
