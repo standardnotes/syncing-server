@@ -134,7 +134,6 @@ RSpec.describe Api::ItemsController, type: :controller do
             expect(revisions.count).to equal(3)
             expect(revisions[0].content).to eq('This is yet another new content.')
             expect(revisions[1].content).to eq('This is the new content.')
-            expect(revisions[2].content).to eq('This is a test note.')
           end
         end
 
