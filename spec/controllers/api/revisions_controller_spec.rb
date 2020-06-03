@@ -57,6 +57,17 @@ RSpec.describe Api::RevisionsController, type: :controller do
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
         expect(JSON.parse(response.body).first['content']).to eq('This is a first revision')
       end
+      it 'should return not found if an item does not exist' do
+        @controller = Api::AuthController.new
+        post :sign_in, params: test_user_credentials
+
+        @controller = Api::RevisionsController.new
+        request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+
+        get :index, params: { item_id: '123456' }
+
+        expect(response).to have_http_status(:not_found)
+      end
       it 'should return limited item revisions' do
         item = test_items.first
 
@@ -75,14 +86,19 @@ RSpec.describe Api::RevisionsController, type: :controller do
         @controller = Api::AuthController.new
         post :sign_in, params: test_user_credentials
 
-        @controller = Api::RevisionsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
+        @controller = Api::ItemsController.new
+        items_param = [item].to_a.map(&:serializable_hash)
+        items_param[0]['content'] = 'This is the new content.'
+        post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+
+        @controller = Api::RevisionsController.new
         get :index, params: { item_id: item.uuid }
 
         expect(response).to have_http_status(:success)
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
-        expect(JSON.parse(response.body).length).to eq(180)
+        expect(JSON.parse(response.body).length).to eq(151)
       end
     end
   end

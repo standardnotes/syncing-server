@@ -5,6 +5,7 @@ class AddItemRevisions < ActiveRecord::Migration[5.1]
       t.string "item_uuid", limit: 36, null: false
       t.string "revision_uuid", limit: 36, null: false
       t.index ["item_uuid"]
+      t.index ["revision_uuid"]
     end
 
     create_table "revisions", id: false do |t|

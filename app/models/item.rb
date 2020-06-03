@@ -1,8 +1,9 @@
 class Item < ApplicationRecord
   belongs_to :user, foreign_key: 'user_uuid', optional: true
-  has_many :item_revisions, foreign_key: 'item_uuid'
-  has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions
+  has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
+  has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
 
+  before_save :cleanup_excessive_revisions
   after_save :persist_revision
 
   MAX_REVISIONS_PER_DAY = 8
@@ -68,37 +69,31 @@ class Item < ApplicationRecord
     end
   end
 
-  def get_revision_history(days)
-    revisions = []
-    days.times do |days_from_today|
-      allowed_revisions_count = [days - days_from_today + MIN_REVISIONS_PER_DAY, MAX_REVISIONS_PER_DAY].min
-      revisions += get_revisions_for_a_day(days_from_today, allowed_revisions_count)
-    end
-    revisions
-  end
-
   private
 
-  def get_revisions_for_a_day(days_from_today, allowed_revisions_count)
+  def cleanup_revisions_for_a_day(days_from_today, allowed_revisions_count)
     date = Time.now.utc.to_date - days_from_today
-    revisions_from_date = revisions.where(created_at: date.midnight..date.end_of_day)
+    revisions_from_date = revisions.where(created_at: date.midnight..date.end_of_day).pluck(:uuid)
 
-    if revisions_from_date.length <= allowed_revisions_count
-      return revisions
+    if revisions_from_date.length > allowed_revisions_count
+      keep_every_nth = (revisions_from_date.length.to_f / allowed_revisions_count).ceil
+      revisions_to_keep = []
+      (0..revisions_from_date.length - keep_every_nth).step(keep_every_nth) do |n|
+        revisions_to_keep.push(revisions_from_date[n])
+      end
+
+      Revision
+        .where(created_at: date.midnight..date.end_of_day)
+        .where.not(uuid: revisions_to_keep)
+        .destroy_all
     end
-
-    limit_revisions(revisions_from_date, allowed_revisions_count)
   end
 
-  def limit_revisions(revisions, allowed_revisions_count)
-    keep_every_nth = (revisions.length.to_f / allowed_revisions_count).ceil
-    keep = [revisions.length - 1]
-
-    (0..revisions.length - keep_every_nth).step(keep_every_nth) do |n|
-      keep.push(revisions[n])
+  def cleanup_excessive_revisions(days = User::REVISIONS_RETENTION_DAYS)
+    days.times do |days_from_today|
+      allowed_revisions_count = [days - days_from_today + MIN_REVISIONS_PER_DAY, MAX_REVISIONS_PER_DAY].min
+      cleanup_revisions_for_a_day(days_from_today, allowed_revisions_count)
     end
-
-    keep
   end
 
   def persist_revision
