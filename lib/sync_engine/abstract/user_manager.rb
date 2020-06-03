@@ -9,10 +9,10 @@ module SyncEngine
       user && test_password(password, user.encrypted_password)
     end
 
-    def sign_in(email, password, api_version, user_agent)
+    def sign_in(email, password, params, user_agent)
       user = @user_class.find_by_email(email)
       if verify_credentials(email, password)
-        create_session(user, api_version, user_agent)
+        create_session(user, params, user_agent)
       else
         { error: { message: 'Invalid email or password.', status: 401 } }
       end
@@ -25,21 +25,20 @@ module SyncEngine
       else
         user = @user_class.new(email: email, encrypted_password: hash_password(password))
         user.update!(registration_params(params))
-        create_session(user, params[:api], user_agent)
+        create_session(user, params, user_agent)
       end
     end
 
-    def change_pw(user, password, params)
+    def change_pw(user, password, params, user_agent = '')
+      current_protocol_version = user.version.to_i
+      new_protocol_version = params[:version].to_i || current_protocol_version
+
+      upgrading_protocol_version = new_protocol_version > current_protocol_version
+
       user.encrypted_password = hash_password(password)
       user.update!(registration_params(params))
 
-      result = { user: user }
-
-      if user.supports_jwt?
-        result[:token] = jwt(user)
-      end
-
-      result
+      create_session(user, params, user_agent, upgrading_protocol_version)
     end
 
     def update(user, params)
@@ -107,21 +106,27 @@ module SyncEngine
       params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :version)
     end
 
-    def create_session(user, api_version, user_agent)
+    def create_session(user, params, user_agent = '', upgrading_protocol_version = false)
       if user.supports_jwt?
         return { user: user, token: jwt(user) }
       end
 
-      session = Session.new(user_uuid: user.uuid, api_version: api_version, user_agent: user_agent)
+      # We want to create a new session only if upgrading from a protocol version that does not
+      # support sessions (i.e: 003 to 004) or if not upgrading protocols at all (i.e: sign in, register, update).
+      if (upgrading_protocol_version && user.version.to_i == 4) || !upgrading_protocol_version
+        session = Session.new(user_uuid: user.uuid, api_version: params[:api], user_agent: user_agent)
 
-      unless session.save
-        return { error: { message: 'Could not create a session.', status: 400 } }
+        unless session.save
+          return { error: { message: 'Could not create a session.', status: 400 } }
+        end
+
+        response = session.response_hash
+        response[:user] = user
+        response
+      else
+        # Just return the user in a hash
+        { user: user }
       end
-
-      response = session.response_hash
-      response[:user] = user
-
-      response
     end
   end
 end

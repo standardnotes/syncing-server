@@ -97,7 +97,7 @@ class Api::AuthController < Api::ApiController
       return render_invalid_auth_error
     end
 
-    result = @user_manager.sign_in(params[:email], params[:password], params[:api], request.user_agent)
+    result = @user_manager.sign_in(params[:email], params[:password], params, request.user_agent)
 
     if result[:error]
       handle_failed_auth_attempt
@@ -189,7 +189,7 @@ class Api::AuthController < Api::ApiController
     handle_successful_auth_attempt
 
     current_user.updated_with_user_agent = request.user_agent
-    result = @user_manager.change_pw(current_user, params[:new_password], params)
+    result = @user_manager.change_pw(current_user, params[:new_password], params, request.user_agent)
 
     if result[:error]
       render json: result, status: :unauthorized

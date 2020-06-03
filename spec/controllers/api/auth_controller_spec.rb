@@ -382,6 +382,35 @@ RSpec.describe Api::AuthController, type: :controller do
           expect(parsed_response_body['token']).to_not be_nil
         end
       end
+
+      context 'and upgrading protocol version' do
+        it 'password should be updated and a new session should not be created' do
+          new_protocol_version = '004'
+          post :sign_in, params: test_user_credentials
+
+          request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+          post :change_pw, params: {
+            current_password: test_user_credentials[:password],
+            new_password: 'new-pwd',
+            pw_nonce: test_user.pw_nonce,
+            version: new_protocol_version,
+          }
+
+          expect(response).to have_http_status(:ok)
+          expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          parsed_response_body = JSON.parse(response.body)
+
+          puts parsed_response_body
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body['user']).to_not be_nil
+          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+          expect(parsed_response_body['token']).to be_nil
+
+          test_user.reload
+
+          expect(test_user.version).to eq(new_protocol_version)
+        end
+      end
     end
   end
 
