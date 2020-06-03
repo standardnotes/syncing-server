@@ -2,8 +2,6 @@ version: '3'
 services:
   app:
     build: .
-    depends_on:
-      - db
     command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
     env_file: .env
     restart: unless-stopped
@@ -11,6 +9,10 @@ services:
       DB_HOST: db
     ports:
       - ${EXPOSED_PORT}:3000
+    volumes:
+      - .:/syncing-server
+    links:
+      - db
   db:
     image: mysql:5.7
     environment:
@@ -19,9 +21,10 @@ services:
       MYSQL_PASSWORD: '${DB_PASSWORD}'
       MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
     expose:
-      - '3306'
+      - 3306
+    ports:
+      - 3306
     restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_general_ci
     volumes:
-      - std_notes_db:/var/lib/mysql
-volumes:
-  std_notes_db:
+      - ./data:/var/lib/mysql

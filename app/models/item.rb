@@ -1,5 +1,12 @@
 class Item < ApplicationRecord
   belongs_to :user, foreign_key: 'user_uuid', optional: true
+  has_many :item_revisions, foreign_key: 'item_uuid'
+  has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions
+
+  after_save :persist_revision
+
+  MAX_REVISIONS_PER_DAY = 8
+  MIN_REVISIONS_PER_DAY = 4
 
   def serializable_hash(options = {})
     allowed_options = [
@@ -59,5 +66,53 @@ class Item < ApplicationRecord
       return unless content['url']
       ExtensionJob.perform_later(url: content['url'], user_id: user_uuid, extension_id: uuid)
     end
+  end
+
+  def get_revision_history(days)
+    revisions = []
+    days.times do |days_from_today|
+      allowed_revisions_count = [days - days_from_today + MIN_REVISIONS_PER_DAY, MAX_REVISIONS_PER_DAY].min
+      revisions += get_revisions_for_a_day(days_from_today, allowed_revisions_count)
+    end
+    revisions
+  end
+
+  private
+
+  def get_revisions_for_a_day(days_from_today, allowed_revisions_count)
+    date = Time.now.utc.to_date - days_from_today
+    revisions_from_date = revisions.where(created_at: date.midnight..date.end_of_day)
+
+    if revisions_from_date.length <= allowed_revisions_count
+      return revisions
+    end
+
+    limit_revisions(revisions_from_date, allowed_revisions_count)
+  end
+
+  def limit_revisions(revisions, allowed_revisions_count)
+    keep_every_nth = (revisions.length.to_f / allowed_revisions_count).ceil
+    keep = [revisions.length - 1]
+
+    (0..revisions.length - keep_every_nth).step(keep_every_nth) do |n|
+      keep.push(revisions[n])
+    end
+
+    keep
+  end
+
+  def persist_revision
+    revision = Revision.new
+    revision.content = content
+    revision.content_type = content_type
+    revision.user_uuid = user_uuid
+    revision.enc_item_key = enc_item_key
+    revision.auth_hash = auth_hash
+    revision.save
+
+    item_revision = ItemRevision.new
+    item_revision.item_uuid = uuid
+    item_revision.revision_uuid = revision.uuid
+    item_revision.save
   end
 end

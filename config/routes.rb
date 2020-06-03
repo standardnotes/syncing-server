@@ -18,7 +18,9 @@ Rails.application.routes.draw do
   post "items/backup" => "api/items#backup"
 
   delete "items" => "api/items#destroy"
-  resources "items", :controller => "api/items"
+  resources "items", :controller => "api/items" do
+    resources "revisions", :controller => "api/revisions"
+  end
 
   # sessions management
   post "session/refresh" => "api/sessions#refresh"

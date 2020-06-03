@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200410020904) do
+ActiveRecord::Schema.define(version: 20200605085931) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -20,8 +20,16 @@ ActiveRecord::Schema.define(version: 20200410020904) do
     t.index ["extension_id"], name: "index_extension_settings_on_extension_id"
   end
 
+  create_table "item_revisions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "item_uuid", limit: 36, null: false
+    t.string "revision_uuid", limit: 36, null: false
+    t.index ["item_uuid"], name: "index_item_revisions_on_item_uuid"
+    t.index ["revision_uuid"], name: "index_item_revisions_on_revision_uuid"
+  end
+
   create_table "items", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "items_key_id"
+    t.string "duplicate_of", limit: 36
     t.text "content", limit: 16777215
     t.string "content_type"
     t.text "enc_item_key"
@@ -39,6 +47,16 @@ ActiveRecord::Schema.define(version: 20200410020904) do
     t.index ["user_uuid"], name: "index_items_on_user_uuid"
   end
 
+  create_table "revisions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.text "content", limit: 16777215
+    t.string "content_type"
+    t.text "enc_item_key"
+    t.string "auth_hash"
+    t.datetime "created_at", precision: 6
+    t.datetime "updated_at", precision: 6
+    t.index ["created_at"], name: "index_revisions_on_created_at"
+  end
+
   create_table "sessions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "user_uuid"
     t.text "user_agent"
@@ -48,6 +66,8 @@ ActiveRecord::Schema.define(version: 20200410020904) do
     t.datetime "expire_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["access_token"], name: "index_sessions_on_access_token", unique: true
+    t.index ["refresh_token"], name: "index_sessions_on_refresh_token", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
     t.index ["user_uuid"], name: "index_sessions_on_user_uuid"
   end

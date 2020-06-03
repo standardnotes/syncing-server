@@ -112,6 +112,30 @@ RSpec.describe Api::ItemsController, type: :controller do
             items_param = serialize_to_hash(items_param)
             expect(saved_items).to match_array(items_param)
           end
+          it 'should store revisions matching changes' do
+            @controller = Api::AuthController.new
+            post :sign_in, params: test_user_credentials
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+
+            # Serializing the items into an array of hashes
+            items_param = test_items.limit(1).to_a.map(&:serializable_hash)
+            items_param[0]['content'] = 'This is the new content.'
+
+            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+
+            items_param[0]['content'] = 'This is yet another new content.'
+            post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+
+            item = Item.where(uuid: items_param[0]['uuid']).first
+
+            revisions = item.revisions
+            expect(revisions.count).to equal(3)
+            expect(revisions[0].content).to eq('This is yet another new content.')
+            expect(revisions[1].content).to eq('This is the new content.')
+            expect(revisions[2].content).to eq('This is a test note.')
+          end
         end
 
         context 'and deleting items' do
