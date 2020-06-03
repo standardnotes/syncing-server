@@ -42,7 +42,7 @@ RSpec.describe Api::RevisionsController, type: :controller do
       it 'should return item revisions' do
         item = test_items.first
 
-        revision = create(:revision, content: 'This is a first revision', user_uuid: test_user.uuid)
+        revision = create(:revision, content: 'This is a first revision')
         create(:item_revision, item_uuid: item.uuid, revision_uuid: revision.uuid)
 
         @controller = Api::AuthController.new
@@ -108,7 +108,7 @@ RSpec.describe Api::RevisionsController, type: :controller do
       it 'should return a specific revision' do
         item = test_items.first
 
-        revision = create(:revision, content: 'This is a first revision', user_uuid: test_user.uuid)
+        revision = create(:revision, content: 'This is a first revision')
         create(:item_revision, item_uuid: item.uuid, revision_uuid: revision.uuid)
 
         @controller = Api::AuthController.new

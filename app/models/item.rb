@@ -105,7 +105,6 @@ class Item < ApplicationRecord
     revision = Revision.new
     revision.content = content
     revision.content_type = content_type
-    revision.user_uuid = user_uuid
     revision.enc_item_key = enc_item_key
     revision.auth_hash = auth_hash
     revision.save
