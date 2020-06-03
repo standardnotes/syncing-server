@@ -125,7 +125,6 @@ RSpec.describe Api::ItemsController, type: :controller do
             items_param[0]['content'] = 'This is the new content.'
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
-            sleep 1
             items_param[0]['content'] = 'This is yet another new content.'
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
