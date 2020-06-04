@@ -74,6 +74,8 @@ class Api::ApiController < ApplicationController
     self.current_session = authentication[:session] if authentication[:type] == 'session_token'
   end
 
+  # Used especially for when the session is expired and the client makes a sign out request,
+  # we want to be able to authenticate the user, so we can terminate the session.
   def authenticate_user_for_sign_out
     token = token_from_request_header
 
