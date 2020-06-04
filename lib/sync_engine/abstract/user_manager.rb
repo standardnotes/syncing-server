@@ -38,7 +38,14 @@ module SyncEngine
       user.encrypted_password = hash_password(password)
       user.update!(registration_params(params))
 
-      create_session(user, params, user_agent, upgrading_protocol_version)
+      # We want to create a new session only if upgrading from a protocol version that does not
+      # support sessions (i.e: 003 to 004) or if not upgrading protocols at all (i.e: change password).
+      if (upgrading_protocol_version && user.version.to_i == 4) || !upgrading_protocol_version
+        create_session(user, params, user_agent)
+      else
+        # Just return the user in a hash
+        { user: user }
+      end
     end
 
     def update(user, params)
@@ -106,27 +113,20 @@ module SyncEngine
       params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :version)
     end
 
-    def create_session(user, params, user_agent = '', upgrading_protocol_version = false)
+    def create_session(user, params, user_agent = '')
       if user.supports_jwt?
         return { user: user, token: jwt(user) }
       end
 
-      # We want to create a new session only if upgrading from a protocol version that does not
-      # support sessions (i.e: 003 to 004) or if not upgrading protocols at all (i.e: sign in, register, update).
-      if (upgrading_protocol_version && user.version.to_i == 4) || !upgrading_protocol_version
-        session = Session.new(user_uuid: user.uuid, api_version: params[:api], user_agent: user_agent)
+      session = Session.new(user_uuid: user.uuid, api_version: params[:api], user_agent: user_agent)
 
-        unless session.save
-          return { error: { message: 'Could not create a session.', status: 400 } }
-        end
-
-        response = session.response_hash
-        response[:user] = user
-        response
-      else
-        # Just return the user in a hash
-        { user: user }
+      unless session.save
+        return { error: { message: 'Could not create a session.', status: 400 } }
       end
+
+      response = session.response_hash
+      response[:user] = user
+      response
     end
   end
 end
