@@ -3,11 +3,10 @@ class Item < ApplicationRecord
   has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
   has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
 
-  before_save :cleanup_excessive_revisions
-  after_save :persist_revision
+  after_save :persist_revision, :cleanup_excessive_revisions
 
-  MAX_REVISIONS_PER_DAY = 8
-  MIN_REVISIONS_PER_DAY = 4
+  MAX_REVISIONS_PER_DAY = 30
+  MIN_REVISIONS_PER_DAY = 2
 
   def serializable_hash(options = {})
     allowed_options = [
@@ -73,14 +72,19 @@ class Item < ApplicationRecord
 
   def cleanup_revisions_for_a_day(days_from_today, allowed_revisions_count)
     date = Time.now.utc.to_date - days_from_today
-    revisions_from_date = revisions.where(created_at: date.midnight..date.end_of_day).pluck(:uuid)
+    revisions_from_date_count = revisions.where(created_at: date.midnight..date.end_of_day).size
 
-    if revisions_from_date.length > allowed_revisions_count
-      keep_every_nth = (revisions_from_date.length.to_f / allowed_revisions_count).ceil
-      revisions_to_keep = []
-      (0..revisions_from_date.length - keep_every_nth).step(keep_every_nth) do |n|
-        revisions_to_keep.push(revisions_from_date[n])
-      end
+    if revisions_from_date_count > allowed_revisions_count
+      revisions_from_date = revisions
+        .where(created_at: date.midnight..date.end_of_day)
+        .order(created_at: :desc)
+        .pluck(:uuid)
+
+      revisions_slice_size = (revisions_from_date.length.to_f / allowed_revisions_count).floor
+      revisions_to_keep = revisions_from_date
+        .each_slice(revisions_slice_size)
+        .map(&:last)
+        .last(allowed_revisions_count)
 
       Revision
         .where(created_at: date.midnight..date.end_of_day)
@@ -91,22 +95,24 @@ class Item < ApplicationRecord
 
   def cleanup_excessive_revisions(days = User::REVISIONS_RETENTION_DAYS)
     days.times do |days_from_today|
-      allowed_revisions_count = [days - days_from_today + MIN_REVISIONS_PER_DAY, MAX_REVISIONS_PER_DAY].min
+      allowed_revisions_count = [[days - days_from_today, MAX_REVISIONS_PER_DAY].min, MIN_REVISIONS_PER_DAY].max
       cleanup_revisions_for_a_day(days_from_today, allowed_revisions_count)
     end
   end
 
   def persist_revision
-    revision = Revision.new
-    revision.content = content
-    revision.content_type = content_type
-    revision.enc_item_key = enc_item_key
-    revision.auth_hash = auth_hash
-    revision.save
+    if content_type == 'Note'
+      revision = Revision.new
+      revision.content = content
+      revision.content_type = content_type
+      revision.enc_item_key = enc_item_key
+      revision.auth_hash = auth_hash
+      revision.save
 
-    item_revision = ItemRevision.new
-    item_revision.item_uuid = uuid
-    item_revision.revision_uuid = revision.uuid
-    item_revision.save
+      item_revision = ItemRevision.new
+      item_revision.item_uuid = uuid
+      item_revision.revision_uuid = revision.uuid
+      item_revision.save
+    end
   end
 end
