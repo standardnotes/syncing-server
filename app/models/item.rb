@@ -3,10 +3,7 @@ class Item < ApplicationRecord
   has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
   has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
 
-  after_save :persist_revision, :cleanup_excessive_revisions
-
-  MAX_REVISIONS_PER_DAY = 30
-  MIN_REVISIONS_PER_DAY = 2
+  after_commit :persist_revision, :cleanup_excessive_revisions
 
   def serializable_hash(options = {})
     allowed_options = [
@@ -70,34 +67,8 @@ class Item < ApplicationRecord
 
   private
 
-  def cleanup_revisions_for_a_day(days_from_today, allowed_revisions_count)
-    date = Time.now.utc.to_date - days_from_today
-    revisions_from_date_count = revisions.where(created_at: date.midnight..date.end_of_day).size
-
-    if revisions_from_date_count > allowed_revisions_count
-      revisions_from_date = revisions
-        .where(created_at: date.midnight..date.end_of_day)
-        .order(created_at: :desc)
-        .pluck(:uuid)
-
-      revisions_slice_size = (revisions_from_date.length.to_f / allowed_revisions_count).floor
-      revisions_to_keep = revisions_from_date
-        .each_slice(revisions_slice_size)
-        .map(&:last)
-        .last(allowed_revisions_count)
-
-      Revision
-        .where(created_at: date.midnight..date.end_of_day)
-        .where.not(uuid: revisions_to_keep)
-        .destroy_all
-    end
-  end
-
   def cleanup_excessive_revisions(days = User::REVISIONS_RETENTION_DAYS)
-    days.times do |days_from_today|
-      allowed_revisions_count = [[days - days_from_today, MAX_REVISIONS_PER_DAY].min, MIN_REVISIONS_PER_DAY].max
-      cleanup_revisions_for_a_day(days_from_today, allowed_revisions_count)
-    end
+    CleanupRevisionsJob.perform_later(uuid, days)
   end
 
   def persist_revision

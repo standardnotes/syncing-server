@@ -23,6 +23,10 @@ RSpec.describe Api::ItemsController, type: :controller do
     Item.where(user_uuid: test_user.uuid)
   end
 
+  let(:note_item) do
+    Item.where(user_uuid: test_user.uuid, content_type: 'Note').first
+  end
+
   describe 'POST sync' do
     context 'when not signed in' do
       it 'should return unauthorized error' do
@@ -120,17 +124,22 @@ RSpec.describe Api::ItemsController, type: :controller do
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
             # Serializing the items into an array of hashes
-            items_param = test_items.limit(1).to_a.map(&:serializable_hash)
+            items_param = [note_item].to_a.map(&:serializable_hash)
 
             items_param[0]['content'] = 'This is the new content.'
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+            expect(response).to have_http_status(:success)
 
+            items_param[0] = JSON.parse(response.body)['saved_items'].first
             items_param[0]['content'] = 'This is yet another new content.'
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
+            expect(response).to have_http_status(:success)
 
             item = Item.where(uuid: items_param[0]['uuid']).first
 
             revisions = item.revisions
+
+            expect(CleanupRevisionsJob).to have_been_enqueued.with(item.uuid, 30).exactly(3).times
             expect(revisions.count).to eq(3)
             expect(revisions[0].content).to eq('This is yet another new content.')
             expect(revisions[1].content).to eq('This is the new content.')
