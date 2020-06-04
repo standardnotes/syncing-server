@@ -15,7 +15,7 @@ class Api::ApiController < ApplicationController
 
   class InvalidApiVersion < StandardError
     def message
-      "Invalid API version."
+      'Invalid API version.'
     end
   end
 

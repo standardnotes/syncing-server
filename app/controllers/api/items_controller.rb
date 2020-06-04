@@ -96,10 +96,8 @@ class Api::ItemsController < Api::ApiController
   def sync_manager
     version = params[:api]
 
-    """
-      If no version is present, this implies an older client version.
-      In this case, the oldest API version should be used.
-    """
+    # If no version is present, this implies an older client version.
+    # In this case, the oldest API version should be used.
     unless version
       return SyncEngine::V20161215::SyncManager.new(current_user)
     end

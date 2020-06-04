@@ -239,14 +239,14 @@ RSpec.describe Api::ItemsController, type: :controller do
 
       context 'when using an invalid api' do
         it 'should throw an exception' do
-          expect {
+          expect do
             @controller = Api::AuthController.new
             post :sign_in, params: test_user_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
             post :sync, params: { api: '00000000' }
-          }.to raise_error(Api::ApiController::InvalidApiVersion)
+          end.to raise_error(Api::ApiController::InvalidApiVersion)
         end
       end
     end
