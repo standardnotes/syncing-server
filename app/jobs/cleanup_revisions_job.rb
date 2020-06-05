@@ -9,7 +9,7 @@ class CleanupRevisionsJob < ApplicationJob
       .select('created_at')
       .order('created_at DESC')
       .group_by { |x| x.created_at.strftime('%Y-%m-%d') }
-      .take(30)
+      .take(days)
 
     days_to_process = []
     last_days_of_revisions.each do |day, _revisions|
