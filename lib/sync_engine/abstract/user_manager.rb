@@ -128,5 +128,7 @@ module SyncEngine
       response[:user] = user
       response
     end
+
+    deprecate :update
   end
 end
