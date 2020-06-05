@@ -3,7 +3,8 @@ class Item < ApplicationRecord
   has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
   has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
 
-  after_commit :persist_revision, :cleanup_excessive_revisions, :duplicate_revisions
+  after_commit :persist_revision, :cleanup_excessive_revisions
+  after_create :duplicate_revisions
 
   def serializable_hash(options = {})
     allowed_options = [
