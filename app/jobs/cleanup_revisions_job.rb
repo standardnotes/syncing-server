@@ -5,7 +5,19 @@ class CleanupRevisionsJob < ApplicationJob
   def perform(item_id, days)
     item = Item.find(item_id)
 
-    days.times do |days_from_today|
+    last_days_of_revisions = item.revisions
+      .select('created_at')
+      .order('created_at DESC')
+      .group_by { |x| x.created_at.strftime('%Y-%m-%d') }
+      .take(30)
+
+    days_to_process = []
+    last_days_of_revisions.each do |day, _revisions|
+      days_to_process.push(day)
+    end
+
+    days_to_process.each do |day|
+      days_from_today = (DateTime.now - day.to_date).to_i
       allowed_revisions_count = [[days - days_from_today, MAX_REVISIONS_PER_DAY].min, MIN_REVISIONS_PER_DAY].max
       cleanup_revisions_for_a_day(item, days_from_today, allowed_revisions_count)
     end
