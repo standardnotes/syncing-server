@@ -18,13 +18,19 @@ RSpec.describe CleanupRevisionsJob do
     amount_of_revisions_per_day = 40
 
     amount_of_days.times do |days_from_today|
-      random_content = (0...8).map { (65 + rand(26)).chr }.join
-      revisions = create_list(
-        :revision,
-        amount_of_revisions_per_day,
-        content: random_content,
-        created_at: days_from_today.days.ago
-      )
+      revisions = []
+
+      amount_of_revisions_per_day.times do |n|
+        revisions.push(
+          create(
+            :revision,
+            uuid: "#{days_from_today}-#{n}",
+            content: (0...8).map { (65 + rand(26)).chr }.join,
+            created_at: days_from_today.days.ago
+          )
+        )
+      end
+
       revisions.each do |revision|
         create(:item_revision, item_uuid: test_item.uuid, revision_uuid: revision.uuid)
       end

@@ -22,10 +22,37 @@ class CleanupRevisionsJob < ApplicationJob
         .pluck(:uuid)
 
       revisions_slice_size = (revisions_from_date.length.to_f / allowed_revisions_count).floor
-      revisions_to_keep = revisions_from_date
-        .each_slice(revisions_slice_size)
-        .map(&:last)
-        .last(allowed_revisions_count)
+      revisions_divided_into_slices = revisions_from_date.each_slice(revisions_slice_size).to_a
+      first_slice = revisions_divided_into_slices.shift
+      last_slice = revisions_divided_into_slices.pop
+
+      revisions_to_keep = [
+        first_slice.first,
+        last_slice.last,
+      ]
+
+      beginning_counter = 0
+      end_counter = revisions_divided_into_slices.length - 1
+      counter = 0
+      while revisions_to_keep.length < allowed_revisions_count
+        if counter.odd?
+          revisions_to_keep.push(
+            revisions_divided_into_slices[beginning_counter][
+              (revisions_divided_into_slices[beginning_counter].length.to_f / 2).floor
+            ]
+          )
+          beginning_counter += 1
+        else
+          revisions_to_keep.push(
+            revisions_divided_into_slices[end_counter][
+              (revisions_divided_into_slices[end_counter].length.to_f / 2).floor
+            ]
+          )
+          end_counter -= 1
+        end
+
+        counter += 1
+      end
 
       Revision
         .where(created_at: date.midnight..date.end_of_day)
