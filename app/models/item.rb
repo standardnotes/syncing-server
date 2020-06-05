@@ -3,12 +3,13 @@ class Item < ApplicationRecord
   has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
   has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
 
-  after_commit :persist_revision, :cleanup_excessive_revisions
+  after_commit :persist_revision, :cleanup_excessive_revisions, :duplicate_revisions
 
   def serializable_hash(options = {})
     allowed_options = [
       'uuid',
       'items_key_id',
+      'duplicate_of',
       'enc_item_key',
       'content',
       'content_type',
@@ -70,6 +71,12 @@ class Item < ApplicationRecord
   def cleanup_excessive_revisions(days = User::REVISIONS_RETENTION_DAYS)
     if content_type == 'Note'
       CleanupRevisionsJob.perform_later(uuid, days)
+    end
+  end
+
+  def duplicate_revisions
+    if content_type == 'Note' && duplicate_of?
+      DuplicateRevisionsJob.perform_later(uuid)
     end
   end
 
