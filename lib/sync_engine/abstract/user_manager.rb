@@ -12,7 +12,7 @@ module SyncEngine
     def sign_in(email, password, params, user_agent)
       user = @user_class.find_by_email(email)
       if verify_credentials(email, password)
-        create_session(user, params, user_agent)
+        create_jwt_or_session(user, params, user_agent)
       else
         { error: { message: 'Invalid email or password.', status: 401 } }
       end
@@ -25,7 +25,7 @@ module SyncEngine
       else
         user = @user_class.new(email: email, encrypted_password: hash_password(password))
         user.update!(registration_params(params))
-        create_session(user, params, user_agent)
+        create_jwt_or_session(user, params, user_agent)
       end
     end
 
@@ -39,11 +39,14 @@ module SyncEngine
       user.update!(registration_params(params))
 
       # We want to create a new session only if upgrading from a protocol version that does not
-      # support sessions (i.e: 003 to 004) or if not upgrading protocols at all (i.e: change password).
-      if (upgrading_protocol_version && user.version.to_i == 4) || !upgrading_protocol_version
+      # support sessions (i.e: 003 to 004).
+      if (upgrading_protocol_version && new_protocol_version == @user_class::SESSIONS_PROTOCOL_VERSION)
         create_session(user, params, user_agent)
+      # If the user is on a client that supports a maximum protocol version of 003, then we want
+      # to issue a new JWT with updated claims.
+      elsif user.supports_jwt?
+        create_jwt(user)
       else
-        # Just return the user in a hash
         { user: user }
       end
     end
@@ -113,11 +116,11 @@ module SyncEngine
       params.permit(:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :version)
     end
 
-    def create_session(user, params, user_agent = '')
-      if user.supports_jwt?
-        return { user: user, token: jwt(user) }
-      end
+    def create_jwt(user)
+      { user: user, token: jwt(user) }
+    end
 
+    def create_session(user, params, user_agent)
       session = Session.new(user_uuid: user.uuid, api_version: params[:api], user_agent: user_agent)
 
       unless session.save
@@ -127,6 +130,14 @@ module SyncEngine
       response = session.response_hash
       response[:user] = user
       response
+    end
+
+    def create_jwt_or_session(user, params, user_agent)
+      if user.supports_jwt?
+        return create_jwt(user)
+      end
+
+      create_session(user, params, user_agent)
     end
 
     deprecate :update

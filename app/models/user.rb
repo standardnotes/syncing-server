@@ -5,6 +5,8 @@ class User < ApplicationRecord
   has_many :items, -> { order 'created_at desc' }, foreign_key: 'user_uuid'
   has_many :sessions, -> { order 'created_at desc' }, foreign_key: 'user_uuid'
 
+  SESSIONS_PROTOCOL_VERSION = 4
+
   def serializable_hash(options = {})
     super(options.merge(only: ['email', 'uuid']))
   end
@@ -118,10 +120,10 @@ class User < ApplicationRecord
   end
 
   def supports_jwt?
-    version.to_i < 4
+    version.to_i < SESSIONS_PROTOCOL_VERSION
   end
 
   def supports_sessions?
-    version.to_i >= 4
+    version.to_i == SESSIONS_PROTOCOL_VERSION
   end
 end
