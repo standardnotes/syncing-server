@@ -536,8 +536,9 @@ RSpec.describe Api::AuthController, type: :controller do
     end
 
     before do
-      user_manager = SyncEngine::V20200115::UserManager.new(User)
-      sign_in_result = user_manager.sign_in(existing_user.email, test_password, '20200115', 'Fake UA')
+      user_manager = SyncEngine::V20190520::UserManager.new(User)
+      params = ActionController::Parameters.new(api: '20190520')
+      sign_in_result = user_manager.sign_in(existing_user.email, test_password, params)
       @jwt = sign_in_result[:token]
     end
 
@@ -563,7 +564,7 @@ RSpec.describe Api::AuthController, type: :controller do
         context 'and a valid JWT is provided' do
           it 'should reject the request' do
             # Upgrading to new version 004
-            user_manager = SyncEngine::V20200115::UserManager.new(User)
+            user_manager = SyncEngine::V20190520::UserManager.new(User)
             change_pw_params = ActionController::Parameters.new(version: '004')
             user_manager.change_pw(existing_user, test_password, change_pw_params)
 

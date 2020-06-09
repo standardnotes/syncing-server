@@ -4,6 +4,8 @@ class Api::AuthController < Api::ApiController
   before_action :can_register, only: [:register]
 
   before_action do
+    params[:user_agent] = request.user_agent
+
     # current_user can still be nil by here.
     user = User.find_by_email(params[:email])
     if user&.locked_until&.future?
@@ -97,7 +99,7 @@ class Api::AuthController < Api::ApiController
       return render_invalid_auth_error
     end
 
-    result = @user_manager.sign_in(params[:email], params[:password], params, request.user_agent)
+    result = @user_manager.sign_in(params[:email], params[:password], params)
 
     if result[:error]
       handle_failed_auth_attempt
@@ -122,7 +124,7 @@ class Api::AuthController < Api::ApiController
       params[:version] = '002'
     end
 
-    result = @user_manager.register(params[:email], params[:password], params, request.user_agent)
+    result = @user_manager.register(params[:email], params[:password], params)
 
     if result[:error]
       render json: result, status: :unauthorized
@@ -189,7 +191,7 @@ class Api::AuthController < Api::ApiController
     handle_successful_auth_attempt
 
     current_user.updated_with_user_agent = request.user_agent
-    result = @user_manager.change_pw(current_user, params[:new_password], params, request.user_agent)
+    result = @user_manager.change_pw(current_user, params[:new_password], params)
 
     if result[:error]
       render json: result, status: :unauthorized
@@ -258,6 +260,26 @@ class Api::AuthController < Api::ApiController
           message: 'User registration is currently not allowed.',
         },
       }, status: :unauthorized
+    end
+  end
+
+  def user_manager
+    version = params[:api]
+
+    # If no version is present, this implies an older client version.
+    # In this case, the oldest API version should be used.
+    unless version
+      return SyncEngine::V20161215::UserManager.new(User)
+    end
+
+    # All other clients should specify a valid API version.
+    case version
+    when '20200115'
+      SyncEngine::V20200115::UserManager.new(User)
+    when '20190520'
+      SyncEngine::V20190520::UserManager.new(User)
+    else
+      raise InvalidApiVersion
     end
   end
 end
