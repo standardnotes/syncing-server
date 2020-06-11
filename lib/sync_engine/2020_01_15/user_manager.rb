@@ -23,7 +23,7 @@ module SyncEngine
 
       def handle_successful_authentication(user, params)
         # Users can be using the new API version but may not be on a protocol that support sessions.
-        if !user.supports_sessions?
+        unless user.supports_sessions?
           return super(user, params)
         end
 
@@ -33,7 +33,15 @@ module SyncEngine
           return { error: { message: 'Could not create a session.', status: 400 } }
         end
 
-        session.response_hash
+        {
+          session: {
+            expire_at: session.access_token_expire_at,
+            refresh_token: session.refresh_token,
+            valid_until: session.refresh_token_expire_at,
+          },
+          token: session.access_token,
+          user: user,
+        }
       end
 
       deprecate :update

@@ -62,18 +62,6 @@ class Session < ApplicationRecord
     "#{client.name} #{client.full_version} on #{client.os_name} #{client.os_full_version}"
   end
 
-  def response_hash
-    {
-      session: {
-        expire_at: access_token_expire_at,
-        refresh_token: refresh_token,
-        valid_until: refresh_token_expire_at,
-      },
-      token: access_token,
-      user: user,
-    }
-  end
-
   private
 
   def config
