@@ -70,6 +70,7 @@ class Session < ApplicationRecord
         valid_until: refresh_token_expire_at,
       },
       token: access_token,
+      user: user,
     }
   end
 

@@ -12,7 +12,7 @@ module SyncEngine
     def sign_in(email, password, params)
       user = @user_class.find_by_email(email)
       if verify_credentials(email, password)
-        handle_auth_response(user, params)
+        handle_successful_authentication(user, params)
       else
         { error: { message: 'Invalid email or password.', status: 401 } }
       end
@@ -25,19 +25,19 @@ module SyncEngine
       else
         user = @user_class.new(email: email, encrypted_password: hash_password(password))
         user.update!(registration_params(params))
-        handle_auth_response(user, params)
+        handle_successful_authentication(user, params)
       end
     end
 
     def change_pw(user, password, params)
       user.encrypted_password = hash_password(password)
       user.update!(registration_params(params))
-      handle_auth_response(user, params)
+      handle_successful_authentication(user, params)
     end
 
     def update(user, params)
       user.update!(registration_params(params))
-      handle_auth_response(user, params)
+      handle_successful_authentication(user, params)
     end
 
     def auth_params(email)
@@ -75,7 +75,7 @@ module SyncEngine
 
     DEFAULT_COST = 11
 
-    def handle_auth_response(user, _params)
+    def handle_successful_authentication(user, _params)
       token = JwtHelper.encode(user_uuid: user.uuid, pw_hash: Digest::SHA256.hexdigest(user.encrypted_password))
       { user: user, token: token }
     end
