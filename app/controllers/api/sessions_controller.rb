@@ -75,11 +75,7 @@ class Api::SessionsController < Api::ApiController
     end
 
     render json: {
-      session: {
-        expire_at: session.access_token_expire_at,
-        refresh_token: session.refresh_token,
-        valid_until: session.refresh_token_expire_at,
-      },
+      session: session.as_client_payload,
       token: session.access_token,
     }
   end
