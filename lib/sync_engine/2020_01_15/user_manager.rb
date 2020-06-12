@@ -27,6 +27,10 @@ module SyncEngine
           return super(user, params)
         end
 
+        create_session(user, params)
+      end
+
+      def create_session(user, params)
         session = user.sessions.new(api_version: params[:api], user_agent: params[:user_agent])
 
         unless session.save

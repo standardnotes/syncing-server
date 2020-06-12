@@ -76,6 +76,10 @@ module SyncEngine
     DEFAULT_COST = 11
 
     def handle_successful_authentication(user, _params)
+      create_jwt(user)
+    end
+
+    def create_jwt(user)
       token = JwtHelper.encode(user_uuid: user.uuid, pw_hash: Digest::SHA256.hexdigest(user.encrypted_password))
       { user: user, token: token }
     end
