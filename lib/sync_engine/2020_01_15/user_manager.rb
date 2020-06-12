@@ -13,7 +13,7 @@ module SyncEngine
         # We want to create a new session only if upgrading from a protocol version that does not
         # support sessions (i.e: 003 to 004).
         if upgrading_protocol_version && new_protocol_version == @user_class::SESSIONS_PROTOCOL_VERSION
-          handle_successful_authentication(user, params)
+          create_session(user, params)
         else
           { user: user }
         end
