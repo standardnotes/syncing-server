@@ -13,19 +13,32 @@ class Api::SessionsController < Api::ApiController
 
   def delete
     unless params[:uuid]
-      render json: { error: { message: 'Please provide the session identifier.' } }, status: :bad_request
+      render json: {
+        error: {
+          message: 'Please provide the session identifier.',
+        },
+      },
+      status: :bad_request
       return
     end
 
     if params[:uuid] == current_session.uuid
-      render json: { error: { message: 'You can not delete your current session.' } }, status: :bad_request
+      render json: {
+        error: {
+          message: 'You can not delete your current session.',
+        },
+      }, status: :bad_request
       return
     end
 
     session = current_user.sessions.where(uuid: params[:uuid]).first
 
     unless session
-      render json: { error: { message: 'No session exists with the provided identifier.' } }, status: :bad_request
+      render json: {
+        error: {
+          message: 'No session exists with the provided identifier.',
+        },
+      }, status: :bad_request
       return
     end
 
