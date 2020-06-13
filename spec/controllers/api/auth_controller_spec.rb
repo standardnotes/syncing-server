@@ -7,12 +7,16 @@ RSpec.describe Api::AuthController, type: :controller do
     build(:user, password: test_password)
   end
 
-  before(:each) do
-    test_user.save
+  let(:test_user_004) do
+    build(:user, password: test_password, version: '004')
   end
 
   let(:test_user_credentials) do
     { email: test_user.email, password: test_password }
+  end
+
+  let(:test_user_004_credentials) do
+    { email: test_user_004.email, password: test_password, api: '20200115' }
   end
 
   let(:auth_params_keys) do
@@ -307,7 +311,10 @@ RSpec.describe Api::AuthController, type: :controller do
         post :sign_in, params: test_user_credentials
 
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
-        post :change_pw, params: { current_password: test_user_credentials[:password] }
+        post :change_pw, params: {
+          current_password: test_user_credentials[:password],
+          new_password: 'new-pwd',
+        }
 
         expect(response).to have_http_status(:unauthorized)
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -375,6 +382,45 @@ RSpec.describe Api::AuthController, type: :controller do
           expect(parsed_response_body['token']).to_not be_nil
         end
       end
+
+      context 'and upgrading protocol version from 003 to 004' do
+        it 'password should be updated and a new session should be created' do
+          new_protocol_version = '004'
+          new_password = 'new-pwd-004'
+          post :sign_in, params: test_user_credentials
+
+          request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+          post :change_pw, params: {
+            current_password: test_user_credentials[:password],
+            new_password: new_password,
+            pw_nonce: test_user.pw_nonce,
+            version: new_protocol_version,
+            api: '20200115',
+          }
+
+          expect(response).to have_http_status(:ok)
+          expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          parsed_response_body = JSON.parse(response.body)
+
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body['user']).to_not be_nil
+          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+          expect(parsed_response_body['token']).to_not be_nil
+          expect(parsed_response_body['session']).to_not be_nil
+
+          test_user.reload
+
+          expect(test_user.version).to eq(new_protocol_version)
+
+          post :sign_in, params: {
+            email: test_user_credentials[:email],
+            password: new_password,
+            api: '20200115',
+          }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
     end
   end
 
@@ -430,6 +476,154 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(parsed_response_body).to_not be_nil
         expect(parsed_response_body['error']).to_not be_nil
         expect(parsed_response_body['error']['message']).to eq('Invalid login credentials.')
+      end
+    end
+  end
+
+  describe 'POST auth/sign_out' do
+    context 'when not signed in' do
+      it 'should return unauthorized error' do
+        expect do
+          post :sign_out
+
+          expect(response).to have_http_status(:unauthorized)
+          expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          parsed_response_body = JSON.parse(response.body)
+
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body['error']).to_not be_nil
+          expect(parsed_response_body['error']['message']).to eq('Invalid login credentials.')
+        end.to change(Session, :count).by(0)
+      end
+    end
+
+    context 'and user has an account version < 004' do
+      it 'should return no response and no sessions should be deleted' do
+        post :sign_in, params: test_user_credentials
+        access_token = JSON.parse(response.body)['token']
+
+        expect do
+          request.headers['Authorization'] = "bearer #{access_token}"
+          post :sign_out
+
+          expect(response).to have_http_status(:no_content)
+          parsed_response_body = JSON.parse(response.body)
+          expect(parsed_response_body).to eq({})
+        end.to change(Session, :count).by(0)
+      end
+    end
+
+    context 'and user has an account version >= 004' do
+      it 'should return no response and the session should be deleted' do
+        post :sign_in, params: test_user_004_credentials
+        access_token = JSON.parse(response.body)['token']
+
+        expect do
+          request.headers['Authorization'] = "bearer #{access_token}"
+          post :sign_out
+
+          expect(response).to have_http_status(:no_content)
+          parsed_response_body = JSON.parse(response.body)
+          expect(parsed_response_body).to eq({})
+        end.to change(Session, :count).by(-1)
+      end
+    end
+  end
+
+  describe 'existing users authentication' do
+    let(:existing_user) do
+      build(:user, password: test_password)
+    end
+
+    before do
+      user_manager = SyncEngine::V20190520::UserManager.new(User)
+      params = ActionController::Parameters.new(api: '20190520')
+      sign_in_result = user_manager.sign_in(existing_user.email, test_password, params)
+      @jwt = sign_in_result[:token]
+    end
+
+    context 'when api is 20200115' do
+      context 'and user version is <= 003' do
+        context 'and a valid JWT is provided' do
+          it 'should authenticate successfully' do
+            expect(existing_user.version).to eq('003')
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{@jwt}"
+
+            new_item = { content: 'Test', content_type: 'Note' }
+            post :create, params: { item: new_item, api: '20200115' }
+
+            expect(response).to have_http_status(:ok)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          end
+        end
+      end
+
+      context 'and user version is >= 004' do
+        context 'and a valid JWT is provided' do
+          it 'should reject the request' do
+            # Upgrading to new version 004
+            user_manager = SyncEngine::V20190520::UserManager.new(User)
+            change_pw_params = ActionController::Parameters.new(version: '004')
+            user_manager.change_pw(existing_user, test_password, change_pw_params)
+
+            test_user.reload
+            expect(existing_user.version).to eq('004')
+
+            # Authenticating with the above JWT
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{@jwt}"
+
+            new_item = { content: 'Test', content_type: 'Note' }
+            post :create, params: { item: new_item, api: '20200115' }
+
+            expect(response).to have_http_status(:unauthorized)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          end
+        end
+      end
+    end
+
+    context 'when api is 20190520' do
+      context 'and user version is <= 003' do
+        context 'and a valid JWT is provided' do
+          it 'should authenticate successfully' do
+            expect(existing_user.version).to eq('003')
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{@jwt}"
+
+            new_item = { content: 'Test', content_type: 'Note' }
+            post :create, params: { item: new_item, api: '20190520' }
+
+            expect(response).to have_http_status(:ok)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          end
+        end
+      end
+
+      context 'and user version >= 004' do
+        context 'and a valid JWT is provided' do
+          it 'should reject the request' do
+            # Upgrading to new version 004
+            user_manager = SyncEngine::V20200115::UserManager.new(User)
+            change_pw_params = ActionController::Parameters.new(version: '004')
+            user_manager.change_pw(existing_user, test_password, change_pw_params)
+
+            test_user.reload
+            expect(existing_user.version).to eq('004')
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{@jwt}"
+
+            new_item = { content: 'Test', content_type: 'Note' }
+            post :create, params: { item: new_item, api: '20190520' }
+
+            expect(response).to have_http_status(:unauthorized)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          end
+        end
       end
     end
   end

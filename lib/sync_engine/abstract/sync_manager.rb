@@ -8,7 +8,7 @@ module SyncEngine
     end
 
     def sync_fields
-      @sync_fields || [:content, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
+      @sync_fields || [:content, :items_key_id, :enc_item_key, :content_type, :auth_hash, :deleted, :created_at]
     end
 
     def destroy_items(uuids)
@@ -28,6 +28,7 @@ module SyncEngine
       parts = decoded.rpartition(':')
       timestamp_string = parts.last
       version = parts.first
+
       if version == '1'
         date = DateTime.strptime(timestamp_string, '%s')
       elsif version == '2'

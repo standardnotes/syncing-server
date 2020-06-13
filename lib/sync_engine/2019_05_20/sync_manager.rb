@@ -41,19 +41,7 @@ module SyncEngine
         conflicts = []
 
         item_hashes.each do |item_hash|
-          is_new_record = false
-          begin
-            item = @user.items.find_or_create_by(uuid: item_hash[:uuid]) do |_created_item|
-              # this block is executed if this is a new record.
-              is_new_record = true
-            end
-          rescue
-            conflicts.push(
-              unsaved_item: item_hash,
-              type: 'uuid_conflict',
-            )
-            next
-          end
+          item = @user.items.find_by(uuid: item_hash[:uuid])
 
           # SFJS did not send updated_at prior to 0.3.59.
           # updated_at value from client will not be saved, as it is not a permitted_param.
@@ -64,7 +52,7 @@ module SyncEngine
             Time.at(0).to_datetime
           end
 
-          unless is_new_record
+          if item
             # We want to check if this updated_at value is equal to the item's current updated_at value.
             # If they differ, it means the client is attempting to save an item which hasn't been updated.
             # In this case, if the incoming_item.updated_at < server_item.updated_at, always conflict.
@@ -103,8 +91,22 @@ module SyncEngine
             end
           end
 
-          item.last_user_agent = request.user_agent
-          item.update(item_hash.permit(*permitted_params))
+          if !item
+            item = @user.items.new({ uuid: item_hash[:uuid] }.merge(item_hash.permit(*permitted_params)))
+            item.last_user_agent = request.user_agent
+            begin
+              item.save
+            rescue
+              conflicts.push(
+                unsaved_item: item_hash,
+                type: 'uuid_conflict',
+              )
+              next
+            end
+          else
+            item.last_user_agent = request.user_agent
+            item.update(item_hash.permit(*permitted_params))
+          end
 
           if item.deleted == true
             item.mark_as_deleted
@@ -147,6 +149,10 @@ module SyncEngine
         if !items.empty? && items.count > limit
           items = items.slice(0, limit)
           date = items.last.updated_at
+          # Note that we don't add 1 microsecond to the date here like we do for the sync_token.
+          # This is because some items may have the exact same updated_at value, like when
+          # initially saving a large amount of imported data. Adding 1 microsecond here
+          # would make us miss these items on subsequent pages.
           cursor_token = sync_token_from_datetime(date)
         end
 

@@ -1,20 +1,4 @@
 class Api::ItemsController < Api::ApiController
-  def sync_manager
-    unless @sync_manager
-      version = params[:api]
-      @sync_manager =
-        if !version
-          SyncEngine::V20161215::SyncManager.new(current_user)
-        elsif version == '20190520'
-          SyncEngine::V20190520::SyncManager.new(current_user)
-        else
-          # Default to latest
-          SyncEngine::V20190520::SyncManager.new(current_user)
-        end
-    end
-    @sync_manager
-  end
-
   def sync
     options = {
       sync_token: params[:sync_token],
@@ -100,12 +84,32 @@ class Api::ItemsController < Api::ApiController
   def destroy
     ids = params[:uuids] || [params[:uuid]]
     sync_manager.destroy_items(ids)
-    render json: {}, status: 204
+    render json: {}, status: :no_content
   end
 
   private
 
   def permitted_params
-    [:content_type, :content, :auth_hash, :enc_item_key]
+    [:content_type, :content, :auth_hash, :enc_item_key, :items_key_id]
+  end
+
+  def sync_manager
+    version = params[:api]
+
+    # If no version is present, this implies an older client version.
+    # In this case, the oldest API version should be used.
+    unless version
+      return SyncEngine::V20161215::SyncManager.new(current_user)
+    end
+
+    # All other clients should specify a valid API version.
+    case version
+    when '20200115'
+      SyncEngine::V20200115::SyncManager.new(current_user)
+    when '20190520'
+      SyncEngine::V20190520::SyncManager.new(current_user)
+    else
+      raise InvalidApiVersion
+    end
   end
 end

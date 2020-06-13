@@ -1,0 +1,21 @@
+default: &default
+  max_lockout: <%= 1.hours %>
+  max_attempts_per_hour: 6
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+staging:
+  <<: *default
+
+production:
+  <<: *default
+
+docker_development:
+  <<: *default
+
+raspberry_pi:
+  <<: *default
