@@ -28,8 +28,8 @@ ActiveRecord::Schema.define(version: 20200605085931) do
   end
 
   create_table "items", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "items_key_id"
     t.string "duplicate_of", limit: 36
+    t.string "items_key_id"
     t.text "content", limit: 16777215
     t.string "content_type"
     t.text "enc_item_key"
@@ -50,6 +50,7 @@ ActiveRecord::Schema.define(version: 20200605085931) do
   create_table "revisions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.text "content", limit: 16777215
     t.string "content_type"
+    t.string "items_key_id"
     t.text "enc_item_key"
     t.string "auth_hash"
     t.datetime "created_at", precision: 6

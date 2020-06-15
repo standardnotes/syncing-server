@@ -12,6 +12,7 @@ class AddItemRevisions < ActiveRecord::Migration[5.1]
       t.string "uuid", limit: 36, primary_key: true, null: false
       t.text "content", limit: 16.megabytes - 1
       t.string "content_type"
+      t.string "items_key_id"
       t.text "enc_item_key"
       t.string "auth_hash"
       t.datetime "created_at", precision: 6
