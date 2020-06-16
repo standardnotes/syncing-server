@@ -19,7 +19,7 @@ RSpec.describe Item, type: :model do
     end
 
     let(:hash_keys) do
-      %w[uuid auth_hash content content_type created_at deleted enc_item_key updated_at items_key_id].sort
+      %w[uuid auth_hash content content_type created_at deleted enc_item_key updated_at items_key_id duplicate_of].sort
     end
 
     specify do

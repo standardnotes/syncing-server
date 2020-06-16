@@ -1,10 +1,16 @@
 class Item < ApplicationRecord
   belongs_to :user, foreign_key: 'user_uuid', optional: true
+  has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
+  has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
+
+  after_commit :persist_revision, :cleanup_excessive_revisions
+  after_create :duplicate_revisions
 
   def serializable_hash(options = {})
     allowed_options = [
       'uuid',
       'items_key_id',
+      'duplicate_of',
       'enc_item_key',
       'content',
       'content_type',
@@ -58,6 +64,37 @@ class Item < ApplicationRecord
       # backup job
       return unless content['url']
       ExtensionJob.perform_later(url: content['url'], user_id: user_uuid, extension_id: uuid)
+    end
+  end
+
+  private
+
+  def cleanup_excessive_revisions(days = User::REVISIONS_RETENTION_DAYS)
+    if content_type == 'Note'
+      CleanupRevisionsJob.perform_later(uuid, days)
+    end
+  end
+
+  def duplicate_revisions
+    if content_type == 'Note' && duplicate_of?
+      DuplicateRevisionsJob.perform_later(uuid)
+    end
+  end
+
+  def persist_revision
+    if content_type == 'Note'
+      revision = Revision.new
+      revision.content = content
+      revision.content_type = content_type
+      revision.enc_item_key = enc_item_key
+      revision.items_key_id = items_key_id
+      revision.auth_hash = auth_hash
+      revision.save
+
+      item_revision = ItemRevision.new
+      item_revision.item_uuid = uuid
+      item_revision.revision_uuid = revision.uuid
+      item_revision.save
     end
   end
 end

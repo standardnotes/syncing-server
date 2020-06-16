@@ -6,6 +6,7 @@
 
 # OS & IDE
 .DS_Store
+.vscode
 
 # Ignore bundler config.
 /.bundle
@@ -48,3 +49,6 @@ dump.rdb
 
 # byebug history
 .byebug_history
+
+# MySQL container data
+data/

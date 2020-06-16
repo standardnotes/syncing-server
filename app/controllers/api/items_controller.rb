@@ -90,7 +90,7 @@ class Api::ItemsController < Api::ApiController
   private
 
   def permitted_params
-    [:content_type, :content, :auth_hash, :enc_item_key, :items_key_id]
+    [:content_type, :content, :auth_hash, :enc_item_key, :items_key_id, :duplicate_of]
   end
 
   def sync_manager
