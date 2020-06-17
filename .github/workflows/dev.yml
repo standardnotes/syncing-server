@@ -50,6 +50,18 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         tags: "latest,${{ github.sha }}"
 
+    - name: Publish Worker to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      env:
+        QUEUE: ${{ secrets.SQS_DEV_QUEUE }}
+      with:
+        name: standardnotes/syncing-server
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: "worker-latest,worker-${{ github.sha }}"
+        dockerfile: Dockerfile.worker
+        buildargs: QUEUE
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -60,6 +72,7 @@ jobs:
     - name: Download task definition
       run: |
         aws ecs describe-task-definition --task-definition syncing-server-dev --query taskDefinition > task-definition.json
+        aws ecs describe-task-definition --task-definition syncing-server-worker-dev --query taskDefinition > worker-task-definition.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -69,10 +82,26 @@ jobs:
         container-name: syncing-server-dev
         image: "standardnotes/syncing-server:${{ github.sha }}"
 
+    - name: Fill in the new image worker ID in the Amazon ECS task definition
+      id: worker-task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: worker-task-definition.json
+        container-name: syncing-server-worker-dev
+        image: "standardnotes/syncing-server:worker-${{ github.sha }}"
+
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: syncing-server-dev
+        cluster: dev
+        wait-for-service-stability: true
+
+    - name: Deploy Amazon ECS worker task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.worker-task-def.outputs.task-definition }}
+        service: syncing-server-worker-dev
         cluster: dev
         wait-for-service-stability: true
