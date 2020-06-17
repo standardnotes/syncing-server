@@ -8,7 +8,7 @@ module StandardNotes
     config.autoload_once_paths += Dir["#{config.root}/lib/**/*"]
     config.active_record.primary_key = :uuid
 
-    Shoryuken.logger.level = Logger::FATAL
+    Shoryuken.logger.level = Logger::INFO
     config.active_job.queue_adapter = :shoryuken
     config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'
 
