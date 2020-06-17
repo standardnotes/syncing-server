@@ -1,5 +1,6 @@
 FROM standardnotes/syncing-server
 
 ARG QUEUE
+ENV AWS_QUEUE_NAME $QUEUE
 
-CMD bundle exec shoryuken -q $QUEUE -R
+CMD bundle exec shoryuken -q $AWS_QUEUE_NAME -R
