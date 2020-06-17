@@ -2,4 +2,4 @@ FROM standardnotes/syncing-server
 
 ARG QUEUE
 
-CMD [ "bundle exec shoryuken -q ${QUEUE} -R" ]
+CMD bundle exec shoryuken -q $QUEUE -R
