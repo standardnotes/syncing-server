@@ -35,7 +35,7 @@ jobs:
     - name: Run tests
       run: bundle exec rspec
 
-  deploy:
+  deploy-web:
     needs: test
 
     runs-on: ubuntu-latest
@@ -50,6 +50,40 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         tags: "latest,${{ github.sha }}"
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Download task definition
+      run: |
+        aws ecs describe-task-definition --task-definition syncing-server-dev --query taskDefinition > task-definition.json
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: syncing-server-dev
+        image: "standardnotes/syncing-server:${{ github.sha }}"
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: syncing-server-dev
+        cluster: dev
+        wait-for-service-stability: false
+
+  deploy-worker:
+    needs: deploy-web
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
     - name: Publish Worker to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       env:
@@ -61,27 +95,9 @@ jobs:
         tags: "worker-latest,worker-${{ github.sha }}"
         dockerfile: Dockerfile.worker
         buildargs: QUEUE
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
     - name: Download task definition
       run: |
-        aws ecs describe-task-definition --task-definition syncing-server-dev --query taskDefinition > task-definition.json
         aws ecs describe-task-definition --task-definition syncing-server-worker-dev --query taskDefinition > worker-task-definition.json
-
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition.json
-        container-name: syncing-server-dev
-        image: "standardnotes/syncing-server:${{ github.sha }}"
-
     - name: Fill in the new image worker ID in the Amazon ECS task definition
       id: worker-task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -89,19 +105,10 @@ jobs:
         task-definition: worker-task-definition.json
         container-name: syncing-server-worker-dev
         image: "standardnotes/syncing-server:worker-${{ github.sha }}"
-
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: syncing-server-dev
-        cluster: dev
-        wait-for-service-stability: true
-
     - name: Deploy Amazon ECS worker task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.worker-task-def.outputs.task-definition }}
         service: syncing-server-worker-dev
         cluster: dev
-        wait-for-service-stability: true
+        wait-for-service-stability: false
