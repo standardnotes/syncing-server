@@ -4,7 +4,6 @@ services:
     build: .
     depends_on:
       - db
-    command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
     env_file: .env
     restart: unless-stopped
     environment:

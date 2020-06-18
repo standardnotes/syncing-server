@@ -19,4 +19,4 @@ RUN if [ "$optimize_for_raspberry_pi" = true ] ; then sed -i 's/bcrypt (3.1.13)/
 RUN gem install bundler && bundle install
 
 # Migrate the DB and start development server
-CMD bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0
+CMD rm -f tmp/pids/server.pid && bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0
