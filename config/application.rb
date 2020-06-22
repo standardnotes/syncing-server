@@ -12,13 +12,8 @@ module StandardNotes
     config.active_job.queue_adapter = :shoryuken
     config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'
 
-    raven_dsn = ENV["RAVEN_DSN"]
-    if raven_dsn
-      Raven.configure do |config|
-        config.dsn = raven_dsn
-        config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
-        config.environments = ['staging', 'production']
-      end
+    Raven.configure do |config|
+      config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
     end
 
     # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications.
