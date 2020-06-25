@@ -84,11 +84,11 @@ class Item < ApplicationRecord
   def persist_revision
     if content_type == 'Note'
       revision = Revision.new
-      revision.content = content
-      revision.content_type = content_type
-      revision.enc_item_key = enc_item_key
-      revision.items_key_id = items_key_id
-      revision.auth_hash = auth_hash
+      revision.content = content_was
+      revision.content_type = content_type_was
+      revision.enc_item_key = enc_item_key_was
+      revision.items_key_id = items_key_id_was
+      revision.auth_hash = auth_hash_was
       revision.save
 
       item_revision = ItemRevision.new
