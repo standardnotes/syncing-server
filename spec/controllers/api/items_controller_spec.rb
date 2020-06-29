@@ -140,10 +140,9 @@ RSpec.describe Api::ItemsController, type: :controller do
             revisions = item.revisions
 
             expect(CleanupRevisionsJob).to have_been_enqueued.with(item.uuid, 30).exactly(3).times
-            expect(revisions.count).to eq(3)
+            expect(revisions.count).to eq(2)
             expect(revisions[0].content).to eq('This is the new content.')
             expect(revisions[1].content).to eq(note_item.content)
-            expect(revisions[2].content).to eq(nil)
           end
         end
 

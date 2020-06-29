@@ -82,7 +82,7 @@ class Item < ApplicationRecord
   end
 
   def persist_revision
-    if content_type == 'Note'
+    if content_type == 'Note' && uuid? && content?
       revision = Revision.new
       revision.content = content_before_last_save
       revision.content_type = content_type_before_last_save
