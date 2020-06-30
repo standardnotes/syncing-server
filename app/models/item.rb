@@ -82,13 +82,13 @@ class Item < ApplicationRecord
   end
 
   def persist_revision
-    if content_type == 'Note'
+    if content_type == 'Note' && !uuid_before_last_save.nil?
       revision = Revision.new
-      revision.content = content
-      revision.content_type = content_type
-      revision.enc_item_key = enc_item_key
-      revision.items_key_id = items_key_id
-      revision.auth_hash = auth_hash
+      revision.content = content_before_last_save
+      revision.content_type = content_type_before_last_save
+      revision.enc_item_key = enc_item_key_before_last_save
+      revision.items_key_id = items_key_id_before_last_save
+      revision.auth_hash = auth_hash_before_last_save
       revision.save
 
       item_revision = ItemRevision.new
