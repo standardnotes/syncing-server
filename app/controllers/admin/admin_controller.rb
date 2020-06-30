@@ -1,14 +1,8 @@
 class Admin::AdminController < ApplicationController
   before_action do
-    allowed_ips = ENV['ADMIN_IPS'].split(',')
-    is_authorized_ip = allowed_ips.include?(request.ip) && allowed_ips.include?(request.remote_ip)
-    if is_authorized_ip
-      admin_key = params[:admin_key]
-      env_admin_key = ENV['ADMIN_KEY']
-      if !admin_key || !env_admin_key || !ActiveSupport::SecurityUtils.secure_compare(admin_key, env_admin_key)
-        render json: {}, status: 401
-      end
-    else
+    admin_key = params[:admin_key]
+    env_admin_key = ENV['ADMIN_KEY']
+    if !admin_key || !env_admin_key || !ActiveSupport::SecurityUtils.secure_compare(admin_key, env_admin_key)
       render json: {}, status: 401
     end
   end
