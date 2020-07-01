@@ -75,7 +75,7 @@ jobs:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: syncing-server-dev
         cluster: dev
-        wait-for-service-stability: false
+        wait-for-service-stability: true
     - name: Create a Sentry.io release
       uses: tclindner/sentry-releases-action@v1.2.0
       env:
@@ -87,7 +87,7 @@ jobs:
         environment: dev
 
   deploy-worker:
-    needs: deploy-web
+    needs: test
 
     runs-on: ubuntu-latest
 
@@ -123,4 +123,17 @@ jobs:
         task-definition: ${{ steps.worker-task-def.outputs.task-definition }}
         service: syncing-server-worker-dev
         cluster: dev
-        wait-for-service-stability: false
+        wait-for-service-stability: true
+
+  notify_slack:
+    needs: [ deploy-worker, deploy-web ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify slack
+      uses: pullreminders/slack-action@master
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      with:
+        args: '{ \"channel\": \"${{ secrets.SLACK_NOTIFICATION_CHANNEL }}\", \"blocks\": [{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Successfully deployed <https://syncing-server-dev.standardnotes.org|[DEV] Syncing Server>\"}}, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Changes: <https://github.com/standardnotes/syncing-server/commit/${{ github.sha }}|${{ github.sha }}>\"}, \"accessory\": {\"type\": \"image\", \"image_url\": \"https://website-dev.standardnotes.org/assets/icon.png\", \"alt_text\": \"Standard Notes\"}}, { \"type\": \"section\", \"fields\": [{\"type\": \"mrkdwn\", \"text\": \"<https://github.com/standardnotes/syncing-server/actions/runs/${{ github.run_id }}|Build details>\"}]}]}'
