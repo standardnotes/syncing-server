@@ -2,4 +2,4 @@ FROM standardnotes/syncing-server
 
 ENV SQS_QUEUE your-queue-name
 
-CMD bundle exec shoryuken -q $SQS_QUEUE -R
+CMD [ "start-worker" ]
