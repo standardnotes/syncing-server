@@ -4,6 +4,7 @@ services:
     build: .
     depends_on:
       - db
+    command: start-local
     env_file: .env
     restart: unless-stopped
     environment:
