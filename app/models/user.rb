@@ -130,6 +130,6 @@ class User < ApplicationRecord
   end
 
   def supports_sessions?
-    version.to_i == SESSIONS_PROTOCOL_VERSION
+    version.to_i >= SESSIONS_PROTOCOL_VERSION
   end
 end
