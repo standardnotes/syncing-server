@@ -57,16 +57,13 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    # If a user signed in before the JWT change was made below, they won't have a pw_hash.
-    if authentication[:type] == 'jwt' && authentication[:claims]['pw_hash']
-      pw_hash = authentication[:claims]['pw_hash']
-      encrypted_password_digest = Digest::SHA256.hexdigest(user.encrypted_password)
-      # newer versions of our jwt include the user's hashed encrypted pw,
-      # to check if the user has changed their pw and thus forbid them from access if they have an old jwt
-      unless ActiveSupport::SecurityUtils.secure_compare(pw_hash, encrypted_password_digest)
-        render_invalid_auth_error
-        return
-      end
+    pw_hash = authentication[:claims]['pw_hash']
+    encrypted_password_digest = Digest::SHA256.hexdigest(user.encrypted_password)
+    # newer versions of our jwt include the user's hashed encrypted pw,
+    # to check if the user has changed their pw and thus forbid them from access if they have an old jwt
+    unless ActiveSupport::SecurityUtils.secure_compare(pw_hash, encrypted_password_digest)
+      render_invalid_auth_error
+      return
     end
 
     self.current_user = user
