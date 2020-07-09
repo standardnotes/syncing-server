@@ -12,7 +12,8 @@
 default: &default
   adapter: mysql2
   encoding: utf8
-  pool: 30
+  pool: <%= ENV['DB_POOL_SIZE'] %>
+  wait_timeout: <%= ENV['DB_WAIT_TIMEOUT'] %>
   username: <%= ENV['DB_USERNAME'] %>
   password: <%= ENV['DB_PASSWORD'] %>
   database: <%= ENV['DB_DATABASE'] %>
