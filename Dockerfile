@@ -1,10 +1,11 @@
-FROM ruby:2.6.5-slim-stretch
+FROM ruby:2.6.5-alpine
 
 ARG optimize_for_raspberry_pi
 
-RUN apt-get update && \
-  apt-get upgrade -y && \
-  apt-get install -y git build-essential libmariadb-dev
+RUN apk add --update --no-cache \
+    alpine-sdk \
+    mariadb-dev \
+    tzdata
 
 WORKDIR /syncing-server
 
