@@ -17,8 +17,7 @@ class Revision < ApplicationRecord
     ]
 
     super(options.merge(only: allowed_options)).merge({
-      revision_uuid: uuid,
-      uuid: item_ids.first,
+      item_id: item_ids.first,
     })
   end
 end
