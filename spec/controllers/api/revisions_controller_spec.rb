@@ -55,7 +55,8 @@ RSpec.describe Api::RevisionsController, type: :controller do
 
         expect(response).to have_http_status(:success)
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
-        expect(JSON.parse(response.body).first['content']).to eq('This is a first revision')
+        parsed_response_body = JSON.parse(response.body)
+        expect(parsed_response_body).not_to include(content: 'This is a first revision')
       end
       it 'should return not found if an item does not exist' do
         @controller = Api::AuthController.new
