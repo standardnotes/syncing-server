@@ -3,6 +3,10 @@ Rails.application.routes.draw do
     post "delete_account" => "admin#delete_account"
   end
 
+  namespace "schedule" do
+    post "perform_daily_backup_jobs" => "schedule#perform_daily_backup_jobs"
+  end
+
   # extension settngs
   get "extension-settings/:id/mute" => "extension_settings#mute"
 
