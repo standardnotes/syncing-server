@@ -1,10 +1,7 @@
 Rails.application.routes.draw do
   namespace "admin" do
     post "delete_account" => "admin#delete_account"
-  end
-
-  namespace "schedule" do
-    post "perform_daily_backup_jobs" => "schedule#perform_daily_backup_jobs"
+    post "perform_daily_backup_jobs" => "admin#perform_daily_backup_jobs"
   end
 
   # extension settngs
