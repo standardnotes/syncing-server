@@ -28,6 +28,11 @@ case "$1" in
     bundle exec shoryuken -q $SQS_QUEUE -R
     ;;
 
+  'daily-backup' )
+    echo "Starting Daily Backup..."
+    bundle exec rake "items:perform_daily_backup_jobs"
+    ;;
+
    * )
     echo "Unknown command"
     ;;
