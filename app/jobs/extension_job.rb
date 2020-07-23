@@ -47,7 +47,10 @@ class ExtensionJob < ApplicationJob
       end
 
       puts "Failed to execute extensions_job: #{response.to_json}"
-      UserMailer.failed_backup(params[:user_id], extension_id, settings.uuid).deliver_later
+
+      unless params[:silent]
+        UserMailer.failed_backup(params[:user_id], extension_id, settings.uuid).deliver_later
+      end
     end
   end
 end
