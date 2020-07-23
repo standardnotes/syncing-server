@@ -34,6 +34,11 @@ case "$COMMAND" in
     bundle exec rake "items:perform_daily_backup_jobs"
     ;;
 
+  'daily-backup-no-email' )
+    echo "Starting Daily Backup Without Emails..."
+    bundle exec rake "items:perform_daily_backup_jobs[false]"
+    ;;
+
   * )
     echo "Unknown command"
     ;;
