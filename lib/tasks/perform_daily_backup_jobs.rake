@@ -24,7 +24,8 @@ namespace :items do
         ExtensionJob.perform_later(
           url: url,
           user_id: item.user.uuid,
-          extension_id: item.uuid
+          extension_id: item.uuid,
+          silent: !send_email
         )
       rescue StandardError
       end

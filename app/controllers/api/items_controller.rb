@@ -71,6 +71,7 @@ class Api::ItemsController < Api::ApiController
         item_ids: items.map { |i| i[:uuid] },
         user_id: current_user.uuid,
         extension_id: ext.uuid,
+        silent: false,
       }
       ExtensionJob.perform_later(params)
     end

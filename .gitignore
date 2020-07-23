@@ -48,3 +48,5 @@ dump.rdb
 
 # byebug history
 .byebug_history
+
+.vscode
