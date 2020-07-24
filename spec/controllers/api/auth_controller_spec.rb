@@ -152,7 +152,7 @@ RSpec.describe Api::AuthController, type: :controller do
         end
       end
 
-      context 'when mfa param key is provided' do
+      context 'when mfa param key is provided but its invalid' do
         it 'sign in should fail' do
           mfa_item.save
           post :sign_in, params: test_user_credentials.merge("mfa_#{mfa_item.uuid}": '000000')
@@ -168,6 +168,25 @@ RSpec.describe Api::AuthController, type: :controller do
             'you entered is incorrect. Please try again.')
 
           expect(parsed_response_body['error']['payload']['mfa_key']).to eq("mfa_#{mfa_item.uuid}")
+        end
+      end
+
+      context 'when mfa param key is provided and its valid' do
+        it 'sign in should succeed' do
+          mfa_item.save
+          secret = mfa_item.decoded_content['secret']
+          totp = ROTP::TOTP.new(secret)
+          otp_code = totp.now
+          post :sign_in, params: test_user_credentials.merge("mfa_#{mfa_item.uuid}": otp_code)
+
+          expect(response).to have_http_status(:ok)
+          expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          parsed_response_body = JSON.parse(response.body)
+
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body['user']).to_not be_nil
+          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+          expect(parsed_response_body['token']).to_not be_nil
         end
       end
     end
