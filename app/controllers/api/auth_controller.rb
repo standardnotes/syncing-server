@@ -63,7 +63,7 @@ class Api::AuthController < Api::ApiController
       return false
     end
 
-    false
+    true
   end
 
   def handle_successful_auth_attempt
