@@ -9,14 +9,8 @@ Rails.application.configure do
   MAX_LOG_MEGABYTES = 50
   config.logger = ActiveSupport::Logger.new(config.paths['log'].first, 1, MAX_LOG_MEGABYTES * 1024 * 1024)
 
-  require 'custom_log_formatter'
-  config.log_formatter = CustomLogFormatter.new
-  config.logger.formatter = config.log_formatter
-
   if ENV["RAILS_LOG_TO_STDOUT"].present?
-    logger           = ActiveSupport::Logger.new(STDOUT)
-    logger.formatter = config.log_formatter
-    config.logger = ActiveSupport::TaggedLogging.new(logger)
+    config.logger = ActiveSupport::Logger.new(STDOUT)
   end
 
   # Eager load code on boot. This eager loads most of Rails and
@@ -50,7 +44,4 @@ Rails.application.configure do
 
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify
-
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
 end

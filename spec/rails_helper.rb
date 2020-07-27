@@ -2,7 +2,6 @@ require 'simplecov'
 SimpleCov.start :rails do
   add_filter %r{^/spec/}
   add_group 'Sync Engine', 'lib/sync_engine'
-  add_filter %r{/lib/custom_log_formatter.rb}
   add_filter %r{/app/mailers}
 
   # Remove 'Libraries' tab

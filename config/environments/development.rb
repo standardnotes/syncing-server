@@ -13,9 +13,9 @@ Rails.application.configure do
 
   config.logger = ActiveSupport::Logger.new(config.paths['log'].first, 1, 1 * 1024 * 1024)
 
-  require 'custom_log_formatter'
-  config.log_formatter = CustomLogFormatter.new
-  config.logger.formatter = config.log_formatter
+  if ENV["RAILS_LOG_TO_STDOUT"].present?
+    config.logger = ActiveSupport::Logger.new(STDOUT)
+  end
 
   # Do not eager load code on boot.
   config.eager_load = false

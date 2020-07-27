@@ -37,5 +37,7 @@ Rails.application.routes.draw do
     post "items/sync" => "items#sync"
   end
 
+  get '*unmatched_route', to: 'application#route_not_found'
+
   root "application#home"
 end
