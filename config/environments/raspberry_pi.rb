@@ -11,7 +11,9 @@ Rails.application.configure do
   config.reload_classes_only_on_change = true
 
   config.logger = ActiveSupport::Logger.new(config.paths['log'].first, 1, 1 * 1024 * 1024)
-  config.logger = Logger.new(STDOUT)
+  if ENV["RAILS_LOG_TO_STDOUT"].present?
+    config.logger = Logger.new(STDOUT)
+  end
   config.logger.level = Logger::INFO
 
   # Do not eager load code on boot.
