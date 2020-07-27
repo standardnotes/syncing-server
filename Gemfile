@@ -41,3 +41,7 @@ group :test do
   gem 'simplecov', require: false
   gem 'factory_bot_rails'
 end
+
+gem "dogstatsd-ruby", "~> 4.8"
+
+gem "ddtrace", "~> 0.38.0"
