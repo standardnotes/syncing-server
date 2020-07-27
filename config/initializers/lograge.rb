@@ -1,5 +1,5 @@
 Rails.application.configure do
-  config.lograge.enabled = Rails.env.production?
+  config.lograge.enabled = true
 
   # Generate log in JSON
   config.lograge.formatter = Lograge::Formatters::Json.new
