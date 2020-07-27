@@ -17,6 +17,10 @@ class ApplicationController < ActionController::Base
   def append_info_to_payload(payload)
     super
 
+    unless payload[:status]
+      return
+    end
+
     payload[:level] = 'INFO'
     if payload[:status] >= 500
       payload[:level] = 'ERROR'
