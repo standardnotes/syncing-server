@@ -57,8 +57,7 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    # If a user signed in before the JWT change was made below, they won't have a pw_hash.
-    if authentication[:type] == 'jwt' && authentication[:claims]['pw_hash']
+    if authentication[:type] == 'jwt'
       pw_hash = authentication[:claims]['pw_hash']
       encrypted_password_digest = Digest::SHA256.hexdigest(user.encrypted_password)
       # newer versions of our jwt include the user's hashed encrypted pw,
