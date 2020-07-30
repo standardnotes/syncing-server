@@ -1,6 +1,10 @@
 if ENV['DATADOG_ENABLED'] == 'true'
   Datadog.configure do |c|
-    # This will activate auto-instrumentation for Rails
-    c.use :rails, { 'service_name' => 'syncing-server' }
+    c.use :rails,
+          {
+            'service_name' => 'syncing-server',
+            'controller_service' => 'syncing-server',
+            'database_service' => 'syncing-server-mysql'
+          }
   end
 end
