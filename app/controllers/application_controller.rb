@@ -2,12 +2,14 @@ class ApplicationController < ActionController::API
   respond_to :json
 
   def route_not_found
-    render 'error_pages/404', status: :not_found
+    render json: {
+      message: 'Hi! the page you are looking for could not be found.',
+    }, status: :not_found
   end
 
   def home
     render json: {
-      message: "Hi! You're not supposed to be here."
+      message: "Hi! You're not supposed to be here.",
     }, status: :ok
   end
 
