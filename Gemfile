@@ -12,7 +12,6 @@ gem 'rails', '5.1.7'
 gem 'rotp'
 gem 'rubocop', '~> 0.79.0', require: false
 gem 'secure_headers'
-gem 'sentry-raven'
 gem 'shoryuken'
 gem 'whenever', require: false
 

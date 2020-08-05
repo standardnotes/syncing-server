@@ -6,7 +6,6 @@ class Api::ApiController < ApplicationController
   attr_accessor :user_manager
 
   before_action :authenticate_user
-  before_action :set_raven_context
 
   before_action do
     request.env['HTTP_ACCEPT_ENCODING'] = 'gzip'
@@ -100,14 +99,6 @@ class Api::ApiController < ApplicationController
 
     self.current_user = user
     self.current_session = authentication[:session]
-  end
-
-  def set_raven_context
-    if current_user
-      Raven.user_context(id: current_user.uuid)
-    end
-
-    Raven.extra_context(params: params.to_unsafe_h, url: request.url)
   end
 
   def not_found(message = 'not_found')

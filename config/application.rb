@@ -12,10 +12,6 @@ module SyncingServer
     config.active_job.queue_adapter = :shoryuken
     config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'
 
-    Raven.configure do |config|
-      config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
-    end
-
     # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications.
     config.middleware.insert_before 0, Rack::Cors do
       allow do

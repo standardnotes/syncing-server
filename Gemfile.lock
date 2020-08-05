@@ -225,8 +225,6 @@ GEM
     ruby_parser (3.14.2)
       sexp_processor (~> 4.9)
     secure_headers (6.3.0)
-    sentry-raven (3.0.0)
-      faraday (>= 1.0)
     sexp_processor (4.14.1)
     shoryuken (5.0.4)
       aws-sdk-core (>= 2)
@@ -290,7 +288,6 @@ DEPENDENCIES
   rspec-rails
   rubocop (~> 0.79.0)
   secure_headers
-  sentry-raven
   shoryuken
   simplecov
   whenever

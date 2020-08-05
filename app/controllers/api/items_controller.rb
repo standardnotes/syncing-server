@@ -7,10 +7,6 @@ class Api::ItemsController < Api::ApiController
       content_type: params[:content_type],
     }
 
-    if params[:event]
-      Raven.capture_message(params[:event])
-    end
-
     results = sync_manager.sync(params[:items], options, request)
 
     begin
