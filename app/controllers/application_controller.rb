@@ -1,18 +1,17 @@
-class ApplicationController < ActionController::Base
-  protect_from_forgery with: :null_session
-  after_action :set_csrf_cookie
-  respond_to :html, :json
-  layout :false
+class ApplicationController < ActionController::API
+  respond_to :json
 
   def route_not_found
     render 'error_pages/404', status: :not_found
   end
 
-  protected
-
-  def set_csrf_cookie
-    cookies['XSRF-TOKEN'] = form_authenticity_token if protect_against_forgery?
+  def home
+    render json: {
+      message: "Hi! You're not supposed to be here."
+    }, status: :ok
   end
+
+  protected
 
   def append_info_to_payload(payload)
     super

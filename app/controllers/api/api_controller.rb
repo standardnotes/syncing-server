@@ -1,6 +1,4 @@
 class Api::ApiController < ApplicationController
-  respond_to :json
-
   attr_accessor :current_user
   attr_accessor :current_session
   attr_accessor :user_manager
