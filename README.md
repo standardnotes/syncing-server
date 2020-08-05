@@ -13,7 +13,7 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 1. Clone the project:
 
 	```
-	git clone https://github.com/standardnotes/syncing-server.git
+	git clone --branch master https://github.com/standardnotes/syncing-server.git
 	```
 
 1. Create a `.env` file in the project's root directory. See [env.sample](env.sample) for required values.
