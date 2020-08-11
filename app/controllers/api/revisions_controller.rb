@@ -11,7 +11,9 @@ class Api::RevisionsController < Api::ApiController
       .select('revisions.*')
       .first
 
-    render json: revision
+    render json: {
+      revision: revision
+    }
   end
 
   def index
@@ -25,6 +27,8 @@ class Api::RevisionsController < Api::ApiController
       .where(created_at: User::REVISIONS_RETENTION_DAYS.days.ago..DateTime::Infinity.new)
       .select('revisions.uuid, content_type, created_at, updated_at')
 
-    render json: revisions
+    render json: {
+      revisions: revisions
+    }
   end
 end
