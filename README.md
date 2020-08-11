@@ -50,37 +50,23 @@ Code coverage report is available within the `coverage` directory.
 
 ## Docker setup
 
-Docker is the quick and easy way to try out Standard Notes. With two commands you'll be up and running.
+Docker is the quick and easy way to try out Standard Notes. We highly recommend using our official [Docker hub image](https://hub.docker.com/repository/docker/standardnotes/syncing-server).
 
 ### Standalone instance
 
-The `Dockerfile` is enough to get you up and running. Once Docker is installed on your system simply run the following commands to get up and running in development mode:
+Before you start make sure you have a `.env` file copied from the sample `env.sample` and configured with your parameters.
 
+If your intention is not contributing but just running the app we recommend using our official image from Docker hub like this:
 ```
-$ docker build -t syncing-server .
-$ docker run -d \
-  -p 3000:3000 \
-  --name my-syncing-server \
-  syncing-server
+docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server:stable
+```
+
+Or if you want to use the `develop` branch that is in a work-in-progress state please use:
+```
+docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server:latest
 ```
 
 You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
-
-Note: :warning: This standalone setup is designed for development use only. Please use the `docker-compose` method below for production instances.
-
-### Docker compose
-
-Use the included [docker-compose.yml](docker-compose.yml) file to build Standard Notes with `docker-compose`. Once your `.env` file has been copied and configured, simply run:
-
-```
-docker-compose up -d
-```
-
-This should load the syncing-server and MySQL database containers and run the necessary migrations. You should then be able to reach the server at `http://localhost:[EXPOSED_PORT]` . For example, if inside of my `.env` file I set "EXPOSED_PORT=7459" I could reach the syncing-server via `http://localhost:7459`
-
-To stop the server, `cd` into this directory again and run `docker-compose down`
-
-Your MySQL Data will be written to your local disk at `/var/lib/mysql` - Be sure to back this up in a production instance.
 
 ### Heroku
 
@@ -120,3 +106,21 @@ You can run your own Standard Notes server on a Raspberry Pi using `docker-compo
 	```
 
 *Tested on a **Raspberry Pi 4 Model B***
+
+## Contributing
+
+For contributing we highly recommend you use our docker-compose setup that is provided in this repository.
+
+### Docker compose setup
+
+Use the included [docker-compose.yml](docker-compose.yml) file to build Standard Notes with `docker-compose`. Once your `.env` file has been copied and configured, simply run:
+
+```
+docker-compose up -d
+```
+
+This should load the syncing-server and MySQL database containers and run the necessary migrations. You should then be able to reach the server at `http://localhost:[EXPOSED_PORT]` . For example, if inside of my `.env` file I set "EXPOSED_PORT=7459" I could reach the syncing-server via `http://localhost:7459`
+
+To stop the server, `cd` into this directory again and run `docker-compose down`
+
+Your MySQL Data will be written to your local disk in the `data` folder to keep it persistent between container runs.
