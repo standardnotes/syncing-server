@@ -32,6 +32,9 @@ Rails.application.configure do
   # yet still be able to expire them through the digest params.
   config.assets.digest = true
 
+  config.assets.logger = false
+  config.assets.quiet = true
+
   config.log_level = :info
 
   # Ignore bad email addresses and do not raise email delivery errors.

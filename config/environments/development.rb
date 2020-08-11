@@ -49,6 +49,9 @@ Rails.application.configure do
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
 
+  config.assets.logger = false
+  config.assets.quiet = true
+
   config.active_job.queue_adapter = :inline
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
