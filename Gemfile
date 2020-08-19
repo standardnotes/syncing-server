@@ -18,7 +18,7 @@ gem 'whenever', require: false
 # Used for 'respond_to' feature
 gem 'responders', '~> 2.0'
 
-group :development, :test, :docker_development do
+group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
   gem 'listen'

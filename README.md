@@ -10,22 +10,22 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 
 ### Getting started
 
-1. Clone the project:
+- Clone the project:
 
 	```
 	git clone --branch master https://github.com/standardnotes/syncing-server.git
 	```
 
-1. Create a `.env` file in the project's root directory. See [env.sample](env.sample) for required values.
+- Create a `.env` file in the project's root directory. See [env.sample](env.sample) for required values.
 
-1. Initialize the project:
+- Initialize the project:
 
 	```
 	bundle install
 	bundle exec rails db:create db:migrate
 	```
 
-1. Start the server:
+- Start the server:
 
 	```
 	bundle exec rails server
@@ -45,8 +45,8 @@ Code coverage report is available within the `coverage` directory.
 
 ### Disabling new user registrations
 
-1. Set the `DISABLE_USER_REGISTRATION` environment variable to `true`
-1. Restart the `syncing-server`
+- Set the `DISABLE_USER_REGISTRATION` environment variable to `true`
+- Restart the `syncing-server`
 
 ## Docker setup
 
@@ -76,7 +76,7 @@ You can deploy your own Standard Notes server with one click on Heroku:
 
 ## Raspberry Pi
 
-You can run your own Standard Notes server on a Raspberry Pi using `docker-compose`.
+You can run your own Standard Notes server on a Raspberry Pi using our official [Docker hub image](https://hub.docker.com/repository/docker/standardnotes/syncing-server) with `rpi` tag.
 
 **Requirements**
 
@@ -85,24 +85,14 @@ You can run your own Standard Notes server on a Raspberry Pi using `docker-compo
 
 ### Getting started
 
-1. Install `libffi` and `libssl` dependencies:
-	```
-	sudo apt install -y libffi-dev libssl-dev
-	```
+- If you do not have a MySQL database instance, you can run one via Docker. We recommend using the [tobi312/rpi-mariadb](https://hub.docker.com/r/tobi312/rpi-mariadb) image. Example:
+  ```
+  docker run -v $(pwd)/mariadb:/var/lib/mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -d tobi312/rpi-mariadb
+  ```
 
-1. Install `python3` and `python3-pip`:
+- Setup your `.env` file (make sure it points to your MySQL instance) and run:
 	```
-	sudo apt install -y python3 python3-pip
-	```
-
-1. Install `docker-compose`:
-	```
-	sudo pip3 install docker-compose
-	```
-
-1. Setup your `.env` file and run:
-	```
-	docker-compose -f docker-compose.yml -f docker-compose.raspberry-pi.yml up -d
+  docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server:rpi
 	```
 
 *Tested on a **Raspberry Pi 4 Model B***

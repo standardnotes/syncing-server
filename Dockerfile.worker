@@ -1,5 +1,0 @@
-FROM standardnotes/syncing-server
-
-ENV SQS_QUEUE your-queue-name
-
-CMD [ "start-worker" ]

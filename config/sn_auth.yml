@@ -13,9 +13,3 @@ staging:
 
 production:
   <<: *default
-
-docker_development:
-  <<: *default
-
-raspberry_pi:
-  <<: *default
