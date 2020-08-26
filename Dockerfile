@@ -9,6 +9,7 @@ RUN addgroup -S snotes -g $GID && adduser -D -S snotes -G snotes -u $UID
 RUN apk add --update --no-cache \
     alpine-sdk \
     mariadb-dev \
+    tini \
     tzdata
 
 WORKDIR /syncing-server

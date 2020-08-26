@@ -12,7 +12,7 @@ case "$COMMAND" in
     echo "Prestart Step 3/3 - Migrating database"
     bundle exec rails db:migrate
     echo "Starting Server..."
-    bundle exec rails server -b 0.0.0.0
+    exec /sbin/tini -- bundle exec rails server -b 0.0.0.0
     ;;
 
   'start-web' )
@@ -21,22 +21,22 @@ case "$COMMAND" in
     echo "Prestart Step 2/2 - Migrating database"
     bundle exec rake db:migrate:ignore_concurrent
     echo "Starting Server..."
-    bundle exec rails server -b 0.0.0.0
+    exec /sbin/tini -- bundle exec rails server -b 0.0.0.0
     ;;
 
   'start-worker' )
     echo "Starting Worker..."
-    bundle exec shoryuken -q $SQS_QUEUE -R
+    exec /sbin/tini -- bundle exec shoryuken -q $SQS_QUEUE -R
     ;;
 
   'daily-backup' )
     echo "Starting Daily Backup..."
-    bundle exec rake "items:perform_daily_backup_jobs"
+    exec /sbin/tini -- bundle exec rake "items:perform_daily_backup_jobs"
     ;;
 
   'daily-backup-no-email' )
     echo "Starting Daily Backup Without Emails..."
-    bundle exec rake "items:perform_daily_backup_jobs[false]"
+    exec /sbin/tini -- bundle exec rake "items:perform_daily_backup_jobs[false]"
     ;;
 
   * )
@@ -44,4 +44,4 @@ case "$COMMAND" in
     ;;
 esac
 
-exec "$@"
+exec /sbin/tini -- "$@"
