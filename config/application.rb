@@ -9,7 +9,7 @@ module SyncingServer
     config.active_record.primary_key = :uuid
 
     Shoryuken.logger.level = Logger::INFO
-    config.active_job.queue_adapter = :shoryuken
+    config.active_job.queue_adapter = ENV.has_key?('ACTIVE_JOB_QUEUE_ADAPTER') ? ENV['ACTIVE_JOB_QUEUE_ADAPTER'].to_sym : :async
     config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'
 
     # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications.
