@@ -22,6 +22,7 @@ class ExtensionJob < ApplicationJob
       items: items,
       auth_params: auth_params,
       silent: mute_emails,
+      settings_id: settings.uuid,
     }.to_json
 
     begin
