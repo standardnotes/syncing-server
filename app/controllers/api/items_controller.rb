@@ -37,7 +37,10 @@ class Api::ItemsController < Api::ApiController
     extensions.each do |ext|
       content = ext.decoded_content
       next unless content
-      post_to_extension(content['url'], items, ext, content['frequency'])
+      frequency = content['frequency']
+      if frequency == 'realtime'
+        post_to_extension(content['url'], items, ext, frequency)
+      end
     end
   end
 
