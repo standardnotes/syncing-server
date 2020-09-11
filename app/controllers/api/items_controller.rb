@@ -39,22 +39,21 @@ class Api::ItemsController < Api::ApiController
       next unless content
       frequency = content['frequency']
       if frequency == 'realtime'
-        post_to_extension(content['url'], items, ext)
+        post_to_extension(content['url'], items, ext, frequency)
       end
     end
   end
 
-  def post_to_extension(url, items, ext)
-    if url && !url.empty?
-      params = {
-        url: url,
-        item_ids: items.map { |i| i[:uuid] },
-        user_id: current_user.uuid,
-        extension_id: ext.uuid,
-        silent: false,
-      }
-      ExtensionJob.perform_later(params)
-    end
+  def post_to_extension(url, items, ext, frequency)
+    return unless url && !url.empty?
+
+    ExtensionJob.perform_later(
+      current_user.uuid,
+      url,
+      ext.uuid,
+      items.map { |i| i[:uuid] },
+      frequency == 'realtime'
+    )
   end
 
   # Writes all user data to backup extension.
@@ -65,7 +64,7 @@ class Api::ItemsController < Api::ApiController
     if content && content['subtype'].nil?
       items = current_user.items.to_a
       if items && !items.empty?
-        post_to_extension(content['url'], items, ext)
+        post_to_extension(content['url'], items, ext, content['frequency'])
       end
     end
   end

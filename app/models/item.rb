@@ -63,7 +63,8 @@ class Item < ApplicationRecord
     elsif content['frequency'] == 'daily'
       # backup job
       return unless content['url']
-      ExtensionJob.perform_later(url: content['url'], user_id: user_uuid, extension_id: uuid, silent: false)
+
+      ExtensionJob.perform_later(user_uuid, content['url'], uuid)
     end
   end
 

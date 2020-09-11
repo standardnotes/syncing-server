@@ -22,15 +22,12 @@ namespace :items do
       url = content['url']
       next if url.nil? || url.length.zero?
 
-      begin
-        ExtensionJob.perform_later(
-          url: url,
-          user_id: item.user.uuid,
-          extension_id: item.uuid,
-          silent: !send_email
-        )
-      rescue StandardError
-      end
+      ExtensionJob.perform_later(
+        item.user.uuid,
+        url,
+        item.uuid,
+        !send_email
+      )
     end
   end
 end
