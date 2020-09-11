@@ -78,7 +78,7 @@ jobs:
         wait-for-service-stability: true
 
   deploy-worker:
-    needs: test
+    needs: deploy-web
 
     runs-on: ubuntu-latest
 
