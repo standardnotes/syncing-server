@@ -67,7 +67,7 @@ class Api::AuthController < Api::ApiController
     true
   end
 
-  def did_successfully_auth_attempt
+  def did_succeed_auth_attempt
     # current_user is only available to jwt requests (change_password)
     user = current_user || User.find_by_email(params[:email])
     user.locked_until = nil
@@ -105,7 +105,7 @@ class Api::AuthController < Api::ApiController
       did_fail_auth_attempt
       render json: result, status: :unauthorized
     else
-      did_successfully_auth_attempt
+      did_succeed_auth_attempt
       render json: result
     end
   end
@@ -189,7 +189,7 @@ class Api::AuthController < Api::ApiController
       return
     end
 
-    did_successfully_auth_attempt
+    did_succeed_auth_attempt
 
     current_user.updated_with_user_agent = request.user_agent
     result = @user_manager.change_pw(current_user, current_session, params[:new_password], params)
