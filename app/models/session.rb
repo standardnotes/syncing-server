@@ -7,7 +7,7 @@ class Session < ApplicationRecord
   has_secure_token :access_token
   has_secure_token :refresh_token
 
-  before_create :refresh_expiration_date
+  before_create :extend_expiration_dates
 
   ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
@@ -32,7 +32,7 @@ class Session < ApplicationRecord
 
     regenerate_access_token
     regenerate_refresh_token
-    refresh_expiration_date
+    extend_expiration_dates
 
     save
     true
@@ -67,7 +67,7 @@ class Session < ApplicationRecord
 
   private
 
-  def refresh_expiration_date
+  def extend_expiration_dates
     self.access_expiration = DateTime.now + ACCESS_TOKEN_AGE
     self.refresh_expiration = DateTime.now + REFRESH_TOKEN_AGE
   end

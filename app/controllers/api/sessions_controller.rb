@@ -60,7 +60,7 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    session = Session.where(refresh_token: params[:refresh_token]).first
+    session = Session.find_by_refresh_token(params[:refresh_token])
 
     unless session
       render json: {
