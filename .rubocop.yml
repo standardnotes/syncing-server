@@ -1,5 +1,5 @@
-inherit_from:
-  - https://shopify.github.io/ruby-style-guide/rubocop.yml
+inherit_gem:
+  rubocop-shopify: rubocop.yml
 
 AllCops:
   Exclude:
@@ -18,6 +18,9 @@ Style/ClassAndModuleChildren:
   Enabled: false
 
 Style/DateTime:
+  Enabled: false
+
+Style/RedundantReturn:
   Enabled: false
 
 # We may enable this in the future

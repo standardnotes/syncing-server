@@ -7,7 +7,10 @@ class Session < ApplicationRecord
   has_secure_token :access_token
   has_secure_token :refresh_token
 
-  before_create :set_expire_at
+  before_create :refresh_expiration_date
+
+  ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
+  REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
 
   def serializable_hash(options = {})
     allowed_options = [
@@ -24,32 +27,23 @@ class Session < ApplicationRecord
     super(options.merge(only: allowed_options, methods: allowed_methods))
   end
 
-  def access_token_expire_at
-    expire_date = (expire_at - refresh_token_expiration_time + access_token_expiration_time)
-    timestamp_ms(expire_date)
-  end
-
-  def refresh_token_expire_at
-    timestamp_ms(expire_at)
-  end
-
-  def regenerate_tokens
-    return false if expired?
+  def renew
+    return false if refresh_expired?
 
     regenerate_access_token
     regenerate_refresh_token
-    set_expire_at
+    refresh_expiration_date
 
     save
     true
   end
 
-  def expired_access_token?
-    access_token_expire_at < timestamp_ms
+  def access_expired?
+    date_to_milliseconds(access_expiration) < date_to_milliseconds(DateTime.now)
   end
 
-  def expired?
-    refresh_token_expire_at < timestamp_ms
+  def refresh_expired?
+    date_to_milliseconds(refresh_expiration) < date_to_milliseconds(DateTime.now)
   end
 
   def device_info
@@ -64,32 +58,21 @@ class Session < ApplicationRecord
 
   def as_client_payload
     {
-      expire_at: access_token_expire_at,
+      access_token: access_token,
       refresh_token: refresh_token,
-      valid_until: refresh_token_expire_at,
+      access_expiration: date_to_milliseconds(access_expiration),
+      refresh_expiration: date_to_milliseconds(refresh_expiration),
     }
   end
 
   private
 
-  def config
-    Rails.application.config.x.session
+  def refresh_expiration_date
+    self.access_expiration = DateTime.now + ACCESS_TOKEN_AGE
+    self.refresh_expiration = DateTime.now + REFRESH_TOKEN_AGE
   end
 
-  def refresh_token_expiration_time
-    config[:refresh_token_expiration_time].seconds
-  end
-
-  def access_token_expiration_time
-    config[:access_token_expiration_time].seconds
-  end
-
-  def set_expire_at
-    self.expire_at = DateTime.now + refresh_token_expiration_time
-  end
-
-  def timestamp_ms(date = nil)
-    date = DateTime.now if date.nil?
+  def date_to_milliseconds(date)
     date.to_datetime.strftime('%Q').to_i
   end
 end

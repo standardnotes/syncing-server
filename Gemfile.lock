@@ -218,6 +218,8 @@ GEM
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 1.7)
+    rubocop-shopify (1.0.0)
+      rubocop (>= 0.78.0)
     ruby-progressbar (1.10.1)
     ruby_parser (3.14.2)
       sexp_processor (~> 4.9)
@@ -284,6 +286,7 @@ DEPENDENCIES
   rotp
   rspec-rails
   rubocop (~> 0.79.0)
+  rubocop-shopify
   secure_headers
   shoryuken
   simplecov

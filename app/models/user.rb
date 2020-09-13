@@ -122,7 +122,7 @@ class User < ApplicationRecord
   end
 
   def active_sessions
-    sessions.where('expire_at > ?', DateTime.now).to_a.map(&:serializable_hash)
+    sessions.where('refresh_expiration > ?', DateTime.now).to_a.map(&:serializable_hash)
   end
 
   def supports_jwt?

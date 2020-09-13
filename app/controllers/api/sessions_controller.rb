@@ -60,10 +60,7 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    session = Session.where(
-      'access_token = ? AND refresh_token = ?',
-      params[:access_token], params[:refresh_token]
-    ).first
+    session = Session.where(refresh_token: params[:refresh_token]).first
 
     unless session
       render json: {
@@ -75,7 +72,7 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    unless session.regenerate_tokens
+    unless session.renew
       render json: {
         error: {
           tag: 'expired-refresh-token',
@@ -87,7 +84,6 @@ class Api::SessionsController < Api::ApiController
 
     render json: {
       session: session.as_client_payload,
-      token: session.access_token,
     }
   end
 

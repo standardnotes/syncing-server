@@ -65,7 +65,7 @@ RSpec.describe Api::SessionsController, type: :controller do
           post :sign_in, params: test_user_004_credentials
 
           @controller = Api::SessionsController.new
-          request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+          request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['session']['access_token']}"
 
           get :index
 
@@ -130,7 +130,7 @@ RSpec.describe Api::SessionsController, type: :controller do
             post :sign_in, params: test_user_004_credentials
 
             @controller = Api::SessionsController.new
-            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['session']['access_token']}"
 
             delete :delete
 
@@ -151,7 +151,7 @@ RSpec.describe Api::SessionsController, type: :controller do
             post :sign_in, params: test_user_004_credentials
 
             @controller = Api::SessionsController.new
-            access_token = JSON.parse(response.body)['token']
+            access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
             current_session = test_user_004.sessions.where(access_token: access_token).first
 
@@ -174,7 +174,7 @@ RSpec.describe Api::SessionsController, type: :controller do
             post :sign_in, params: test_user_004_credentials
 
             @controller = Api::SessionsController.new
-            access_token = JSON.parse(response.body)['token']
+            access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
 
             another_test_user = build(:user, password: test_password, version: '004')
@@ -201,7 +201,7 @@ RSpec.describe Api::SessionsController, type: :controller do
             post :sign_in, params: test_user_004_credentials
 
             @controller = Api::SessionsController.new
-            access_token = JSON.parse(response.body)['token']
+            access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
             other_session = test_user_004.sessions.where.not(access_token: access_token).first
 
@@ -264,7 +264,7 @@ RSpec.describe Api::SessionsController, type: :controller do
           post :sign_in, params: test_user_004_credentials
 
           @controller = Api::SessionsController.new
-          access_token = JSON.parse(response.body)['token']
+          access_token = JSON.parse(response.body)['session']['access_token']
           request.headers['Authorization'] = "bearer #{access_token}"
 
           # Registering another test user, so multiple sessions from multiple users exist...
@@ -326,11 +326,12 @@ RSpec.describe Api::SessionsController, type: :controller do
         post :sign_in, params: test_user_004_credentials
 
         @controller = Api::SessionsController.new
-        access_token = JSON.parse(response.body)['token']
+        access_token = JSON.parse(response.body)['session']['access_token']
 
         # Expiring the refresh token...
         current_session = test_user_004.sessions.where(access_token: access_token).first
-        current_session.expire_at = DateTime.now - 3600.seconds
+        current_session.access_expiration = DateTime.now - 3600.seconds
+        current_session.refresh_expiration = DateTime.now - 3600.seconds
         current_session.save
 
         refresh_token = current_session.refresh_token
@@ -359,7 +360,8 @@ RSpec.describe Api::SessionsController, type: :controller do
 
         # Session should remain expired...
         current_session.reload
-        expect(current_session.expire_at).to be < DateTime.now
+        expect(current_session.access_expiration).to be < DateTime.now
+        expect(current_session.refresh_expiration).to be < DateTime.now
       end
     end
 
@@ -369,7 +371,7 @@ RSpec.describe Api::SessionsController, type: :controller do
         post :sign_in, params: test_user_004_credentials
 
         @controller = Api::SessionsController.new
-        access_token = JSON.parse(response.body)['token']
+        access_token = JSON.parse(response.body)['session']['access_token']
 
         current_session = test_user_004.sessions.where(access_token: access_token).first
         refresh_token = current_session.refresh_token
@@ -386,13 +388,12 @@ RSpec.describe Api::SessionsController, type: :controller do
           parsed_response_body = JSON.parse(response.body)
 
           expect(parsed_response_body).to_not be_nil
-          expect(parsed_response_body['token']).to_not be_nil
-          expect(parsed_response_body['token']).to_not eq(access_token)
+          expect(parsed_response_body['token']).to be_nil
 
           expect(parsed_response_body['session']).to_not be_nil
-          expect(parsed_response_body['session']['expire_at']).to_not be_nil
-          expect(parsed_response_body['session']['expire_at']).to be_an(Numeric)
-          expect(parsed_response_body['session']['expire_at']).to be > 0
+          expect(parsed_response_body['session']['access_expiration']).to_not be_nil
+          expect(parsed_response_body['session']['access_expiration']).to be_an(Numeric)
+          expect(parsed_response_body['session']['access_expiration']).to be > 0
 
           expect(parsed_response_body['session']['refresh_token']).to_not be_nil
           expect(parsed_response_body['session']['refresh_token']).to_not eq(access_token)

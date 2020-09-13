@@ -11,6 +11,7 @@ gem 'rack-cors', require: 'rack/cors'
 gem 'rails', '5.1.7'
 gem 'rotp'
 gem 'rubocop', '~> 0.79.0', require: false
+gem 'rubocop-shopify', require: false
 gem 'secure_headers'
 gem 'shoryuken'
 gem 'whenever', require: false

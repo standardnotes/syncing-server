@@ -1,6 +1,5 @@
 class Api::AuthController < Api::ApiController
   skip_before_action :authenticate_user, except: [:change_pw, :update]
-  before_action :authenticate_user_for_sign_out, only: [:sign_out]
   before_action :can_register, only: [:register]
 
   before_action do
@@ -27,6 +26,8 @@ class Api::AuthController < Api::ApiController
     user.items.where(content_type: 'SF|MFA', deleted: false).first
   end
 
+  # Returns true if the user does not have MFA enabled,
+  # or if the supplied MFA parameters are valid
   def verify_mfa
     mfa = mfa_for_email(params[:email])
     return true if mfa.nil?
@@ -66,7 +67,7 @@ class Api::AuthController < Api::ApiController
     true
   end
 
-  def handle_successful_auth_attempt
+  def did_successfully_auth_attempt
     # current_user is only available to jwt requests (change_password)
     user = current_user || User.find_by_email(params[:email])
     user.locked_until = nil
@@ -74,7 +75,7 @@ class Api::AuthController < Api::ApiController
     user.save
   end
 
-  def handle_failed_auth_attempt
+  def did_fail_auth_attempt
     # current_user is only available to jwt requests (change_password)
     user = current_user || User.find_by_email(params[:email])
     return unless user
@@ -91,7 +92,6 @@ class Api::AuthController < Api::ApiController
 
   def sign_in
     unless verify_mfa
-      # error responses are handled by the verify_mfa method
       return
     end
 
@@ -102,10 +102,10 @@ class Api::AuthController < Api::ApiController
     result = @user_manager.sign_in(params[:email], params[:password], params)
 
     if result[:error]
-      handle_failed_auth_attempt
+      did_fail_auth_attempt
       render json: result, status: :unauthorized
     else
-      handle_successful_auth_attempt
+      did_successfully_auth_attempt
       render json: result
     end
   end
@@ -172,10 +172,13 @@ class Api::AuthController < Api::ApiController
     end
 
     # Verify current password first
-    valid_credentials = @user_manager.verify_credentials(current_user.email, params[:current_password])
+    valid_credentials = @user_manager.verify_credentials(
+      current_user.email,
+      params[:current_password]
+    )
 
     unless valid_credentials
-      handle_failed_auth_attempt
+      did_fail_auth_attempt
 
       render json: {
         error: {
@@ -186,10 +189,10 @@ class Api::AuthController < Api::ApiController
       return
     end
 
-    handle_successful_auth_attempt
+    did_successfully_auth_attempt
 
     current_user.updated_with_user_agent = request.user_agent
-    result = @user_manager.change_pw(current_user, params[:new_password], params)
+    result = @user_manager.change_pw(current_user, current_session, params[:new_password], params)
 
     if result[:error]
       render json: result, status: :unauthorized
@@ -198,6 +201,8 @@ class Api::AuthController < Api::ApiController
     end
   end
 
+  # Presently not used by clients, but used by tests.
+  # Will be used by clients starting with client v4+
   def update
     current_user.updated_with_user_agent = request.user_agent
     result = @user_manager.update(current_user, params)
@@ -208,9 +213,10 @@ class Api::AuthController < Api::ApiController
     end
   end
 
+  # Returns the accounts key parameters (FKA auth_params).
+  # If the account has MFA enabled, those parameters will be required.
   def auth_params
     unless verify_mfa
-      # error responses are handled by the verify_mfa method
       return
     end
 
@@ -233,17 +239,27 @@ class Api::AuthController < Api::ApiController
     render json: auth_params
   end
 
+  # When looking up emails for accounts that do not exist,
+  # send psuedo parameters to mask existence status of account
   def pseudo_auth_params(email)
     {
       identifier: email,
-      pw_cost: 110_000,
       pw_nonce: Digest::SHA2.hexdigest(email + Rails.application.secrets.secret_key_base),
       version: '004',
     }
   end
 
   def sign_out
-    current_session&.destroy
+    # Users with an expired token may still make a request to the sign out endpoint
+    token = token_from_request_header
+
+    if token.nil?
+      render_invalid_auth_error
+      return
+    end
+
+    session = Session.find_by_access_token(token)
+    session&.destroy
     render json: {}, status: :no_content
   end
 
