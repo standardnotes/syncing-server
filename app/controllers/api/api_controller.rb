@@ -3,6 +3,8 @@ class Api::ApiController < ApplicationController
   attr_accessor :current_session
   attr_accessor :user_manager
 
+  EXPIRED_TOKEN_HTTP_CODE = 498
+
   before_action :authenticate_user
 
   before_action do
@@ -96,7 +98,7 @@ class Api::ApiController < ApplicationController
         tag: 'expired-access-token',
         message: 'The provided access token has expired.',
       },
-    }, status: :unauthorized
+    }, status: EXPIRED_TOKEN_HTTP_CODE
   end
 
   def decode_token(token)
