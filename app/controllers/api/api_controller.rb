@@ -96,7 +96,7 @@ class Api::ApiController < ApplicationController
         tag: 'expired-access-token',
         message: 'The provided access token has expired.',
       },
-    }, status: :access_expired
+    }, status: :unauthorized
   end
 
   def decode_token(token)
