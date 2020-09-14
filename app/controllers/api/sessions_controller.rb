@@ -62,7 +62,7 @@ class Api::SessionsController < Api::ApiController
 
     session = Session.find_by_refresh_token(params[:refresh_token])
 
-    unless session
+    if session.nil? || session.access_token != params[:access_token]
       render json: {
         error: {
           tag: 'invalid-parameters',
