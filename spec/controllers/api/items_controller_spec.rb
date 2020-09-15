@@ -15,7 +15,7 @@ RSpec.describe Api::ItemsController, type: :controller do
     create(:item, :backup_realtime, user_uuid: test_user.uuid)
   end
 
-  let(:test_user_credentials) do
+  let(:test_user_003_credentials) do
     { email: test_user.email, password: test_password }
   end
 
@@ -49,7 +49,7 @@ RSpec.describe Api::ItemsController, type: :controller do
         context 'and no items are sent to be updated' do
           it 'should return existing items' do
             @controller = Api::AuthController.new
-            post :sign_in, params: test_user_credentials
+            post :sign_in, params: test_user_003_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -84,7 +84,7 @@ RSpec.describe Api::ItemsController, type: :controller do
         context 'and modifying note contents' do
           it 'should return results matching the new changes' do
             @controller = Api::AuthController.new
-            post :sign_in, params: test_user_credentials
+            post :sign_in, params: test_user_003_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -118,7 +118,7 @@ RSpec.describe Api::ItemsController, type: :controller do
           end
           it 'should store revisions matching changes' do
             @controller = Api::AuthController.new
-            post :sign_in, params: test_user_credentials
+            post :sign_in, params: test_user_003_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -149,7 +149,7 @@ RSpec.describe Api::ItemsController, type: :controller do
         context 'and deleting items' do
           it 'should return results matching the new changes' do
             @controller = Api::AuthController.new
-            post :sign_in, params: test_user_credentials
+            post :sign_in, params: test_user_003_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -192,7 +192,7 @@ RSpec.describe Api::ItemsController, type: :controller do
         context 'and syncing items along with new ones' do
           it 'should return results matching the new changes' do
             @controller = Api::AuthController.new
-            post :sign_in, params: test_user_credentials
+            post :sign_in, params: test_user_003_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -250,7 +250,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       context 'when using the fallback api' do
         it 'should return results' do
           @controller = Api::AuthController.new
-          post :sign_in, params: test_user_credentials
+          post :sign_in, params: test_user_003_credentials
 
           @controller = Api::ItemsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -273,7 +273,7 @@ RSpec.describe Api::ItemsController, type: :controller do
         it 'should throw an exception' do
           expect do
             @controller = Api::AuthController.new
-            post :sign_in, params: test_user_credentials
+            post :sign_in, params: test_user_003_credentials
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -305,7 +305,7 @@ RSpec.describe Api::ItemsController, type: :controller do
     context 'when signed in' do
       it 'should return no content' do
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::ItemsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -341,7 +341,7 @@ RSpec.describe Api::ItemsController, type: :controller do
     context 'when signed in' do
       it 'should return results' do
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::ItemsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -361,7 +361,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       end
       it 'should duplicate revisions for a conflicting item' do
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::ItemsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -399,7 +399,7 @@ RSpec.describe Api::ItemsController, type: :controller do
     context 'when signed in' do
       it 'should return no content' do
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::ItemsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"

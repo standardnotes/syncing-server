@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200605085931) do
+ActiveRecord::Schema.define(version: 20200913150251) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -64,7 +64,8 @@ ActiveRecord::Schema.define(version: 20200605085931) do
     t.string "api_version"
     t.string "access_token", null: false
     t.string "refresh_token", null: false
-    t.datetime "expire_at", null: false
+    t.datetime "access_expiration", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "refresh_expiration", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["access_token"], name: "index_sessions_on_access_token", unique: true
@@ -81,14 +82,15 @@ ActiveRecord::Schema.define(version: 20200605085931) do
     t.integer "pw_key_size"
     t.string "pw_nonce"
     t.string "encrypted_password", default: "", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.string "pw_salt"
     t.string "version"
     t.text "updated_with_user_agent"
     t.datetime "locked_until"
     t.integer "num_failed_attempts"
     t.index ["email"], name: "index_users_on_email"
+    t.index ["uuid"], name: "index_users_on_uuid"
   end
 
 end

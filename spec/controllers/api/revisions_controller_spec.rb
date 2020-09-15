@@ -13,7 +13,7 @@ RSpec.describe Api::RevisionsController, type: :controller do
     create_list(:item, 10, :note_type, user_uuid: test_user.uuid, content: 'This is a test note.')
   end
 
-  let(:test_user_credentials) do
+  let(:test_user_003_credentials) do
     { email: test_user.email, password: test_password }
   end
 
@@ -46,7 +46,7 @@ RSpec.describe Api::RevisionsController, type: :controller do
         create(:item_revision, item_uuid: item.uuid, revision_uuid: revision.uuid)
 
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::RevisionsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -60,7 +60,7 @@ RSpec.describe Api::RevisionsController, type: :controller do
       end
       it 'should return not found if an item does not exist' do
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::RevisionsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
@@ -97,7 +97,7 @@ RSpec.describe Api::RevisionsController, type: :controller do
         create(:item_revision, item_uuid: item.uuid, revision_uuid: revision.uuid)
 
         @controller = Api::AuthController.new
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         @controller = Api::RevisionsController.new
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"

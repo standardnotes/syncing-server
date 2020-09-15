@@ -10,7 +10,7 @@ The proposed sessions management system will be part of the `004` release, which
 
 Any account version can use this new API version. That includes `001`, `002`, `003` and the upcoming `004` version. Because the newest client will support these accounts, and the API version will still be hardcoded to `20200115`. But only those who upgrade their account version to `004` will be able to use this new session management feature.
 
-The following message will be shown to them once the account upgrade succeeds: 
+The following message will be shown to them once the account upgrade succeeds:
 
 `Your session with the server has been upgraded to the latest version. You will need to re-enter your account password on your other devices to continue syncing.`
 
@@ -30,7 +30,8 @@ The [SNJS library](https://github.com/standardnotes/snjs/blob/64e4e65c7660b9758e
 | api_version    | string    | The server API version used to create the session |
 | access_token   | string    | The access token used to authenticate requests    |
 | refresh_token  | string    | The refresh token used to extend tokens           |
-| expire_at      | datetime  | The expiration time of the session                |
+| access_expiration      | datetime  | The expiration time of the access token                |
+| renew_expiration      | datetime  | The expiration time of the refresh token                |
 | created_at     | datetime  | Date and time of creation of the session          |
 | updated_at     | datetime  | Last updated date and time of the session         |
 
@@ -128,8 +129,8 @@ Here's how to refresh tokens:
     Host: sync.standardnotes.org
     Authorization: Bearer <access token>
 
-    { 
-      "refresh_token": "R_xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx" 
+    {
+      "refresh_token": "R_xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx"
     }
     ```
 
@@ -139,7 +140,7 @@ Here's how to refresh tokens:
         {
           "token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
           "session": {
-            "expire_at": 1583020800,
+            "refresh_expiration": 1583020800,
             "refresh_token": "xxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
           }
         }
@@ -208,8 +209,8 @@ Mitigation(s):
 
 - ### What advantages does the use of a `refresh_token` bring?
 
-  The sole purpose of the `refresh_token` is to extend a user session. This is done by generating new tokens, and invalidating the current ones. 
-  
+  The sole purpose of the `refresh_token` is to extend a user session. This is done by generating new tokens, and invalidating the current ones.
+
   Also, it limits the use of user credentials by not requiring them to obtain a new `access_token`. This brings greater user experience than having to re-enter credentials every time the `access_token` is expired.
 
 - ### Why not use an `access_token` with a long expiration time?

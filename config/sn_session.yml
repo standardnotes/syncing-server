@@ -1,14 +1,16 @@
 default: &default
-  access_token_expiration_time: <%= 60.days %>
-  refresh_token_expiration_time: <%= 1.years %>
+  access_token_age: <%= 60.days %>
+  refresh_token_age: <%= 1.years %>
 
 development:
   <<: *default
+  access_token_age: <%= 2.seconds %>
+  refresh_token_age: <%= 6.seconds %>
 
 test:
   <<: *default
-  access_token_expiration_time: <%= 2.seconds %>
-  refresh_token_expiration_time: <%= 6.seconds %>
+  access_token_age: <%= 2.seconds %>
+  refresh_token_age: <%= 6.seconds %>
 
 staging:
   <<: *default

@@ -11,7 +11,7 @@ RSpec.describe Api::AuthController, type: :controller do
     build(:user, password: test_password, version: '004')
   end
 
-  let(:test_user_credentials) do
+  let(:test_user_003_credentials) do
     { email: test_user.email, password: test_password }
   end
 
@@ -19,8 +19,12 @@ RSpec.describe Api::AuthController, type: :controller do
     { email: test_user_004.email, password: test_password, api: '20200115' }
   end
 
-  let(:auth_params_keys) do
+  let(:auth_params_keys_003) do
     %w[identifier pw_cost pw_nonce version].sort
+  end
+
+  let(:auth_params_keys_004) do
+    %w[identifier pw_nonce version].sort
   end
 
   let(:mfa_item) do
@@ -29,7 +33,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
   describe 'GET auth/params' do
     context 'when the provided email does not belong to a user' do
-      it 'should return the params' do
+      it 'should return 004 psuedo params' do
         get :auth_params, params: { email: 'test@email.com' }
 
         expect(response).to have_http_status(:ok)
@@ -37,15 +41,14 @@ RSpec.describe Api::AuthController, type: :controller do
 
         parsed_response_body = JSON.parse(response.body)
 
-        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys)
+        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys_004)
         expect(parsed_response_body['identifier']).to eq 'test@email.com'
-        expect(parsed_response_body['pw_cost']).to_not be_nil
         expect(parsed_response_body['pw_nonce']).to_not be_nil
         expect(parsed_response_body['version']).to_not be_nil
       end
     end
 
-    context 'when the provided email belongs to a user' do
+    context 'when the provided email belongs to a 003 user' do
       it 'should return the params' do
         get :auth_params, params: { email: test_user.email }
 
@@ -54,7 +57,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
         parsed_response_body = JSON.parse(response.body)
 
-        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys)
+        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys_003)
         expect(parsed_response_body['identifier']).to eq test_user.email
         expect(parsed_response_body['version']).to_not be_nil
       end
@@ -121,7 +124,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
     context 'when valid crendentials are provided' do
       it 'sign in should not fail' do
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         expect(response).to have_http_status(:ok)
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -129,7 +132,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
         expect(parsed_response_body).to_not be_nil
         expect(parsed_response_body['user']).to_not be_nil
-        expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+        expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
         expect(parsed_response_body['token']).to_not be_nil
       end
     end
@@ -138,7 +141,7 @@ RSpec.describe Api::AuthController, type: :controller do
       context 'when mfa param key is not provided' do
         it 'sign in should fail' do
           mfa_item.save
-          post :sign_in, params: test_user_credentials
+          post :sign_in, params: test_user_003_credentials
 
           expect(response).to have_http_status(:unauthorized)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -155,7 +158,7 @@ RSpec.describe Api::AuthController, type: :controller do
       context 'when mfa param key is provided but its invalid' do
         it 'sign in should fail' do
           mfa_item.save
-          post :sign_in, params: test_user_credentials.merge("mfa_#{mfa_item.uuid}": '000000')
+          post :sign_in, params: test_user_003_credentials.merge("mfa_#{mfa_item.uuid}": '000000')
 
           expect(response).to have_http_status(:unauthorized)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -177,7 +180,7 @@ RSpec.describe Api::AuthController, type: :controller do
           secret = mfa_item.decoded_content['secret']
           totp = ROTP::TOTP.new(secret)
           otp_code = totp.now
-          post :sign_in, params: test_user_credentials.merge("mfa_#{mfa_item.uuid}": otp_code)
+          post :sign_in, params: test_user_003_credentials.merge("mfa_#{mfa_item.uuid}": otp_code)
 
           expect(response).to have_http_status(:ok)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -185,7 +188,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['user']).to_not be_nil
-          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+          expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
           expect(parsed_response_body['token']).to_not be_nil
         end
       end
@@ -209,7 +212,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
     context 'when registering with an existing email' do
       it 'register should fail' do
-        post :register, params: { email: test_user_credentials[:email], password: test_user_credentials[:password] }
+        post :register, params: { email: test_user_003_credentials[:email], password: test_user_003_credentials[:password] }
 
         expect(response).to have_http_status(:unauthorized)
         expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -272,7 +275,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
     context 'when user is authenticated' do
       it 'should be updated' do
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
         post :update, params: { version: '002' }
@@ -283,7 +286,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
         expect(parsed_response_body).to_not be_nil
         expect(parsed_response_body['user']).to_not be_nil
-        expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+        expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
         expect(parsed_response_body['token']).to_not be_nil
 
         test_user.reload
@@ -309,7 +312,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
     context 'when current password is not provided' do
       it 'change password should fail' do
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
         post :change_pw, params: {}
@@ -327,11 +330,11 @@ RSpec.describe Api::AuthController, type: :controller do
 
     context 'when password nonce is not provided' do
       it 'change password should fail' do
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
         post :change_pw, params: {
-          current_password: test_user_credentials[:password],
+          current_password: test_user_003_credentials[:password],
           new_password: 'new-pwd',
         }
 
@@ -349,7 +352,7 @@ RSpec.describe Api::AuthController, type: :controller do
     context 'when parameters are provided' do
       context 'and current password is invalid' do
         it 'change password should fail' do
-          post :sign_in, params: test_user_credentials
+          post :sign_in, params: test_user_003_credentials
 
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
           post :change_pw, params: {
@@ -371,11 +374,11 @@ RSpec.describe Api::AuthController, type: :controller do
 
       context 'and current password is valid' do
         it 'change password should not fail and password should be updated' do
-          post :sign_in, params: test_user_credentials
+          post :sign_in, params: test_user_003_credentials
 
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
           post :change_pw, params: {
-            current_password: test_user_credentials[:password],
+            current_password: test_user_003_credentials[:password],
             new_password: 'new-pwd',
             pw_nonce: test_user.pw_nonce,
           }
@@ -386,10 +389,10 @@ RSpec.describe Api::AuthController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['user']).to_not be_nil
-          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+          expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
           expect(parsed_response_body['token']).to_not be_nil
 
-          post :sign_in, params: { email: test_user_credentials[:email], password: 'new-pwd' }
+          post :sign_in, params: { email: test_user_003_credentials[:email], password: 'new-pwd' }
 
           expect(response).to have_http_status(:ok)
           expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
@@ -397,7 +400,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['user']).to_not be_nil
-          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
+          expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
           expect(parsed_response_body['token']).to_not be_nil
         end
       end
@@ -406,11 +409,11 @@ RSpec.describe Api::AuthController, type: :controller do
         it 'password should be updated and a new session should be created' do
           new_protocol_version = '004'
           new_password = 'new-pwd-004'
-          post :sign_in, params: test_user_credentials
+          post :sign_in, params: test_user_003_credentials
 
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
           post :change_pw, params: {
-            current_password: test_user_credentials[:password],
+            current_password: test_user_003_credentials[:password],
             new_password: new_password,
             pw_nonce: test_user.pw_nonce,
             version: new_protocol_version,
@@ -423,8 +426,8 @@ RSpec.describe Api::AuthController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['user']).to_not be_nil
-          expect(parsed_response_body['user']['email']).to eq(test_user_credentials[:email])
-          expect(parsed_response_body['token']).to_not be_nil
+          expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
+          expect(parsed_response_body['token']).to be_nil
           expect(parsed_response_body['session']).to_not be_nil
 
           test_user.reload
@@ -432,7 +435,7 @@ RSpec.describe Api::AuthController, type: :controller do
           expect(test_user.version).to eq(new_protocol_version)
 
           post :sign_in, params: {
-            email: test_user_credentials[:email],
+            email: test_user_003_credentials[:email],
             password: new_password,
             api: '20200115',
           }
@@ -477,11 +480,11 @@ RSpec.describe Api::AuthController, type: :controller do
 
     context 'when the user signs in, changes their password and still use their old JWT' do
       it 'should return unauthorized error' do
-        post :sign_in, params: test_user_credentials
+        post :sign_in, params: test_user_003_credentials
 
         request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
         post :change_pw, params: {
-          current_password: test_user_credentials[:password],
+          current_password: test_user_003_credentials[:password],
           new_password: 'new-pwd',
           pw_nonce: test_user.pw_nonce,
         }
@@ -517,8 +520,8 @@ RSpec.describe Api::AuthController, type: :controller do
     end
 
     context 'and user has an account version < 004' do
-      it 'should return no response and no sessions should be deleted' do
-        post :sign_in, params: test_user_credentials
+      it 'should return empty response and 0 sessions should be deleted' do
+        post :sign_in, params: test_user_003_credentials
         access_token = JSON.parse(response.body)['token']
 
         expect do
@@ -535,7 +538,7 @@ RSpec.describe Api::AuthController, type: :controller do
     context 'and user has an account version >= 004' do
       it 'should return no response and the session should be deleted' do
         post :sign_in, params: test_user_004_credentials
-        access_token = JSON.parse(response.body)['token']
+        access_token = JSON.parse(response.body)['session']['access_token']
 
         expect do
           request.headers['Authorization'] = "bearer #{access_token}"
@@ -585,7 +588,7 @@ RSpec.describe Api::AuthController, type: :controller do
             # Upgrading to new version 004
             user_manager = SyncEngine::V20190520::UserManager.new(User)
             change_pw_params = ActionController::Parameters.new(version: '004')
-            user_manager.change_pw(existing_user, test_password, change_pw_params)
+            user_manager.change_pw(existing_user, nil, test_password, change_pw_params)
 
             test_user.reload
             expect(existing_user.version).to eq('004')
@@ -628,7 +631,7 @@ RSpec.describe Api::AuthController, type: :controller do
             # Upgrading to new version 004
             user_manager = SyncEngine::V20200115::UserManager.new(User)
             change_pw_params = ActionController::Parameters.new(version: '004')
-            user_manager.change_pw(existing_user, test_password, change_pw_params)
+            user_manager.change_pw(existing_user, nil, test_password, change_pw_params)
 
             test_user.reload
             expect(existing_user.version).to eq('004')
