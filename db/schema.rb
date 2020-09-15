@@ -64,7 +64,7 @@ ActiveRecord::Schema.define(version: 20200913150251) do
     t.string "api_version"
     t.string "access_token", null: false
     t.string "refresh_token", null: false
-    t.datetime "access_expiration"
+    t.datetime "access_expiration", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "refresh_expiration", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
