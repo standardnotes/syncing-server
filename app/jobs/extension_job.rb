@@ -20,8 +20,10 @@ class ExtensionJob < ApplicationJob
     settings = ExtensionSetting.find_or_create_by(extension_id: extension_id)
     mute_emails = force_mute || settings.mute_emails
 
-    tmp_file_path = prepare_tmp_file(auth_params, items)
-    filename = upload_tmp_file_to_s3(tmp_file_path)
+    tmp_file = prepare_tmp_file(auth_params, items)
+    filename = upload_tmp_file_to_s3(tmp_file.path)
+    tmp_file.close
+    tmp_file.unlink
 
     payload = {
       items: items,
@@ -56,6 +58,12 @@ class ExtensionJob < ApplicationJob
   end
 
   def upload_tmp_file_to_s3(tmp_file_path)
+    unless ENV['S3_BACKUP_BUCKET_NAME'] && ENV['AWS_REGION']
+      Rails.logger.warn { 'S3 backup bucket not configured' }
+
+      return nil
+    end
+
     s3 = Aws::S3::Resource.new(region: ENV['AWS_REGION'])
     filename = SecureRandom.hex
     obj = s3.bucket(ENV['S3_BACKUP_BUCKET_NAME']).object(filename)
@@ -71,6 +79,6 @@ class ExtensionJob < ApplicationJob
     tmp.write(JSON.pretty_generate(payload.as_json).to_s)
     tmp.rewind
 
-    tmp.path
+    tmp
   end
 end
