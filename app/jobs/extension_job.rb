@@ -76,7 +76,7 @@ class ExtensionJob < ApplicationJob
     tmp = Tempfile.new(SecureRandom.hex)
     payload = { 'items' => items }
     payload['auth_params'] = auth_params unless auth_params.nil?
-    tmp.write(JSON.pretty_generate(payload.as_json).to_s)
+    tmp.write(JSON.pretty_generate(payload.as_json({})).to_s)
     tmp.rewind
 
     tmp
