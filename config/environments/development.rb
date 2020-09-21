@@ -17,6 +17,9 @@ Rails.application.configure do
     config.logger = ActiveSupport::Logger.new(STDOUT)
   end
 
+  config.colorize_logging = false
+  config.logger.formatter = StandardNotesFormatter.new
+
   # Do not eager load code on boot.
   config.eager_load = false
 
