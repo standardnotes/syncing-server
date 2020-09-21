@@ -47,7 +47,7 @@ class ExtensionJob < ApplicationJob
     response = http.request(req)
 
     unless response.code.starts_with?('2')
-      Rails.logger.warn "Failed to reach extensions server: #{response.to_json}"
+      Rails.logger.error "Failed to reach extensions server: #{response.to_json}"
 
       UserMailer.failed_backup(
         user_id,
