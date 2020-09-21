@@ -44,11 +44,15 @@ class ExtensionJob < ApplicationJob
       return
     end
 
-    response = http.request(req)
+    sent = false
+    begin
+      response = http.request(req)
+      sent = response.code.starts_with?('2')
+    rescue StandardError => e
+      Rails.logger.error "Failed to send a request to extensions server: #{e.message}"
+    end
 
-    unless response.code.starts_with?('2')
-      Rails.logger.error "Failed to reach extensions server: #{response.to_json}"
-
+    unless sent
       UserMailer.failed_backup(
         user_id,
         extension_id,
