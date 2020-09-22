@@ -13,7 +13,7 @@ class ExtensionJob < ApplicationJob
       user.items.where(deleted: false).to_a
     end
 
-    auth_params = user.auth_params
+    auth_params = user.key_params
 
     settings = ExtensionSetting.find_or_create_by(extension_id: extension_id)
     mute_emails = force_mute || settings.mute_emails

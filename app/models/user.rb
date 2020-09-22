@@ -5,6 +5,11 @@ class User < ApplicationRecord
   has_many :items, -> { order 'created_at desc' }, foreign_key: 'user_uuid'
   has_many :sessions, -> { order 'created_at desc' }, foreign_key: 'user_uuid'
 
+  # Allow kp_origination to also be called origination, as that is the value
+  # coming back from the client
+  alias_attribute :origination, :kp_origination
+  alias_attribute :created, :kp_created
+
   SESSIONS_PROTOCOL_VERSION = 4
 
   REVISIONS_RETENTION_DAYS = 30
@@ -13,20 +18,27 @@ class User < ApplicationRecord
     super(options.merge(only: ['email', 'uuid']))
   end
 
-  def auth_params
-    params = { pw_cost: pw_cost, version: version, identifier: email }
-
-    if pw_nonce
+  def key_params(authenticated = false)
+    params = { version: version, identifier: email }
+    case version
+    when '004'
+      if authenticated
+        params[:created] = kp_created
+        params[:origination] = kp_origination
+      end
       params[:pw_nonce] = pw_nonce
-    end
-
-    if pw_salt
+    when '003'
+      params[:pw_nonce] = pw_nonce
+    when '002'
+      params[:email] = email
+      params[:pw_cost] = pw_cost
       params[:pw_salt] = pw_salt
-    end
-
-    if pw_func
-      params[:pw_func] = pw_func
+    when '001'
+      params[:email] = email
       params[:pw_alg] = pw_alg
+      params[:pw_cost] = pw_cost
+      params[:pw_func] = pw_func
+      params[:pw_salt] = pw_salt
       params[:pw_key_size] = pw_key_size
     end
 
@@ -42,7 +54,7 @@ class User < ApplicationRecord
   def download_backup
     data = {
       items: items.where(deleted: false),
-      auth_params: auth_params,
+      auth_params: key_params(true),
     }
     body = JSON.pretty_generate(data.as_json({}))
 

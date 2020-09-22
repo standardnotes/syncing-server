@@ -17,11 +17,16 @@ FactoryBot.define do
         user_manager = SyncEngine::V20161215::UserManager.new(User)
         '20161215'
       end
-
-      params = ActionController::Parameters.new(pw_cost: 110_000, api: api_version, version: version)
+      params = ActionController::Parameters.new(
+        api: api_version,
+        version: version,
+        kp_origination: 'registration',
+        kp_created: DateTime.now.to_i
+      )
       result = user_manager.register(email, password, params)
 
       result[:user]
     end
   end
+
 end

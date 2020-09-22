@@ -32,37 +32,41 @@ class Api::ApiController < ApplicationController
   private
 
   def authenticate_user
+    authenticate_user_with_options(true)
+  end
+
+  def authenticate_user_with_options(renders = true)
     token = token_from_request_header
 
     if token.nil?
-      render_invalid_auth_error
+      render_invalid_auth_error if renders
       return
     end
 
     authentication = decode_token token
 
     if authentication.nil?
-      render_invalid_auth_error
+      render_invalid_auth_error if renders
       return
     end
 
     user = authentication[:user]
 
     if user.nil?
-      render_invalid_auth_error
+      render_invalid_auth_error if renders
       return
     end
 
     if authentication[:type] == 'jwt' && user.supports_sessions?
-      render_invalid_auth_error
+      render_invalid_auth_error if renders
       return
     end
 
     if authentication[:type] == 'session_token'
       if authentication[:session].refresh_expired?
-        return render_invalid_auth_error
+        return render_invalid_auth_error if renders
       elsif authentication[:session].access_expired?
-        return render_expired_token_error
+        return render_expired_token_error if renders
       end
     elsif authentication[:type] == 'jwt'
       pw_hash = authentication[:claims]['pw_hash']
@@ -70,7 +74,7 @@ class Api::ApiController < ApplicationController
       # Newer versions of our jwt include the user's hashed encrypted pw,
       # to check if the user has changed their pw and thus forbid them from access if they have an old jwt
       unless ActiveSupport::SecurityUtils.secure_compare(pw_hash, encrypted_password_digest)
-        render_invalid_auth_error
+        render_invalid_auth_error if renders
         return
       end
     end

@@ -216,6 +216,15 @@ class Api::AuthController < Api::ApiController
   # Returns the accounts key parameters (FKA auth_params).
   # If the account has MFA enabled, those parameters will be required.
   def auth_params
+    authenticate_user_with_options(false)
+
+    # If the user is authenticated, we return additional parameters
+    has_session = !current_session.nil?
+    if has_session
+      render json: current_user.key_params(true)
+      return
+    end
+
     unless verify_mfa
       return
     end
@@ -229,7 +238,7 @@ class Api::AuthController < Api::ApiController
       return
     end
 
-    auth_params = @user_manager.auth_params(params[:email])
+    auth_params = User.find_by_email(params[:email])&.key_params
 
     unless auth_params
       render json: pseudo_auth_params(params[:email])
@@ -244,7 +253,7 @@ class Api::AuthController < Api::ApiController
   def pseudo_auth_params(email)
     {
       identifier: email,
-      pw_nonce: Digest::SHA2.hexdigest(email + Rails.application.secrets.secret_key_base),
+      pw_nonce: Digest::SHA2.hexdigest(email + ENV['PSEUDO_KEY_PARAMS_KEY']),
       version: '004',
     }
   end

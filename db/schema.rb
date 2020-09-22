@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200913150251) do
+ActiveRecord::Schema.define(version: 20200916205444) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -86,6 +86,8 @@ ActiveRecord::Schema.define(version: 20200913150251) do
     t.datetime "updated_at"
     t.string "pw_salt"
     t.string "version"
+    t.string "kp_origination"
+    t.string "kp_created"
     t.text "updated_with_user_agent"
     t.datetime "locked_until"
     t.integer "num_failed_attempts"
