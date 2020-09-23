@@ -29,6 +29,7 @@ class User < ApplicationRecord
       params[:pw_nonce] = pw_nonce
     when '003'
       params[:pw_nonce] = pw_nonce
+      params[:pw_cost] = pw_cost
     when '002'
       params[:email] = email
       params[:pw_cost] = pw_cost
