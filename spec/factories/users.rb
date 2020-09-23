@@ -20,8 +20,8 @@ FactoryBot.define do
       params = ActionController::Parameters.new(
         api: api_version,
         version: version,
-        kp_origination: 'registration',
-        kp_created: DateTime.now.to_i
+        origination: 'registration',
+        created: DateTime.now.to_i.to_s
       )
       result = user_manager.register(email, password, params)
 

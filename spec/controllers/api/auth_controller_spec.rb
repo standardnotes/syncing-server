@@ -20,7 +20,7 @@ RSpec.describe Api::AuthController, type: :controller do
   end
 
   let(:auth_params_keys_003) do
-    %w[identifier pw_nonce version].sort
+    %w[identifier pw_nonce version pw_cost].sort
   end
 
   let(:auth_params_keys_004) do
@@ -76,7 +76,7 @@ RSpec.describe Api::AuthController, type: :controller do
 
         parsed_response_body = JSON.parse(response.body)
 
-        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys_003)
+        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys_004)
         expect(parsed_response_body['identifier']).to eq test_user_004.email
         expect(parsed_response_body['version']).to_not be_nil
         expect(parsed_response_body['origination']).to be_nil

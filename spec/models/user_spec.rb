@@ -47,7 +47,7 @@ RSpec.describe User, type: :model do
       subject.version = '003'
 
       auth_params = subject.key_params
-      expect(auth_params.keys.sort).to contain_exactly(:identifier, :pw_nonce, :version)
+      expect(auth_params.keys.sort).to contain_exactly(:identifier, :pw_nonce, :version, :pw_cost)
     end
 
     specify do
