@@ -4,8 +4,8 @@ default: &default
 
 development:
   <<: *default
-  access_token_age: <%= 2.seconds %>
-  refresh_token_age: <%= 6.seconds %>
+  access_token_age: <%= 5.minutes %>
+  refresh_token_age: <%= 10.minutes %>
 
 test:
   <<: *default

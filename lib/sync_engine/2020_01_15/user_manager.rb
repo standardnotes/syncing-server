@@ -15,6 +15,7 @@ module SyncEngine
 
         return {
           session: session&.as_client_payload,
+          key_params: user.key_params(true),
           user: user,
         }
       end
@@ -39,6 +40,7 @@ module SyncEngine
 
         return {
           session: session.as_client_payload,
+          key_params: user.key_params(true),
           user: user,
         }
       end

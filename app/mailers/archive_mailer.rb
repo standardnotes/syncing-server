@@ -6,7 +6,7 @@ class ArchiveMailer < ApplicationMailer
     date = Date.today
     data = {
       items: user.items.where(deleted: false),
-      auth_params: user.auth_params,
+      auth_params: user.key_params,
     }
     attachments["SN-Data-#{date}.txt"] = {
       mime_type: 'application/json',

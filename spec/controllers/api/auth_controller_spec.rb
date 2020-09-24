@@ -20,11 +20,15 @@ RSpec.describe Api::AuthController, type: :controller do
   end
 
   let(:auth_params_keys_003) do
-    %w[identifier pw_cost pw_nonce version].sort
+    %w[identifier pw_nonce version pw_cost].sort
   end
 
   let(:auth_params_keys_004) do
     %w[identifier pw_nonce version].sort
+  end
+
+  let(:auth_params_authenticated_keys_004) do
+    %w[identifier pw_nonce version origination created].sort
   end
 
   let(:mfa_item) do
@@ -62,10 +66,40 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(parsed_response_body['version']).to_not be_nil
       end
     end
+
+    context 'when the provided email belongs to a 004 user' do
+      it 'should not return origination and created with no session' do
+        get :auth_params, params: { email: test_user_004.email }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body.keys.sort).to contain_exactly(*auth_params_keys_004)
+        expect(parsed_response_body['identifier']).to eq test_user_004.email
+        expect(parsed_response_body['version']).to_not be_nil
+        expect(parsed_response_body['origination']).to be_nil
+        expect(parsed_response_body['created']).to be_nil
+      end
+
+      it 'should return origination and created with session' do
+        post :sign_in, params: test_user_004_credentials
+        access_token = JSON.parse(response.body)['session']['access_token']
+        request.headers['Authorization'] = "bearer #{access_token}"
+
+        get :auth_params, params: { email: test_user_004.email }
+
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body['origination']).to_not be_nil
+        expect(parsed_response_body['created']).to_not be_nil
+      end
+    end
   end
 
   describe 'POST auth/sign_in' do
-    context 'when no crendentials are provided' do
+    context 'when no credentials are provided' do
       it 'sign in should fail' do
         post :sign_in
 
@@ -79,7 +113,7 @@ RSpec.describe Api::AuthController, type: :controller do
       end
     end
 
-    context 'when invalid crendentials are provided' do
+    context 'when invalid credentials are provided' do
       it 'sign in should fail' do
         post :sign_in, params: { email: test_user.email, password: 'invalid-password' }
 
@@ -93,7 +127,7 @@ RSpec.describe Api::AuthController, type: :controller do
       end
     end
 
-    context 'when invalid crendentials are provided multiple times' do
+    context 'when invalid credentials are provided multiple times' do
       it 'sign in should fail and user should be locked' do
         [*1..6].each do |_login_attempt|
           post :sign_in, params: { email: test_user.email, password: 'invalid-password' }
@@ -122,7 +156,7 @@ RSpec.describe Api::AuthController, type: :controller do
       end
     end
 
-    context 'when valid crendentials are provided' do
+    context 'when valid credentials are provided' do
       it 'sign in should not fail' do
         post :sign_in, params: test_user_003_credentials
 
@@ -134,6 +168,16 @@ RSpec.describe Api::AuthController, type: :controller do
         expect(parsed_response_body['user']).to_not be_nil
         expect(parsed_response_body['user']['email']).to eq(test_user_003_credentials[:email])
         expect(parsed_response_body['token']).to_not be_nil
+      end
+
+      it 'sign in should return full key params' do
+        post :sign_in, params: test_user_004_credentials
+
+        parsed_response_body = JSON.parse(response.body)
+
+        expect(parsed_response_body['key_params']).to_not be_nil
+        expect(parsed_response_body['key_params']['origination']).to_not be_nil
+        expect(parsed_response_body['key_params']['created']).to_not be_nil
       end
     end
 

@@ -2,7 +2,19 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   subject do
-    described_class.create(pw_cost: 11_000, version: '003', email: 'sn@testing.com', encrypted_password: 'encrypted')
+    described_class.create(
+      pw_nonce: 'somenonce',
+      version: '004',
+      email: 'sn@testing.com',
+      encrypted_password: 'encrypted',
+      kp_origination: 'registration',
+      kp_created: DateTime.now.to_i,
+      pw_salt: 'salt',
+      pw_cost: 1,
+      pw_alg: 'alg',
+      pw_func: 'func',
+      pw_key_size: 1
+    )
   end
 
   describe 'serializable_hash' do
@@ -22,29 +34,34 @@ RSpec.describe User, type: :model do
 
   describe 'auth_params' do
     specify do
-      auth_params = subject.auth_params
-      expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier)
+      auth_params = subject.key_params
+      expect(auth_params.keys.sort).to contain_exactly(:identifier, :pw_nonce, :version)
     end
 
     specify do
-      subject.pw_nonce = 'some nonce'
-
-      auth_params = subject.auth_params
-      expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier, :pw_nonce)
+      auth_params = subject.key_params(true)
+      expect(auth_params.keys.sort).to contain_exactly(:identifier, :created, :origination, :pw_nonce, :version)
     end
 
     specify do
-      subject.pw_salt = 'some salt'
+      subject.version = '003'
 
-      auth_params = subject.auth_params
-      expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier, :pw_salt)
+      auth_params = subject.key_params
+      expect(auth_params.keys.sort).to contain_exactly(:identifier, :pw_nonce, :version, :pw_cost)
     end
 
     specify do
-      subject.pw_func = 'some function'
+      subject.version = '002'
 
-      auth_params = subject.auth_params
-      expect(auth_params.keys).to contain_exactly(:pw_cost, :version, :identifier, :pw_func, :pw_alg, :pw_key_size)
+      auth_params = subject.key_params
+      expect(auth_params.keys.sort).to contain_exactly(:email, :identifier, :pw_cost, :pw_salt, :version)
+    end
+
+    specify do
+      subject.version = '001'
+
+      auth_params = subject.key_params
+      expect(auth_params.keys.sort).to contain_exactly(:email, :identifier, :pw_alg, :pw_cost, :pw_func, :pw_key_size, :pw_salt, :version)
     end
   end
 
