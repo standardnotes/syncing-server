@@ -50,6 +50,7 @@ class ExtensionJob < ApplicationJob
       sent = response.code.starts_with?('2')
     rescue StandardError => e
       Rails.logger.error "Failed to send a request to extensions server: #{e.message}"
+      Rails.logger.info "Response code was #{response.code}. Body sample: #{response.body[0, 100]}" if response
     end
 
     unless sent
