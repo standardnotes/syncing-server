@@ -8,34 +8,38 @@ namespace :items do
 
     items = Item.where(content_type: 'SF|Extension', deleted: false)
 
-    counter = 1
+    Rails.logger.info "Found #{items.length} extension items to process"
+
     items.each do |item|
-      Rails.logger.info "Processing extension item #{counter}/#{items.length}"
-      counter += 1
+      begin
+        content = item.decoded_content
+        next unless content && content['frequency'] == 'daily'
+        next unless item.user
 
-      content = item.decoded_content
-      next unless content && content['frequency'] == 'daily'
-      next unless item.user
-
-      if content['subtype'] == 'backup.email_archive'
-        if send_email
-          ArchiveMailer.data_backup(item.user.uuid).deliver_later
+        if content['subtype'] == 'backup.email_archive'
+          if send_email
+            ArchiveMailer.data_backup(item.user.uuid).deliver_later
+          end
+          next
         end
-        next
+
+        url = content['url']
+        next if url.nil? || url.length.zero?
+
+        Rails.logger.info "Enqueueing extensions #{content['name']} for user #{item.user.uuid} and endpoint: #{url.split('?').first}"
+
+        ExtensionJob.perform_later(
+          item.user.uuid,
+          url,
+          item.uuid,
+          [],
+          !send_email
+        )
+      rescue StandardError => e
+        Rails.logger.error "Failed processing item #{item.uuid}: #{e.message}"
       end
-
-      url = content['url']
-      next if url.nil? || url.length.zero?
-
-      Rails.logger.info "Enqueueing extensions #{content['name']} for user #{item.user.uuid} and endpoint: #{url.split('?').first}"
-
-      ExtensionJob.perform_later(
-        item.user.uuid,
-        url,
-        item.uuid,
-        [],
-        !send_email
-      )
     end
+
+    Rails.logger.info 'Finished processing daily backup jobs'
   end
 end
