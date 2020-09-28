@@ -7,7 +7,12 @@ namespace :items do
     send_email = args[:send_email].nil?
 
     items = Item.where(content_type: 'SF|Extension', deleted: false)
+
+    counter = 1
     items.each do |item|
+      Rails.logger.info "Processing extension item #{counter}/#{items.length}"
+      counter += 1
+
       content = item.decoded_content
       next unless content && content['frequency'] == 'daily'
       next unless item.user
