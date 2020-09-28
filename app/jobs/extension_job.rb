@@ -28,6 +28,7 @@ class ExtensionJob < ApplicationJob
     payload = {
       items: items,
       backup_filename: filename,
+      user_uuid: user.uuid,
       auth_params: auth_params,
       silent: mute_emails,
       settings_id: settings.uuid,
