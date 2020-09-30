@@ -7,7 +7,7 @@ module SyncEngine
     end
 
     def self.legacy_secret_key_base
-      ENV['legacy_secret_key_base']
+      ENV['LEGACY_SECRET_KEY_BASE']
     end
 
     def self.encode(payload)
