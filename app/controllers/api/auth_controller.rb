@@ -121,7 +121,7 @@ class Api::AuthController < Api::ApiController
     end
 
     unless params[:version]
-      params[:version] = '002'
+      params[:version] = params[:pw_nonce] ? '001' : '002'
     end
 
     result = @user_manager.register(params[:email], params[:password], params)
