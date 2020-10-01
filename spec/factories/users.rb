@@ -27,6 +27,14 @@ FactoryBot.define do
 
       result[:user]
     end
-  end
 
+    trait :legacy_001 do
+      version { '001' }
+      pw_salt { 'salt' }
+      pw_cost { 1 }
+      pw_alg { 'alg' }
+      pw_func { 'func' }
+      pw_key_size { 1 }
+    end
+  end
 end
