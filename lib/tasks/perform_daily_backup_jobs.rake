@@ -25,8 +25,6 @@ namespace :items do
           url = content['url']
           next if url.nil? || url.length.zero?
 
-          Rails.logger.info "Enqueueing extensions #{content['name']} for user #{item.user.uuid} and endpoint: #{url.split('?').first}"
-
           ExtensionJob.perform_later(
             item.user.uuid,
             url,
