@@ -7,7 +7,7 @@ module SyncEngine
         upgrading_protocol_version = new_protocol_version > current_protocol_version
 
         user.encrypted_password = hash_password(password)
-        user.update!(registration_params(params))
+        user.update!(registration_params(params, true))
 
         if upgrading_protocol_version && new_protocol_version == @user_class::SESSIONS_PROTOCOL_VERSION
           session = create_session(user, params)
