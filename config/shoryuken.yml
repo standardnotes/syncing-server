@@ -1,3 +1,9 @@
 aws:
   region: <%= ENV.fetch('AWS_REGION', 'us-east-1') %>
+  receive_message: 1
+  wait_time_seconds: 20
 concurrency: <%= ENV.fetch('DB_POOL_SIZE', 5) %>
+polling_strategy: StrictPriority
+queues:
+  - <%= ENV.fetch('SQS_QUEUE', 'sn_main') %>
+  - <%= ENV.fetch('SQS_QUEUE_LOW_PRIORITY', 'sn_main_low_priority') %>

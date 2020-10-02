@@ -1,4 +1,6 @@
 class CleanupRevisionsJob < ApplicationJob
+  queue_as ENV['SQS_QUEUE_LOW_PRIORITY'] || 'sn_main_low_priority'
+
   MAX_REVISIONS_PER_DAY = 30
   MIN_REVISIONS_PER_DAY = 2
 

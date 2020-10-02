@@ -26,7 +26,7 @@ case "$COMMAND" in
 
   'start-worker' )
     echo "Starting Worker..."
-    bundle exec shoryuken -q $SQS_QUEUE -R
+    bundle exec shoryuken -R -C config/shoryuken.yml
     ;;
 
   'daily-backup' )
