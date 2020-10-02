@@ -51,13 +51,11 @@ module SyncEngine
     end
 
     def registration_params(params, with_defaults = true)
-      defaults = {
-        pw_func: nil,
-        pw_alg: nil,
-        pw_cost: nil,
-        pw_salt: nil,
-        pw_key_size: nil,
-      }
+      defaults = {}
+
+      registration_fields.each do |field|
+        defaults.store(field, nil)
+      end
 
       if with_defaults
         return params.permit(*registration_fields).reverse_merge(defaults)
