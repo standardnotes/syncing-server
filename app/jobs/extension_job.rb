@@ -40,8 +40,8 @@ class ExtensionJob < ApplicationJob
       req = Net::HTTP::Post.new(uri.request_uri, 'Content-Type' => 'application/json')
       req.body = payload
       http.use_ssl = (uri.scheme == 'https')
-    rescue
-      Rails.logger.error "Error creating extensions server request with payload: #{payload}."
+    rescue StandardError => e
+      Rails.logger.error "Error creating extensions server request: #{e.message}"
       return
     end
 
