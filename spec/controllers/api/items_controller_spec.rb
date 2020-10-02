@@ -310,22 +310,15 @@ RSpec.describe Api::ItemsController, type: :controller do
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
             new_item = create(:item, :with_items_key_id, user_uuid: test_user.uuid)
+            expect(new_item.items_key_id).to_not be_nil
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
-            expect(response).to have_http_status(:ok)
-            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
-
             parsed_response_body = JSON.parse(response.body)
-
-            expect(parsed_response_body).to_not be_nil
-
             saved_items = parsed_response_body['saved_items']
-            expect(saved_items).to_not be_nil
-
             saved_item = serialize_to_hash(saved_items)[0]
             actual_item = Item.find(new_item[:uuid])
 
@@ -343,22 +336,15 @@ RSpec.describe Api::ItemsController, type: :controller do
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
             new_item = create(:item, :with_auth_hash, user_uuid: test_user.uuid)
+            expect(new_item.auth_hash).to_not be_nil
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
-            expect(response).to have_http_status(:ok)
-            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
-
             parsed_response_body = JSON.parse(response.body)
-
-            expect(parsed_response_body).to_not be_nil
-
             saved_items = parsed_response_body['saved_items']
-            expect(saved_items).to_not be_nil
-
             saved_item = serialize_to_hash(saved_items)[0]
             actual_item = Item.find(new_item[:uuid])
 
@@ -400,6 +386,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
             new_item = create(:item, :with_items_key_id, user_uuid: test_user.uuid)
+            expect(new_item.items_key_id).to_not be_nil
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
@@ -407,12 +394,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             post :sync, params: { limit: 5, items: items_param }
 
             parsed_response_body = JSON.parse(response.body)
-
-            expect(parsed_response_body).to_not be_nil
-
             saved_items = parsed_response_body['saved_items']
-            expect(saved_items).to_not be_nil
-
             saved_item = serialize_to_hash(saved_items)[0]
             actual_item = Item.find(new_item[:uuid])
 
@@ -430,22 +412,15 @@ RSpec.describe Api::ItemsController, type: :controller do
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
 
             new_item = create(:item, :with_auth_hash, user_uuid: test_user.uuid)
+            expect(new_item.auth_hash).to_not be_nil
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
 
             post :sync, params: { limit: 5, items: items_param }
 
-            expect(response).to have_http_status(:ok)
-            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
-
             parsed_response_body = JSON.parse(response.body)
-
-            expect(parsed_response_body).to_not be_nil
-
             saved_items = parsed_response_body['saved_items']
-            expect(saved_items).to_not be_nil
-
             saved_item = serialize_to_hash(saved_items)[0]
             actual_item = Item.find(new_item[:uuid])
 
