@@ -1,7 +1,7 @@
 class Item < ApplicationRecord
   belongs_to :user, foreign_key: 'user_uuid', optional: true
   has_many :item_revisions, foreign_key: 'item_uuid', dependent: :destroy
-  has_many :revisions, -> { order 'revisions.created_at DESC' }, through: :item_revisions, dependent: :destroy
+  has_many :revisions, -> { order 'revisions.creation_date DESC' }, through: :item_revisions, dependent: :destroy
 
   after_commit :persist_revision, :cleanup_excessive_revisions
   after_create :duplicate_revisions
@@ -90,6 +90,7 @@ class Item < ApplicationRecord
       revision.enc_item_key = enc_item_key_before_last_save
       revision.items_key_id = items_key_id_before_last_save
       revision.auth_hash = auth_hash_before_last_save
+      revision.creation_date = Date.today
       revision.save
 
       item_revision = ItemRevision.new

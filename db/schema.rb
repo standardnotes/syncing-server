@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200916205444) do
+ActiveRecord::Schema.define(version: 20201002095431) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -53,9 +53,11 @@ ActiveRecord::Schema.define(version: 20200916205444) do
     t.string "items_key_id"
     t.text "enc_item_key"
     t.string "auth_hash"
+    t.date "creation_date"
     t.datetime "created_at", precision: 6
     t.datetime "updated_at", precision: 6
     t.index ["created_at"], name: "index_revisions_on_created_at"
+    t.index ["creation_date"], name: "index_revisions_on_creation_date"
   end
 
   create_table "sessions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -82,8 +84,8 @@ ActiveRecord::Schema.define(version: 20200916205444) do
     t.integer "pw_key_size"
     t.string "pw_nonce"
     t.string "encrypted_password", default: "", null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "pw_salt"
     t.string "version"
     t.string "kp_origination"
@@ -92,7 +94,6 @@ ActiveRecord::Schema.define(version: 20200916205444) do
     t.datetime "locked_until"
     t.integer "num_failed_attempts"
     t.index ["email"], name: "index_users_on_email"
-    t.index ["uuid"], name: "index_users_on_uuid"
   end
 
 end

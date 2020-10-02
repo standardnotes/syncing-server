@@ -12,6 +12,7 @@ class Revision < ApplicationRecord
       'content_type',
       'auth_hash',
       'deleted',
+      'creation_date',
       'created_at',
       'updated_at',
     ]
