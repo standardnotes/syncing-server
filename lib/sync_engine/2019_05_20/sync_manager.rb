@@ -92,7 +92,7 @@ module SyncEngine
           end
 
           if !item
-            item = @user.items.new({ uuid: item_hash[:uuid] }.merge(item_hash.permit(*permitted_params)))
+            item = @user.items.new({ uuid: item_hash[:uuid] }.merge(item_params(item_hash)))
             item.last_user_agent = request.user_agent
             begin
               item.save
@@ -105,7 +105,7 @@ module SyncEngine
             end
           else
             item.last_user_agent = request.user_agent
-            item.update(item_hash.permit(*permitted_params))
+            item.update(item_params(item_hash))
           end
 
           if item.deleted == true
