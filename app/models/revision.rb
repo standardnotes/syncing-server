@@ -8,6 +8,7 @@ class Revision < ApplicationRecord
       'content_type',
       'content',
       'created_at',
+      'creation_date',
       'enc_item_key',
       'item_uuid',
       'items_key_id',

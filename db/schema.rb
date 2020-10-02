@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20201001191834) do
+ActiveRecord::Schema.define(version: 20201002113048) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -54,9 +54,11 @@ ActiveRecord::Schema.define(version: 20201001191834) do
     t.string "items_key_id"
     t.text "enc_item_key"
     t.string "auth_hash"
+    t.date "creation_date"
     t.datetime "created_at", precision: 6
     t.datetime "updated_at", precision: 6
     t.index ["created_at"], name: "index_revisions_on_created_at"
+    t.index ["creation_date"], name: "index_revisions_on_creation_date"
   end
 
   create_table "sessions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
