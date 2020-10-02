@@ -11,7 +11,11 @@ Rails.application.configure do
   config.cache_classes = false
   config.reload_classes_only_on_change = true
 
-  config.logger = ActiveSupport::Logger.new(config.paths['log'].first, 1, 1 * 1024 * 1024)
+  config.logger = ActiveSupport::Logger.new(
+    config.paths['log'].first,
+    1,
+    1 * 1024 * 1024
+  )
 
   if ENV["RAILS_LOG_TO_STDOUT"].present?
     config.logger = ActiveSupport::Logger.new(STDOUT)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200916205444) do
+ActiveRecord::Schema.define(version: 20201001191834) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(version: 20200916205444) do
   end
 
   create_table "revisions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "item_uuid"
     t.text "content", limit: 16777215
     t.string "content_type"
     t.string "items_key_id"
