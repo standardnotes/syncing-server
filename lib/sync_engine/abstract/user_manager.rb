@@ -50,18 +50,16 @@ module SyncEngine
       raise Other::NotImplementedError 'Must override'
     end
 
-    def registration_params(params, with_defaults = true)
-      defaults = {}
-
-      registration_fields.each do |field|
-        defaults.store(field, nil)
-      end
-
+    def registration_params(params, with_defaults = false)
       if with_defaults
-        return params.permit(*registration_fields).reverse_merge(defaults)
+        defaults = {}
+        registration_fields.each do |field|
+          defaults.store(field, nil)
+        end
+        params.permit(*registration_fields).reverse_merge(defaults)
+      else
+        params.permit(*registration_fields)
       end
-
-      params.permit(*registration_fields)
     end
   end
 end
