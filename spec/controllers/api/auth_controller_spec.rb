@@ -487,6 +487,58 @@ RSpec.describe Api::AuthController, type: :controller do
           expect(response).to have_http_status(:ok)
         end
       end
+
+      context 'and upgrading protocol version from 001 to 004' do
+        it 'password should be updated and legacy fields cleared' do
+          legacy_user = create(:user, :legacy_001, password: test_password)
+
+          expect(legacy_user.pw_func).to_not be_nil
+          expect(legacy_user.pw_alg).to_not be_nil
+          expect(legacy_user.pw_cost).to_not be_nil
+          expect(legacy_user.pw_salt).to_not be_nil
+          expect(legacy_user.pw_key_size).to_not be_nil
+
+          new_protocol_version = '004'
+          new_password = 'new-pwd-004'
+          post :sign_in, params: { email: legacy_user.email, password: test_password }
+
+          request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['token']}"
+          post :change_pw, params: {
+            current_password: test_password,
+            new_password: new_password,
+            pw_nonce: test_user.pw_nonce,
+            version: new_protocol_version,
+            api: '20200115',
+          }
+
+          expect(response).to have_http_status(:ok)
+          expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+          parsed_response_body = JSON.parse(response.body)
+
+          expect(parsed_response_body).to_not be_nil
+          expect(parsed_response_body['user']).to_not be_nil
+          expect(parsed_response_body['user']['email']).to eq(legacy_user.email)
+          expect(parsed_response_body['token']).to be_nil
+          expect(parsed_response_body['session']).to_not be_nil
+
+          legacy_user.reload
+
+          expect(legacy_user.version).to eq(new_protocol_version)
+          expect(legacy_user.pw_func).to be_nil
+          expect(legacy_user.pw_alg).to be_nil
+          expect(legacy_user.pw_cost).to be_nil
+          expect(legacy_user.pw_salt).to be_nil
+          expect(legacy_user.pw_key_size).to be_nil
+
+          post :sign_in, params: {
+            email: legacy_user.email,
+            password: new_password,
+            api: '20200115',
+          }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
     end
   end
 
