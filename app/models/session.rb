@@ -1,8 +1,4 @@
-require 'bcrypt'
-
 class Session < ApplicationRecord
-  include BCrypt
-
   belongs_to :user, foreign_key: 'user_uuid'
 
   validates :user_agent, length: { in: 0..255, allow_nil: true }
@@ -22,12 +18,13 @@ class Session < ApplicationRecord
   def self.authenticate(session_id, access_token)
     session = Session.find_by_uuid(session_id)
     if session
-      BCrypt::Password.new(session.hashed_access_token) == access_token ? session : nil
+      hashed_access_token = Digest::SHA256.hexdigest(access_token)
+      session.hashed_access_token == hashed_access_token ? session : nil
     end
   end
 
   def verify_refresh_token(refresh_token)
-    BCrypt::Password.new(hashed_refresh_token) == refresh_token
+    hashed_refresh_token == create_hash_from_value(refresh_token)
   end
 
   def serializable_hash(options = {})
@@ -104,7 +101,6 @@ class Session < ApplicationRecord
   end
 
   def create_hash_from_value(value)
-    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST : BCrypt::Engine.cost
-    BCrypt::Password.create(value, cost: cost)
+    Digest::SHA256.hexdigest(value)
   end
 end
