@@ -19,18 +19,10 @@ class Session < ApplicationRecord
   ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
 
-  def generate_tokens
-    access_token = SecureRandom.urlsafe_base64
-    refresh_token = SecureRandom.urlsafe_base64
-    self.hashed_access_token = create_hash_from_value(access_token)
-    self.hashed_refresh_token = create_hash_from_value(refresh_token)
-  end
-
   def self.authenticate(session_id, access_token)
     session = Session.find(session_id)
     if session
-      hashed_access_token = create_hash_from_value(access_token)
-      session.hashed_access_token == hashed_access_token ? session : nil
+      BCrypt::Password.new(session.hashed_access_token) == access_token ? session : nil
     end
   end
 
@@ -95,6 +87,13 @@ class Session < ApplicationRecord
   end
 
   private
+
+  def generate_tokens
+    self.access_token = SecureRandom.urlsafe_base64
+    self.refresh_token = SecureRandom.urlsafe_base64
+    self.hashed_access_token = create_hash_from_value(access_token)
+    self.hashed_refresh_token = create_hash_from_value(refresh_token)
+  end
 
   def extend_expiration_dates
     self.access_expiration = DateTime.now + ACCESS_TOKEN_AGE
