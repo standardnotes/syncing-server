@@ -32,9 +32,9 @@ class Api::ApiController < ApplicationController
   end
 
   def session_id_from_request_header
-    return unless request.headers['Session-Uuid'].present?
+    return unless request.headers['Session-ID'].present?
 
-    session_id = request.headers['Session-Uuid']
+    session_id = request.headers['Session-ID']
 
     unless UUID.validate(session_id)
       return
