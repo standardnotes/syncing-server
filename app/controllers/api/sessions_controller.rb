@@ -53,7 +53,7 @@ class Api::SessionsController < Api::ApiController
   end
 
   def refresh
-    unless params[:access_token] || params[:refresh_token] || params[:session_id]
+    if !params[:access_token] || !params[:refresh_token] || !params[:session_id]
       render json: {
         error: {
           message: 'Please provide all required parameters.',
@@ -66,7 +66,7 @@ class Api::SessionsController < Api::ApiController
       render json: {
         error: {
           tag: 'invalid-session-id',
-          message: 'Please provide a valid Session ID.',
+          message: 'Please provide a valid session identifier.',
         },
       }, status: :bad_request
       return
@@ -74,11 +74,21 @@ class Api::SessionsController < Api::ApiController
 
     session = Session.authenticate(params[:session_id], params[:access_token])
 
-    if session.nil? || !session&.verify_refresh_token(params[:refresh_token])
+    if session.nil?
       render json: {
         error: {
           tag: 'invalid-parameters',
           message: 'The provided parameters are not valid.',
+        },
+      }, status: :bad_request
+      return
+    end
+
+    unless session&.verify_refresh_token(params[:refresh_token])
+      render json: {
+        error: {
+          tag: 'invalid-refresh-token',
+          message: 'The refresh token is not valid.',
         },
       }, status: :bad_request
       return

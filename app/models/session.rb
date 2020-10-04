@@ -20,15 +20,14 @@ class Session < ApplicationRecord
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
 
   def self.authenticate(session_id, access_token)
-    session = Session.find(session_id)
+    session = Session.find_by_uuid(session_id)
     if session
       BCrypt::Password.new(session.hashed_access_token) == access_token ? session : nil
     end
   end
 
   def verify_refresh_token(refresh_token)
-    hashed_refresh_token = create_hash_from_value(refresh_token)
-    self.hashed_refresh_token == hashed_refresh_token
+    BCrypt::Password.new(hashed_refresh_token) == refresh_token
   end
 
   def serializable_hash(options = {})
