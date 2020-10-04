@@ -260,14 +260,15 @@ class Api::AuthController < Api::ApiController
 
   def sign_out
     # Users with an expired token may still make a request to the sign out endpoint
-    token = token_from_request_header
+    access_token = access_token_from_request_header
+    session_id = session_id_from_request_header
 
-    if token.nil?
+    if access_token.nil? || session_id.nil?
       render_invalid_auth_error
       return
     end
 
-    session = Session.find_by_access_token(token)
+    session = Session.authenticate(session_id, access_token)
     session&.destroy
     render json: {}, status: :no_content
   end

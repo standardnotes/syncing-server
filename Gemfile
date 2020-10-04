@@ -14,6 +14,7 @@ gem 'rubocop', '~> 0.79.0', require: false
 gem 'rubocop-shopify', require: false
 gem 'secure_headers'
 gem 'shoryuken'
+gem 'uuid'
 gem 'whenever', require: false
 
 # Used for 'respond_to' feature

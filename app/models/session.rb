@@ -1,16 +1,43 @@
+require 'bcrypt'
+
 class Session < ApplicationRecord
+  include BCrypt
+
   belongs_to :user, foreign_key: 'user_uuid'
 
   validates :user_agent, length: { in: 0..255, allow_nil: true }
   validates :api_version, inclusion: { in: %w(20200115) }
 
-  has_secure_token :access_token
-  has_secure_token :refresh_token
+  attr_accessor :access_token
+  attr_accessor :refresh_token
 
-  before_create :extend_expiration_dates
+  before_create do
+    generate_tokens
+    extend_expiration_dates
+  end
 
   ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
+
+  def generate_tokens
+    access_token = SecureRandom.urlsafe_base64
+    refresh_token = SecureRandom.urlsafe_base64
+    self.hashed_access_token = create_hash_from_value(access_token)
+    self.hashed_refresh_token = create_hash_from_value(refresh_token)
+  end
+
+  def self.authenticate(session_id, access_token)
+    session = Session.find(session_id)
+    if session
+      hashed_access_token = create_hash_from_value(access_token)
+      session.hashed_access_token == hashed_access_token ? session : nil
+    end
+  end
+
+  def verify_refresh_token(refresh_token)
+    hashed_refresh_token = create_hash_from_value(refresh_token)
+    self.hashed_refresh_token == hashed_refresh_token
+  end
 
   def serializable_hash(options = {})
     allowed_options = [
@@ -30,12 +57,10 @@ class Session < ApplicationRecord
   def renew
     return false if refresh_expired?
 
-    regenerate_access_token
-    regenerate_refresh_token
+    generate_tokens
     extend_expiration_dates
 
     save
-    true
   end
 
   def access_expired?
@@ -57,7 +82,11 @@ class Session < ApplicationRecord
   end
 
   def as_client_payload
+    # TODO: this method should only be called on a newly created instance or after
+    # calling renew method. The reason is that access_token and refresh_token are 
+    # just class attributes and are not really persisted to database.
     {
+      session_id: uuid,
       access_token: access_token,
       refresh_token: refresh_token,
       access_expiration: date_to_milliseconds(access_expiration),
@@ -74,5 +103,10 @@ class Session < ApplicationRecord
 
   def date_to_milliseconds(date)
     date.to_datetime.strftime('%Q').to_i
+  end
+
+  def create_hash_from_value(value)
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST : BCrypt::Engine.cost
+    BCrypt::Password.create(value, cost: cost)
   end
 end

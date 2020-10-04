@@ -1,3 +1,5 @@
+require 'uuid'
+
 class Api::ApiController < ApplicationController
   attr_accessor :current_user
   attr_accessor :current_session
@@ -17,7 +19,7 @@ class Api::ApiController < ApplicationController
     end
   end
 
-  def token_from_request_header
+  def access_token_from_request_header
     return unless request.headers['Authorization'].present?
 
     strategy, token = request.headers['Authorization'].split(' ')
@@ -29,6 +31,18 @@ class Api::ApiController < ApplicationController
     token
   end
 
+  def session_id_from_request_header
+    return unless request.headers['Session-Uuid'].present?
+
+    session_id = request.headers['Session-Uuid']
+
+    unless UUID.validate(session_id)
+      return
+    end
+
+    session_id
+  end
+
   private
 
   def authenticate_user
@@ -36,14 +50,15 @@ class Api::ApiController < ApplicationController
   end
 
   def authenticate_user_with_options(renders = true)
-    token = token_from_request_header
+    access_token = access_token_from_request_header
+    session_id = session_id_from_request_header
 
-    if token.nil?
+    if access_token.nil?
       render_invalid_auth_error if renders
       return
     end
 
-    authentication = decode_token token
+    authentication = decode_token(access_token, session_id)
 
     if authentication.nil?
       render_invalid_auth_error if renders
@@ -105,10 +120,10 @@ class Api::ApiController < ApplicationController
     }, status: EXPIRED_TOKEN_HTTP_CODE
   end
 
-  def decode_token(token)
+  def decode_token(access_token, session_id = nil)
     # Try JWT first
     claims = begin
-              SyncEngine::JwtHelper.decode(token)
+              SyncEngine::JwtHelper.decode(access_token)
              rescue
                nil
             end
@@ -119,14 +134,18 @@ class Api::ApiController < ApplicationController
       claims: claims,
     } unless claims.nil?
 
+    if session_id.nil?
+      return nil
+    end
+
     # See if it's an access_token
-    session = Session.find_by_access_token(token)
+    session = Session.authenticate(session_id, access_token)
 
     if session
       return {
         type: 'session_token',
         user: session.user,
-        session: session
+        session: session,
       }
     end
   end

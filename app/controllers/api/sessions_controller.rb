@@ -1,3 +1,5 @@
+require 'uuid'
+
 class Api::SessionsController < Api::ApiController
   skip_before_action :authenticate_user, only: [:refresh]
   before_action :require_valid_session, except: [:refresh]
@@ -51,7 +53,7 @@ class Api::SessionsController < Api::ApiController
   end
 
   def refresh
-    unless params[:access_token] || params[:refresh_token]
+    unless params[:access_token] || params[:refresh_token] || params[:session_id]
       render json: {
         error: {
           message: 'Please provide all required parameters.',
@@ -60,9 +62,19 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    session = Session.find_by_refresh_token(params[:refresh_token])
+    unless UUID.validate(params[:session_id])
+      render json: {
+        error: {
+          tag: 'invalid-session-id',
+          message: 'Please provide a valid Session ID.',
+        },
+      }, status: :bad_request
+      return
+    end
 
-    if session.nil? || session.access_token != params[:access_token]
+    session = Session.authenticate(params[:session_id], params[:access_token])
+
+    if session.nil? || !session&.verify_refresh_token(params[:refresh_token])
       render json: {
         error: {
           tag: 'invalid-parameters',
