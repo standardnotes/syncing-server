@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20201002113048) do
+ActiveRecord::Schema.define(version: 20201004040050) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -64,14 +64,14 @@ ActiveRecord::Schema.define(version: 20201002113048) do
     t.string "user_uuid"
     t.text "user_agent"
     t.string "api_version"
-    t.string "access_token", null: false
-    t.string "refresh_token", null: false
+    t.string "hashed_access_token", null: false
+    t.string "hashed_refresh_token", null: false
     t.datetime "access_expiration", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "refresh_expiration", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["access_token"], name: "index_sessions_on_access_token", unique: true
-    t.index ["refresh_token"], name: "index_sessions_on_refresh_token", unique: true
+    t.index ["hashed_access_token"], name: "index_sessions_on_hashed_access_token", unique: true
+    t.index ["hashed_refresh_token"], name: "index_sessions_on_hashed_refresh_token", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
     t.index ["user_uuid"], name: "index_sessions_on_user_uuid"
   end
@@ -84,8 +84,8 @@ ActiveRecord::Schema.define(version: 20201002113048) do
     t.integer "pw_key_size"
     t.string "pw_nonce"
     t.string "encrypted_password", default: "", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.string "pw_salt"
     t.string "version"
     t.string "kp_origination"
@@ -94,6 +94,7 @@ ActiveRecord::Schema.define(version: 20201002113048) do
     t.datetime "locked_until"
     t.integer "num_failed_attempts"
     t.index ["email"], name: "index_users_on_email"
+    t.index ["uuid"], name: "index_users_on_uuid"
   end
 
 end
