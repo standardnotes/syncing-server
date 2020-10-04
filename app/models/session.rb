@@ -78,7 +78,7 @@ class Session < ApplicationRecord
     # calling renew method. The reason is that access_token and refresh_token are 
     # just class attributes and are not really persisted to database.
     {
-      session_id: uuid,
+      id: uuid,
       access_token: access_token,
       refresh_token: refresh_token,
       access_expiration: date_to_milliseconds(access_expiration),
