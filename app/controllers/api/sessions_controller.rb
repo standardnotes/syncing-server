@@ -51,7 +51,7 @@ class Api::SessionsController < Api::ApiController
   end
 
   def refresh
-    unless params[:access_token] || params[:refresh_token]
+    if !params[:access_token] || !params[:refresh_token]
       render json: {
         error: {
           message: 'Please provide all required parameters.',
@@ -60,9 +60,9 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    session = Session.find_by_refresh_token(params[:refresh_token])
+    session = Session.from_token(params[:access_token])
 
-    if session.nil? || session.access_token != params[:access_token]
+    if session.nil?
       render json: {
         error: {
           tag: 'invalid-parameters',
@@ -72,7 +72,19 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    unless session.renew
+    unless session.valid_refresh_token?(params[:refresh_token])
+      render json: {
+        error: {
+          tag: 'invalid-refresh-token',
+          message: 'The refresh token is not valid.',
+        },
+      }, status: :bad_request
+      return
+    end
+
+    access_token, refresh_token = session.renew
+
+    unless access_token
       render json: {
         error: {
           tag: 'expired-refresh-token',
@@ -83,7 +95,7 @@ class Api::SessionsController < Api::ApiController
     end
 
     render json: {
-      session: session.as_client_payload,
+      session: session.as_client_payload(access_token, refresh_token),
     }
   end
 
