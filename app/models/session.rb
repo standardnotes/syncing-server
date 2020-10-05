@@ -69,7 +69,7 @@ class Session < ApplicationRecord
   end
 
   def renew
-    return false if refresh_expired?
+    return nil, nil if refresh_expired?
 
     access_token, refresh_token = create_tokens
     set_expiration_dates
