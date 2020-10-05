@@ -70,8 +70,6 @@ ActiveRecord::Schema.define(version: 20201004040050) do
     t.datetime "refresh_expiration", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["hashed_access_token"], name: "index_sessions_on_hashed_access_token", unique: true
-    t.index ["hashed_refresh_token"], name: "index_sessions_on_hashed_refresh_token", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
     t.index ["user_uuid"], name: "index_sessions_on_user_uuid"
   end
