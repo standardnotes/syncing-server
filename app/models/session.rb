@@ -5,42 +5,52 @@ class Session < ApplicationRecord
   validates :api_version, inclusion: { in: %w(20200115) }
 
   before_create do
-    extend_expiration_dates
+    set_expiration_dates
   end
+
+  SESSION_TOKEN_VERSION = 1
 
   ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
-  SESSION_TOKEN_VERSION = 1
 
-  def self.create_hash_from_value(value)
-    Digest::SHA256.hexdigest(value)
+  def self.hash_string(string)
+    Digest::SHA256.hexdigest(string)
   end
 
-  def self.generate_tokens
+  def create_tokens
     access_token = SecureRandom.urlsafe_base64
     refresh_token = SecureRandom.urlsafe_base64
-    {
-      access_token: access_token,
-      refresh_token: refresh_token,
-    }
+    self.hashed_access_token = Session.hash_string(access_token)
+    self.hashed_refresh_token = Session.hash_string(refresh_token)
+    save
+    return access_token, refresh_token
   end
 
-  def self.authenticate(request_token)
-    _version, session_id, access_token = request_token.split(':')
+  def self.from_token(request_token)
+    _version, session_id, access_token = Session.deconstruct_token(request_token)
     session = Session.find_by_uuid(session_id)
     if session && !access_token.nil?
-      hashed_access_token = Session.create_hash_from_value(access_token)
-      if ActiveSupport::SecurityUtils.secure_compare(session.hashed_access_token, hashed_access_token)
-        session
-      end
+      return session if ActiveSupport::SecurityUtils.secure_compare(
+        session.hashed_access_token,
+        Session.hash_string(access_token)
+      )
     end
   end
 
   def valid_refresh_token?(request_token)
-    _version, _session_id, refresh_token = request_token.split(':')
-    hashed_token = Session.create_hash_from_value(refresh_token)
-    !refresh_token.nil? && ActiveSupport::SecurityUtils
-      .secure_compare(hashed_token, hashed_refresh_token)
+    _version, _session_id, refresh_token = Session.deconstruct_token(request_token)
+    !refresh_token.nil? && ActiveSupport::SecurityUtils.secure_compare(
+      Session.hash_string(refresh_token),
+      hashed_refresh_token
+    )
+  end
+
+  def self.construct_token(uuid, token)
+    return "#{SESSION_TOKEN_VERSION}:#{uuid}:#{token}"
+  end
+
+  def self.deconstruct_token(token)
+    return token.split(':')
   end
 
   def serializable_hash(options = {})
@@ -58,14 +68,14 @@ class Session < ApplicationRecord
     super(options.merge(only: allowed_options, methods: allowed_methods))
   end
 
-  def renew(access_token:, refresh_token:)
+  def renew
     return false if refresh_expired?
-    return false if access_token.nil? || refresh_token.nil?
 
-    set_hashed_tokens({ access_token: access_token, refresh_token: refresh_token, })
-    extend_expiration_dates
+    access_token, refresh_token = create_tokens
+    set_expiration_dates
 
     save
+    return access_token, refresh_token
   end
 
   def access_expired?
@@ -86,19 +96,13 @@ class Session < ApplicationRecord
     "#{client.name} #{client.full_version} on #{client.os_name} #{client.os_full_version}"
   end
 
-  def set_hashed_tokens(access_token:, refresh_token:)
-    self.hashed_access_token = Session.create_hash_from_value(access_token)
-    self.hashed_refresh_token = Session.create_hash_from_value(refresh_token)
-    save
-  end
-
-  def as_client_payload(access_token:, refresh_token:)
+  def as_client_payload(access_token, refresh_token)
     if access_token.nil? || refresh_token.nil?
       throw 'access_token and refresh_token parameters required.'
     end
     {
-      access_token: "#{SESSION_TOKEN_VERSION}:#{uuid}:#{access_token}",
-      refresh_token: "#{SESSION_TOKEN_VERSION}:#{uuid}:#{refresh_token}",
+      access_token: Session.construct_token(uuid, access_token),
+      refresh_token: Session.construct_token(uuid, refresh_token),
       access_expiration: date_to_milliseconds(access_expiration),
       refresh_expiration: date_to_milliseconds(refresh_expiration),
     }
@@ -106,7 +110,7 @@ class Session < ApplicationRecord
 
   private
 
-  def extend_expiration_dates
+  def set_expiration_dates
     self.access_expiration = DateTime.now + ACCESS_TOKEN_AGE
     self.refresh_expiration = DateTime.now + REFRESH_TOKEN_AGE
   end

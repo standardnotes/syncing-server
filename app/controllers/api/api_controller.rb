@@ -120,7 +120,7 @@ class Api::ApiController < ApplicationController
     } unless claims.nil?
 
     # See if it's an access_token
-    session = Session.authenticate(token)
+    session = Session.from_token(token)
 
     if session
       return {

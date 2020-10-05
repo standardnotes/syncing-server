@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(version: 20201004040050) do
   end
 
   create_table "revisions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "item_uuid"
     t.text "content", limit: 16777215
     t.string "content_type"
     t.string "items_key_id"

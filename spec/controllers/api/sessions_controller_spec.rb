@@ -154,7 +154,7 @@ RSpec.describe Api::SessionsController, type: :controller do
             access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
 
-            current_session = Session.authenticate(access_token)
+            current_session = Session.from_token(access_token)
 
             delete :delete, params: { uuid: current_session.uuid }
 
@@ -204,7 +204,7 @@ RSpec.describe Api::SessionsController, type: :controller do
             @controller = Api::SessionsController.new
             access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
-            current_session = Session.authenticate(access_token)
+            current_session = Session.from_token(access_token)
             other_session = test_user_004.sessions.where.not(uuid: current_session.uuid).first
 
             expect do
@@ -332,7 +332,7 @@ RSpec.describe Api::SessionsController, type: :controller do
         refresh_token = JSON.parse(response.body)['session']['refresh_token']
 
         # Expiring the refresh token...
-        current_session = Session.authenticate(access_token)
+        current_session = Session.from_token(access_token)
         current_session.access_expiration = DateTime.now - 3600.seconds
         current_session.refresh_expiration = DateTime.now - 3600.seconds
         current_session.save
@@ -395,7 +395,7 @@ RSpec.describe Api::SessionsController, type: :controller do
         end.to change(Session, :count).by(0)
 
         # Tokens should be renewed. Meaning that old access_token is invalid.
-        current_session = Session.authenticate(access_token)
+        current_session = Session.from_token(access_token)
         expect(current_session).to be_nil
       end
     end
