@@ -19,7 +19,7 @@ class Api::ApiController < ApplicationController
     end
   end
 
-  def access_token_from_request_header
+  def token_from_request_header
     return unless request.headers['Authorization'].present?
 
     strategy, token = request.headers['Authorization'].split(' ')
@@ -31,18 +31,6 @@ class Api::ApiController < ApplicationController
     token
   end
 
-  def session_id_from_request_header
-    return unless request.headers['Session-ID'].present?
-
-    session_id = request.headers['Session-ID']
-
-    unless UUID.validate(session_id)
-      return
-    end
-
-    session_id
-  end
-
   private
 
   def authenticate_user
@@ -50,15 +38,14 @@ class Api::ApiController < ApplicationController
   end
 
   def authenticate_user_with_options(renders = true)
-    access_token = access_token_from_request_header
-    session_id = session_id_from_request_header
+    token = token_from_request_header
 
-    if access_token.nil?
+    if token.nil?
       render_invalid_auth_error if renders
       return
     end
 
-    authentication = decode_token(access_token, session_id)
+    authentication = decode_token(token)
 
     if authentication.nil?
       render_invalid_auth_error if renders
@@ -120,10 +107,10 @@ class Api::ApiController < ApplicationController
     }, status: EXPIRED_TOKEN_HTTP_CODE
   end
 
-  def decode_token(access_token, session_id = nil)
+  def decode_token(token)
     # Try JWT first
     claims = begin
-              SyncEngine::JwtHelper.decode(access_token)
+              SyncEngine::JwtHelper.decode(token)
              rescue
                nil
             end
@@ -134,12 +121,8 @@ class Api::ApiController < ApplicationController
       claims: claims,
     } unless claims.nil?
 
-    if session_id.nil?
-      return nil
-    end
-
     # See if it's an access_token
-    session = Session.authenticate(session_id, access_token)
+    session = Session.authenticate(token)
 
     if session
       return {
