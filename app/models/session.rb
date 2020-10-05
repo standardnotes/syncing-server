@@ -14,19 +14,28 @@ class Session < ApplicationRecord
 
   ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
+  SESSION_TOKEN_VERSION = 1
+
+  def self.create_hash_from_value(value)
+    Digest::SHA256.hexdigest(value)
+  end
 
   def self.authenticate(request_token)
     _version, session_id, access_token = request_token.split(':')
     session = Session.find_by_uuid(session_id)
     if session && !access_token.nil?
-      hashed_access_token = Digest::SHA256.hexdigest(access_token)
-      session.hashed_access_token == hashed_access_token ? session : nil
+      hashed_access_token = Session.create_hash_from_value(access_token)
+      if ActiveSupport::SecurityUtils.secure_compare(session.hashed_access_token, hashed_access_token)
+        session
+      end
     end
   end
 
   def valid_refresh_token?(request_token)
     _version, _session_id, refresh_token = request_token.split(':')
-    !refresh_token.nil? && hashed_refresh_token == create_hash_from_value(refresh_token)
+    hashed_token = Session.create_hash_from_value(refresh_token)
+    !refresh_token.nil? && ActiveSupport::SecurityUtils
+      .secure_compare(hashed_token, hashed_refresh_token)
   end
 
   def serializable_hash(options = {})
@@ -76,8 +85,8 @@ class Session < ApplicationRecord
     # calling renew method. The reason is that access_token and refresh_token are 
     # just class attributes and are not really persisted to database.
     {
-      access_token: "1:#{uuid}:#{access_token}",
-      refresh_token: "1:#{uuid}:#{refresh_token}",
+      access_token: "#{SESSION_TOKEN_VERSION}:#{uuid}:#{access_token}",
+      refresh_token: "#{SESSION_TOKEN_VERSION}:#{uuid}:#{refresh_token}",
       access_expiration: date_to_milliseconds(access_expiration),
       refresh_expiration: date_to_milliseconds(refresh_expiration),
     }
@@ -88,8 +97,8 @@ class Session < ApplicationRecord
   def generate_tokens
     self.access_token = SecureRandom.urlsafe_base64
     self.refresh_token = SecureRandom.urlsafe_base64
-    self.hashed_access_token = create_hash_from_value(access_token)
-    self.hashed_refresh_token = create_hash_from_value(refresh_token)
+    self.hashed_access_token = Session.create_hash_from_value(access_token)
+    self.hashed_refresh_token = Session.create_hash_from_value(refresh_token)
   end
 
   def extend_expiration_dates
@@ -99,9 +108,5 @@ class Session < ApplicationRecord
 
   def date_to_milliseconds(date)
     date.to_datetime.strftime('%Q').to_i
-  end
-
-  def create_hash_from_value(value)
-    Digest::SHA256.hexdigest(value)
   end
 end
