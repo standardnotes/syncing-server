@@ -15,16 +15,18 @@ class Session < ApplicationRecord
   ACCESS_TOKEN_AGE = Rails.application.config.x.session[:access_token_age].seconds
   REFRESH_TOKEN_AGE = Rails.application.config.x.session[:refresh_token_age].seconds
 
-  def self.authenticate(session_id, access_token)
+  def self.authenticate(request_token)
+    _version, session_id, access_token = request_token.split(':')
     session = Session.find_by_uuid(session_id)
-    if session
+    if session && !access_token.nil?
       hashed_access_token = Digest::SHA256.hexdigest(access_token)
       session.hashed_access_token == hashed_access_token ? session : nil
     end
   end
 
-  def verify_refresh_token(refresh_token)
-    hashed_refresh_token == create_hash_from_value(refresh_token)
+  def valid_refresh_token?(request_token)
+    _version, _session_id, refresh_token = request_token.split(':')
+    !refresh_token.nil? && hashed_refresh_token == create_hash_from_value(refresh_token)
   end
 
   def serializable_hash(options = {})
@@ -74,9 +76,8 @@ class Session < ApplicationRecord
     # calling renew method. The reason is that access_token and refresh_token are 
     # just class attributes and are not really persisted to database.
     {
-      id: uuid,
-      access_token: access_token,
-      refresh_token: refresh_token,
+      access_token: "1:#{uuid}:#{access_token}",
+      refresh_token: "1:#{uuid}:#{refresh_token}",
       access_expiration: date_to_milliseconds(access_expiration),
       refresh_expiration: date_to_milliseconds(refresh_expiration),
     }
