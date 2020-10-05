@@ -1,5 +1,3 @@
-require 'uuid'
-
 class Api::SessionsController < Api::ApiController
   skip_before_action :authenticate_user, only: [:refresh]
   before_action :require_valid_session, except: [:refresh]
