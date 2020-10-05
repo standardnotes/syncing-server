@@ -45,11 +45,11 @@ class Session < ApplicationRecord
   end
 
   def self.construct_token(uuid, token)
-    return "#{SESSION_TOKEN_VERSION}:#{uuid}:#{token}"
+    "#{SESSION_TOKEN_VERSION}:#{uuid}:#{token}"
   end
 
   def self.deconstruct_token(token)
-    return token.split(':')
+    token.split(':')
   end
 
   def serializable_hash(options = {})
