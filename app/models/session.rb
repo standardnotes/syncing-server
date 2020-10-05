@@ -98,7 +98,7 @@ class Session < ApplicationRecord
 
   def as_client_payload(access_token, refresh_token)
     if access_token.nil? || refresh_token.nil?
-      throw 'access_token and refresh_token parameters required.'
+      raise 'access_token and refresh_token parameters required.'
     end
     {
       access_token: Session.construct_token(uuid, access_token),
