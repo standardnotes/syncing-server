@@ -4,21 +4,18 @@ class Revision < ApplicationRecord
 
   def serializable_hash(options = {})
     allowed_options = [
-      'uuid',
-      'items_key_id',
-      'duplicate_of',
-      'enc_item_key',
-      'content',
-      'content_type',
       'auth_hash',
-      'deleted',
-      'creation_date',
+      'content_type',
+      'content',
       'created_at',
+      'creation_date',
+      'enc_item_key',
+      'item_uuid',
+      'items_key_id',
       'updated_at',
+      'uuid',
     ]
 
-    super(options.merge(only: allowed_options)).merge({
-      item_id: item_ids.first,
-    })
+    super(options.merge(only: allowed_options))
   end
 end
