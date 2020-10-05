@@ -143,8 +143,6 @@ GEM
     loofah (2.4.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
-    macaddr (1.7.2)
-      systemu (~> 2.6.5)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
     method_source (0.9.2)
@@ -254,7 +252,6 @@ GEM
     sshkit (1.20.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
-    systemu (2.6.5)
     temple (0.8.2)
     thor (1.0.1)
     thread_safe (0.3.6)
@@ -262,8 +259,6 @@ GEM
     tzinfo (1.2.6)
       thread_safe (~> 0.1)
     unicode-display_width (1.6.1)
-    uuid (2.3.9)
-      macaddr (~> 1.0)
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -306,7 +301,6 @@ DEPENDENCIES
   secure_headers
   shoryuken
   simplecov
-  uuid
   whenever
 
 BUNDLED WITH
