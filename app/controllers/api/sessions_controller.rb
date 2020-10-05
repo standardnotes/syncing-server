@@ -82,7 +82,9 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    unless session.renew
+    tokens = Session.generate_tokens
+
+    unless session.renew(tokens[:access_token], tokens[:refresh_token])
       render json: {
         error: {
           tag: 'expired-refresh-token',
@@ -93,7 +95,7 @@ class Api::SessionsController < Api::ApiController
     end
 
     render json: {
-      session: session.as_client_payload,
+      session: session.as_client_payload(tokens[:access_token], tokens[:refresh_token]),
     }
   end
 

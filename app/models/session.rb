@@ -4,11 +4,7 @@ class Session < ApplicationRecord
   validates :user_agent, length: { in: 0..255, allow_nil: true }
   validates :api_version, inclusion: { in: %w(20200115) }
 
-  attr_accessor :access_token
-  attr_accessor :refresh_token
-
   before_create do
-    generate_tokens
     extend_expiration_dates
   end
 
@@ -18,6 +14,15 @@ class Session < ApplicationRecord
 
   def self.create_hash_from_value(value)
     Digest::SHA256.hexdigest(value)
+  end
+
+  def self.generate_tokens
+    access_token = SecureRandom.urlsafe_base64
+    refresh_token = SecureRandom.urlsafe_base64
+    {
+      access_token: access_token,
+      refresh_token: refresh_token,
+    }
   end
 
   def self.authenticate(request_token)
@@ -53,10 +58,11 @@ class Session < ApplicationRecord
     super(options.merge(only: allowed_options, methods: allowed_methods))
   end
 
-  def renew
+  def renew(access_token, refresh_token)
     return false if refresh_expired?
+    return false if access_token.nil? || refresh_token.nil?
 
-    generate_tokens
+    set_hashed_tokens(access_token, refresh_token)
     extend_expiration_dates
 
     save
@@ -80,10 +86,16 @@ class Session < ApplicationRecord
     "#{client.name} #{client.full_version} on #{client.os_name} #{client.os_full_version}"
   end
 
-  def as_client_payload
-    # TODO: this method should only be called on a newly created instance or after
-    # calling renew method. The reason is that access_token and refresh_token are 
-    # just class attributes and are not really persisted to database.
+  def set_hashed_tokens(access_token, refresh_token)
+    self.hashed_access_token = Session.create_hash_from_value(access_token)
+    self.hashed_refresh_token = Session.create_hash_from_value(refresh_token)
+    save
+  end
+
+  def as_client_payload(access_token, refresh_token)
+    if access_token.nil? || refresh_token.nil?
+      throw 'access_token and refresh_token parameters required.'
+    end
     {
       access_token: "#{SESSION_TOKEN_VERSION}:#{uuid}:#{access_token}",
       refresh_token: "#{SESSION_TOKEN_VERSION}:#{uuid}:#{refresh_token}",
@@ -93,13 +105,6 @@ class Session < ApplicationRecord
   end
 
   private
-
-  def generate_tokens
-    self.access_token = SecureRandom.urlsafe_base64
-    self.refresh_token = SecureRandom.urlsafe_base64
-    self.hashed_access_token = Session.create_hash_from_value(access_token)
-    self.hashed_refresh_token = Session.create_hash_from_value(refresh_token)
-  end
 
   def extend_expiration_dates
     self.access_expiration = DateTime.now + ACCESS_TOKEN_AGE
