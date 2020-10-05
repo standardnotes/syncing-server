@@ -22,7 +22,6 @@ class Session < ApplicationRecord
     refresh_token = SecureRandom.urlsafe_base64
     self.hashed_access_token = Session.hash_string(access_token)
     self.hashed_refresh_token = Session.hash_string(refresh_token)
-    save
     return access_token, refresh_token
   end
 
