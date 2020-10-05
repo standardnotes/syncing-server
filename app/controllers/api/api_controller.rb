@@ -1,5 +1,3 @@
-require 'uuid'
-
 class Api::ApiController < ApplicationController
   attr_accessor :current_user
   attr_accessor :current_session
