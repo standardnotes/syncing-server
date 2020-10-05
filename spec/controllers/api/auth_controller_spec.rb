@@ -86,9 +86,7 @@ RSpec.describe Api::AuthController, type: :controller do
       it 'should return origination and created with session' do
         post :sign_in, params: test_user_004_credentials
         access_token = JSON.parse(response.body)['session']['access_token']
-        session_id = JSON.parse(response.body)['session']['id']
         request.headers['Authorization'] = "bearer #{access_token}"
-        request.headers['Session-ID'] = session_id
 
         get :auth_params, params: { email: test_user_004.email }
 
@@ -626,7 +624,9 @@ RSpec.describe Api::AuthController, type: :controller do
           request.headers['Authorization'] = "bearer #{access_token}"
           post :sign_out
 
-          expect(response).to have_http_status(:unauthorized)
+          expect(response).to have_http_status(:no_content)
+          parsed_response_body = JSON.parse(response.body)
+          expect(parsed_response_body).to eq({})
         end.to change(Session, :count).by(0)
       end
     end
@@ -635,11 +635,9 @@ RSpec.describe Api::AuthController, type: :controller do
       it 'should return no response and the session should be deleted' do
         post :sign_in, params: test_user_004_credentials
         access_token = JSON.parse(response.body)['session']['access_token']
-        session_id = JSON.parse(response.body)['session']['id']
 
         expect do
           request.headers['Authorization'] = "bearer #{access_token}"
-          request.headers['Session-ID'] = session_id
           post :sign_out
 
           expect(response).to have_http_status(:no_content)

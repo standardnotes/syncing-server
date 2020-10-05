@@ -66,7 +66,6 @@ RSpec.describe Api::SessionsController, type: :controller do
 
           @controller = Api::SessionsController.new
           request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['session']['access_token']}"
-          request.headers['Session-ID'] = JSON.parse(response.body)['session']['id']
 
           get :index
 
@@ -132,7 +131,6 @@ RSpec.describe Api::SessionsController, type: :controller do
 
             @controller = Api::SessionsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['session']['access_token']}"
-            request.headers['Session-ID'] = JSON.parse(response.body)['session']['id']
 
             delete :delete
 
@@ -154,11 +152,9 @@ RSpec.describe Api::SessionsController, type: :controller do
 
             @controller = Api::SessionsController.new
             access_token = JSON.parse(response.body)['session']['access_token']
-            session_id = JSON.parse(response.body)['session']['id']
             request.headers['Authorization'] = "bearer #{access_token}"
-            request.headers['Session-ID'] = session_id
 
-            current_session = test_user_004.sessions.find_by_uuid(session_id)
+            current_session = Session.authenticate(access_token)
 
             delete :delete, params: { uuid: current_session.uuid }
 
@@ -180,9 +176,7 @@ RSpec.describe Api::SessionsController, type: :controller do
 
             @controller = Api::SessionsController.new
             access_token = JSON.parse(response.body)['session']['access_token']
-            session_id = JSON.parse(response.body)['session']['id']
             request.headers['Authorization'] = "bearer #{access_token}"
-            request.headers['Session-ID'] = session_id
 
             another_test_user = build(:user, password: test_password, version: '004')
             other_session = another_test_user.sessions.first
@@ -209,10 +203,9 @@ RSpec.describe Api::SessionsController, type: :controller do
 
             @controller = Api::SessionsController.new
             access_token = JSON.parse(response.body)['session']['access_token']
-            session_id = JSON.parse(response.body)['session']['id']
             request.headers['Authorization'] = "bearer #{access_token}"
-            request.headers['Session-ID'] = session_id
-            other_session = test_user_004.sessions.where.not(uuid: session_id).first
+            current_session = Session.authenticate(access_token)
+            other_session = test_user_004.sessions.where.not(uuid: current_session.uuid).first
 
             expect do
               delete :delete, params: { uuid: other_session.uuid }
@@ -274,9 +267,7 @@ RSpec.describe Api::SessionsController, type: :controller do
 
           @controller = Api::SessionsController.new
           access_token = JSON.parse(response.body)['session']['access_token']
-          session_id = JSON.parse(response.body)['session']['id']
           request.headers['Authorization'] = "bearer #{access_token}"
-          request.headers['Session-ID'] = session_id
 
           # Registering another test user, so multiple sessions from multiple users exist...
           build(:user, password: test_password, version: '004')
@@ -315,7 +306,6 @@ RSpec.describe Api::SessionsController, type: :controller do
       it 'should fail' do
         post :refresh, params: {
           user_uuid: 'not-a-real-uuid',
-          session_id: SecureRandom.uuid,
           access_token: 'not-a-real-access-token',
           refresh_token: 'not-a-real-refresh-token',
         }
@@ -339,20 +329,17 @@ RSpec.describe Api::SessionsController, type: :controller do
 
         @controller = Api::SessionsController.new
         access_token = JSON.parse(response.body)['session']['access_token']
-        session_id = JSON.parse(response.body)['session']['id']
+        refresh_token = JSON.parse(response.body)['session']['refresh_token']
 
         # Expiring the refresh token...
-        current_session = test_user_004.sessions.where(uuid: session_id).first
+        current_session = Session.authenticate(access_token)
         current_session.access_expiration = DateTime.now - 3600.seconds
         current_session.refresh_expiration = DateTime.now - 3600.seconds
         current_session.save
 
-        refresh_token = current_session.refresh_token
-
         expect do
           post :refresh, params: {
             user_uuid: test_user_004.uuid,
-            session_id: session_id,
             access_token: access_token,
             refresh_token: refresh_token,
           }
@@ -364,8 +351,8 @@ RSpec.describe Api::SessionsController, type: :controller do
 
           expect(parsed_response_body).to_not be_nil
           expect(parsed_response_body['error']).to_not be_nil
-          expect(parsed_response_body['error']['message']).to eq('The refresh token is not valid.')
-          expect(parsed_response_body['error']['tag']).to eq('invalid-refresh-token')
+          expect(parsed_response_body['error']['message']).to eq('The refresh token has expired.')
+          expect(parsed_response_body['error']['tag']).to eq('expired-refresh-token')
         end.to change(Session, :count).by(0)
 
         # Session should remain expired...
@@ -383,11 +370,9 @@ RSpec.describe Api::SessionsController, type: :controller do
         @controller = Api::SessionsController.new
         access_token = JSON.parse(response.body)['session']['access_token']
         refresh_token = JSON.parse(response.body)['session']['refresh_token']
-        session_id = JSON.parse(response.body)['session']['id']
 
         expect do
           post :refresh, params: {
-            session_id: session_id,
             access_token: access_token,
             refresh_token: refresh_token,
           }
@@ -410,7 +395,7 @@ RSpec.describe Api::SessionsController, type: :controller do
         end.to change(Session, :count).by(0)
 
         # Tokens should be renewed. Meaning that old access_token is invalid.
-        current_session = Session.authenticate(session_id, access_token)
+        current_session = Session.authenticate(access_token)
         expect(current_session).to be_nil
       end
     end
