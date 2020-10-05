@@ -16,7 +16,7 @@ module SyncEngine
         end
 
         return {
-          session: session&.as_client_payload(tokens[:access_token], tokens[:refresh_token]),
+          session: session&.as_client_payload(tokens),
           key_params: user.key_params(true),
           user: user,
         }
@@ -42,7 +42,7 @@ module SyncEngine
         end
 
         return {
-          session: session.as_client_payload(tokens[:access_token], tokens[:refresh_token]),
+          session: session.as_client_payload(tokens),
           key_params: user.key_params(true),
           user: user,
         }
@@ -54,7 +54,7 @@ module SyncEngine
           user_agent: params[:user_agent]
         )
 
-        session.set_hashed_tokens(tokens[:access_token], tokens[:refresh_token])
+        session.set_hashed_tokens(tokens)
 
         return nil unless session.save
 

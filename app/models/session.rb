@@ -58,11 +58,11 @@ class Session < ApplicationRecord
     super(options.merge(only: allowed_options, methods: allowed_methods))
   end
 
-  def renew(access_token, refresh_token)
+  def renew(access_token:, refresh_token:)
     return false if refresh_expired?
     return false if access_token.nil? || refresh_token.nil?
 
-    set_hashed_tokens(access_token, refresh_token)
+    set_hashed_tokens({ access_token: access_token, refresh_token: refresh_token, })
     extend_expiration_dates
 
     save
@@ -86,13 +86,13 @@ class Session < ApplicationRecord
     "#{client.name} #{client.full_version} on #{client.os_name} #{client.os_full_version}"
   end
 
-  def set_hashed_tokens(access_token, refresh_token)
+  def set_hashed_tokens(access_token:, refresh_token:)
     self.hashed_access_token = Session.create_hash_from_value(access_token)
     self.hashed_refresh_token = Session.create_hash_from_value(refresh_token)
     save
   end
 
-  def as_client_payload(access_token, refresh_token)
+  def as_client_payload(access_token:, refresh_token:)
     if access_token.nil? || refresh_token.nil?
       throw 'access_token and refresh_token parameters required.'
     end
