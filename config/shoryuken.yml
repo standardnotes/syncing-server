@@ -2,7 +2,6 @@ aws:
   region: <%= ENV.fetch('AWS_REGION', 'us-east-1') %>
   receive_message:
     wait_time_seconds: 20
-    max_number_of_messages: 1
 concurrency: <%= ENV.fetch('DB_POOL_SIZE', 5) %>
 polling_strategy: StrictPriority
 queues:
