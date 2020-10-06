@@ -72,7 +72,9 @@ class Item < ApplicationRecord
 
   def cleanup_excessive_revisions(days = User::REVISIONS_RETENTION_DAYS)
     if content_type == 'Note'
-      CleanupRevisionsJob.perform_later(uuid, days)
+      5000.times do
+        CleanupRevisionsJob.perform_later(uuid, days)
+      end
     end
   end
 
