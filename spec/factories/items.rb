@@ -28,5 +28,13 @@ FactoryBot.define do
       content { encode_content(frequency: 'realtime', url: 'http://test.com') }
       content_type { 'SF|Extension' }
     end
+
+    trait :with_items_key_id do
+      items_key_id { SecureRandom.uuid }
+    end
+
+    trait :with_auth_hash do
+      auth_hash { '003:something' }
+    end
   end
 end

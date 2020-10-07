@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200916205444) do
+ActiveRecord::Schema.define(version: 20201004040050) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "extension_id"
@@ -48,28 +48,29 @@ ActiveRecord::Schema.define(version: 20200916205444) do
   end
 
   create_table "revisions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "item_uuid"
     t.text "content", limit: 16777215
     t.string "content_type"
     t.string "items_key_id"
     t.text "enc_item_key"
     t.string "auth_hash"
+    t.date "creation_date"
     t.datetime "created_at", precision: 6
     t.datetime "updated_at", precision: 6
     t.index ["created_at"], name: "index_revisions_on_created_at"
+    t.index ["creation_date"], name: "index_revisions_on_creation_date"
   end
 
   create_table "sessions", primary_key: "uuid", id: :string, limit: 36, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "user_uuid"
     t.text "user_agent"
     t.string "api_version"
-    t.string "access_token", null: false
-    t.string "refresh_token", null: false
+    t.string "hashed_access_token", null: false
+    t.string "hashed_refresh_token", null: false
     t.datetime "access_expiration", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "refresh_expiration", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["access_token"], name: "index_sessions_on_access_token", unique: true
-    t.index ["refresh_token"], name: "index_sessions_on_refresh_token", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
     t.index ["user_uuid"], name: "index_sessions_on_user_uuid"
   end

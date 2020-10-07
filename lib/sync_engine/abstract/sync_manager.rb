@@ -38,8 +38,12 @@ module SyncEngine
       date
     end
 
-    def item_params
-      params.permit(*permitted_params)
+    def item_params(params)
+      defaults = {
+        items_key_id: nil,
+        auth_hash: nil,
+      }
+      params.permit(*permitted_params).reverse_merge(defaults)
     end
 
     def permitted_params

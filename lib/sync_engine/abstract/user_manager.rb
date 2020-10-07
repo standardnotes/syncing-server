@@ -4,6 +4,10 @@ module SyncEngine
       @user_class = user_class
     end
 
+    def registration_fields
+      [:pw_func, :pw_alg, :pw_cost, :pw_key_size, :pw_nonce, :pw_salt, :origination, :created, :version]
+    end
+
     def verify_credentials(email, password)
       user = @user_class.find_by_email(email)
       user && test_password(password, user.encrypted_password)
@@ -46,18 +50,16 @@ module SyncEngine
       raise Other::NotImplementedError 'Must override'
     end
 
-    def registration_params(params)
-      params.permit(
-        :pw_func,
-        :pw_alg,
-        :pw_cost,
-        :pw_key_size,
-        :pw_nonce,
-        :pw_salt,
-        :origination,
-        :created,
-        :version
-      )
+    def registration_params(params, with_defaults = false)
+      if with_defaults
+        defaults = {}
+        registration_fields.each do |field|
+          defaults.store(field, nil)
+        end
+        params.permit(*registration_fields).reverse_merge(defaults)
+      else
+        params.permit(*registration_fields)
+      end
     end
   end
 end

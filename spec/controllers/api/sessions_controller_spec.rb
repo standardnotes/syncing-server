@@ -153,7 +153,8 @@ RSpec.describe Api::SessionsController, type: :controller do
             @controller = Api::SessionsController.new
             access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
-            current_session = test_user_004.sessions.where(access_token: access_token).first
+
+            current_session = Session.from_token(access_token)
 
             delete :delete, params: { uuid: current_session.uuid }
 
@@ -203,7 +204,8 @@ RSpec.describe Api::SessionsController, type: :controller do
             @controller = Api::SessionsController.new
             access_token = JSON.parse(response.body)['session']['access_token']
             request.headers['Authorization'] = "bearer #{access_token}"
-            other_session = test_user_004.sessions.where.not(access_token: access_token).first
+            current_session = Session.from_token(access_token)
+            other_session = test_user_004.sessions.where.not(uuid: current_session.uuid).first
 
             expect do
               delete :delete, params: { uuid: other_session.uuid }
@@ -327,14 +329,13 @@ RSpec.describe Api::SessionsController, type: :controller do
 
         @controller = Api::SessionsController.new
         access_token = JSON.parse(response.body)['session']['access_token']
+        refresh_token = JSON.parse(response.body)['session']['refresh_token']
 
         # Expiring the refresh token...
-        current_session = test_user_004.sessions.where(access_token: access_token).first
+        current_session = Session.from_token(access_token)
         current_session.access_expiration = DateTime.now - 3600.seconds
         current_session.refresh_expiration = DateTime.now - 3600.seconds
         current_session.save
-
-        refresh_token = current_session.refresh_token
 
         expect do
           post :refresh, params: {
@@ -354,10 +355,6 @@ RSpec.describe Api::SessionsController, type: :controller do
           expect(parsed_response_body['error']['tag']).to eq('expired-refresh-token')
         end.to change(Session, :count).by(0)
 
-        # Tokens should remain the same...
-        expect(current_session.access_token).to eq(access_token)
-        expect(current_session.refresh_token).to eq(refresh_token)
-
         # Session should remain expired...
         current_session.reload
         expect(current_session.access_expiration).to be < DateTime.now
@@ -372,9 +369,7 @@ RSpec.describe Api::SessionsController, type: :controller do
 
         @controller = Api::SessionsController.new
         access_token = JSON.parse(response.body)['session']['access_token']
-
-        current_session = test_user_004.sessions.where(access_token: access_token).first
-        refresh_token = current_session.refresh_token
+        refresh_token = JSON.parse(response.body)['session']['refresh_token']
 
         expect do
           post :refresh, params: {
@@ -399,10 +394,9 @@ RSpec.describe Api::SessionsController, type: :controller do
           expect(parsed_response_body['session']['refresh_token']).to_not eq(access_token)
         end.to change(Session, :count).by(0)
 
-        # Tokens should be renewed...
-        current_session.reload
-        expect(current_session.access_token).to_not eq(access_token)
-        expect(current_session.refresh_token).to_not eq(refresh_token)
+        # Tokens should be renewed. Meaning that old access_token is invalid.
+        current_session = Session.from_token(access_token)
+        expect(current_session).to be_nil
       end
     end
   end

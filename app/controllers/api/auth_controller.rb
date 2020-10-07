@@ -267,7 +267,7 @@ class Api::AuthController < Api::ApiController
       return
     end
 
-    session = Session.find_by_access_token(token)
+    session = Session.from_token(token)
     session&.destroy
     render json: {}, status: :no_content
   end

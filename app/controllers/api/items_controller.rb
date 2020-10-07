@@ -26,6 +26,10 @@ class Api::ItemsController < Api::ApiController
     end
 
     render json: results
+  rescue ActiveRecord::StatementInvalid => e
+    Rails.logger.error "Could not perfom sync operation. MySQL statement length #{e.message.length}"
+
+    render json: { 'messages': 'Could not perform sync operation on item' }, status: 500
   end
 
   def post_to_realtime_extensions(items)

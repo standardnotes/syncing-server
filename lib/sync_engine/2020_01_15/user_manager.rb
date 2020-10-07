@@ -7,17 +7,21 @@ module SyncEngine
         upgrading_protocol_version = new_protocol_version > current_protocol_version
 
         user.encrypted_password = hash_password(password)
-        user.update!(registration_params(params))
+        user.update!(registration_params(params, true))
 
-        if upgrading_protocol_version && new_protocol_version == @user_class::SESSIONS_PROTOCOL_VERSION
-          session = create_session(user, params)
-        end
-
-        return {
-          session: session&.as_client_payload,
+        result = {
           key_params: user.key_params(true),
           user: user,
         }
+
+        if upgrading_protocol_version && new_protocol_version == @user_class::SESSIONS_PROTOCOL_VERSION
+          session, tokens = create_session(user, params)
+          if session
+            result[:session] = session.as_client_payload(tokens[0], tokens[1])
+          end
+        end
+
+        return result
       end
 
       private
@@ -27,7 +31,7 @@ module SyncEngine
           return super(user, params)
         end
 
-        session = create_session(user, params)
+        session, tokens = create_session(user, params)
 
         unless session
           return {
@@ -39,7 +43,7 @@ module SyncEngine
         end
 
         return {
-          session: session.as_client_payload,
+          session: session.as_client_payload(tokens[0], tokens[1]),
           key_params: user.key_params(true),
           user: user,
         }
@@ -51,9 +55,11 @@ module SyncEngine
           user_agent: params[:user_agent]
         )
 
+        tokens = session.create_tokens
+
         return nil unless session.save
 
-        return session
+        return session, tokens
       end
 
       deprecate :update

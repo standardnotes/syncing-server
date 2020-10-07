@@ -43,7 +43,7 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    authentication = decode_token token
+    authentication = decode_token(token)
 
     if authentication.nil?
       render_invalid_auth_error if renders
@@ -120,13 +120,13 @@ class Api::ApiController < ApplicationController
     } unless claims.nil?
 
     # See if it's an access_token
-    session = Session.find_by_access_token(token)
+    session = Session.from_token(token)
 
     if session
       return {
         type: 'session_token',
         user: session.user,
-        session: session
+        session: session,
       }
     end
   end

@@ -27,7 +27,8 @@ RSpec.describe CleanupRevisionsJob do
               :revision,
               uuid: "#{days_from_today}-#{n}",
               content: (0...8).map { (65 + rand(26)).chr }.join,
-              created_at: days_from_today.days.ago
+              created_at: days_from_today.days.ago,
+              creation_date: days_from_today.days.ago
             )
           )
         end
@@ -41,21 +42,21 @@ RSpec.describe CleanupRevisionsJob do
     it 'should clean up revisions from last 30 days' do
       subject.perform(test_item.uuid, 30)
 
-      revisions = test_item.revisions.where(created_at: 30.days.ago..DateTime::Infinity.new)
+      revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
       expect(revisions.length).to eq(466)
     end
 
     it 'should clean up revisions in a decaying fashion for last 30 days' do
       subject.perform(test_item.uuid, 30)
 
-      revisions = test_item.revisions.where(created_at: 30.days.ago..DateTime::Infinity.new)
+      revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
 
       revisions_by_date = {}
       revisions.each do |revision|
-        unless revisions_by_date[revision['created_at'].to_date]
-          revisions_by_date[revision['created_at'].to_date] = []
+        unless revisions_by_date[revision['creation_date']]
+          revisions_by_date[revision['creation_date']] = []
         end
-        revisions_by_date[revision['created_at'].to_date].push(revision)
+        revisions_by_date[revision['creation_date']].push(revision)
       end
 
       expected_revision_counts = []
@@ -84,7 +85,8 @@ RSpec.describe CleanupRevisionsJob do
           :revision,
           amount_of_revisions_per_day,
           content: (0...8).map { (65 + rand(26)).chr }.join,
-          created_at: days_from_today.days.ago
+          created_at: days_from_today.days.ago,
+          creation_date: days_from_today.days.ago
         )
 
         revisions.each do |revision|
@@ -96,21 +98,21 @@ RSpec.describe CleanupRevisionsJob do
     it 'should clean up revisions from last 30 days' do
       subject.perform(test_item.uuid, 30)
 
-      revisions = test_item.revisions.where(created_at: 30.days.ago..DateTime::Infinity.new)
+      revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
       expect(revisions.length).to eq(50)
     end
 
     it 'should clean up revisions in a decaying fashion for last 30 days' do
       subject.perform(test_item.uuid, 30)
 
-      revisions = test_item.revisions.where(created_at: 30.days.ago..DateTime::Infinity.new)
+      revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
 
       revisions_by_date = {}
       revisions.each do |revision|
-        unless revisions_by_date[revision['created_at'].to_date]
-          revisions_by_date[revision['created_at'].to_date] = []
+        unless revisions_by_date[revision['creation_date']]
+          revisions_by_date[revision['creation_date']] = []
         end
-        revisions_by_date[revision['created_at'].to_date].push(revision)
+        revisions_by_date[revision['creation_date']].push(revision)
       end
 
       expected_revision_counts = {

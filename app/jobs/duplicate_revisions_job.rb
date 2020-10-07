@@ -1,4 +1,6 @@
 class DuplicateRevisionsJob < ApplicationJob
+  queue_as ENV['SQS_QUEUE_LOW_PRIORITY'] || 'sn_main_low_priority'
+
   def perform(item_id)
     item = Item.find(item_id)
 
