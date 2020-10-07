@@ -73,6 +73,11 @@ class CleanupRevisionsJob < ApplicationJob
         .where(creation_date: date)
         .where.not(uuid: revisions_to_keep)
         .delete_all
+
+      ItemRevision
+        .where(item_uuid: item.uuid)
+        .where(revision_uuid: revisions_from_date.difference(revisions_to_keep))
+        .delete_all
     end
   end
 end

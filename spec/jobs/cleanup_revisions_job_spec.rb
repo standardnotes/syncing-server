@@ -44,6 +44,7 @@ RSpec.describe CleanupRevisionsJob do
 
       revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
       expect(revisions.length).to eq(466)
+      expect(test_item.item_revisions.length).to eq(666)
     end
 
     it 'should clean up revisions in a decaying fashion for last 30 days' do
