@@ -16,7 +16,7 @@ You can run your own Standard Notes server and use it with any Standard Notes ap
 	git clone --branch master https://github.com/standardnotes/syncing-server.git
 	```
 
-1. Create a `.env` file in the project's root directory. See [env.sample](env.sample) for required values.
+1. Create a `.env` file in the project's root directory. See [.env.sample](.env.sample) for required values.
 
 1. Initialize the project:
 
@@ -54,7 +54,7 @@ Docker is the quick and easy way to try out Standard Notes. We highly recommend 
 
 ### Standalone instance
 
-Before you start make sure you have a `.env` file copied from the sample `env.sample` and configured with your parameters.
+Before you start make sure you have a `.env` file copied from the sample `.env.sample` and configured with your parameters.
 
 If your intention is not contributing but just running the app we recommend using our official image from Docker hub like this:
 ```
