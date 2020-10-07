@@ -70,6 +70,7 @@ class CleanupRevisionsJob < ApplicationJob
       end
 
       Revision
+        .where(item_uuid: item.uuid)
         .where(creation_date: date)
         .where.not(uuid: revisions_to_keep)
         .delete_all
