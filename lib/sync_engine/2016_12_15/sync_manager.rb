@@ -123,8 +123,10 @@ module SyncEngine
 
         if !items.empty? && items.count > limit
           items = items.slice(0, limit)
-          date = items.last.updated_at
-          cursor_token = sync_token_from_datetime(date)
+          if items.last
+            date = items.last.updated_at
+            cursor_token = sync_token_from_datetime(date)
+          end
         end
 
         [items, cursor_token]
