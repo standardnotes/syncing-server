@@ -117,7 +117,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             expect(saved_items).to match_array(items_param)
           end
 
-          xit 'should store revisions matching changes' do
+          it 'should store revisions matching changes' do
             @controller = Api::AuthController.new
             post :sign_in, params: test_user_003_credentials
 
@@ -138,7 +138,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             item = Item.where(uuid: items_param[0]['uuid']).first
 
-            revisions = item.revisions
+            revisions = item.revisions.order(created_at: :desc)
 
             expect(CleanupRevisionsJob).to have_been_enqueued.with(item.uuid, 30).exactly(3).times
             expect(revisions.count).to eq(2)
