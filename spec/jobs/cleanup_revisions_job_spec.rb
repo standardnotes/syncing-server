@@ -50,7 +50,10 @@ RSpec.describe CleanupRevisionsJob do
     it 'should clean up revisions in a decaying fashion for last 30 days' do
       subject.perform(test_item.uuid, 30)
 
-      revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
+      revisions = test_item
+        .revisions
+        .where(creation_date: 29.days.ago..Date::Infinity.new)
+        .order(creation_date: :desc)
 
       revisions_by_date = {}
       revisions.each do |revision|
