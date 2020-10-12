@@ -5,7 +5,13 @@ class CleanupRevisionsJob < ApplicationJob
   MIN_REVISIONS_PER_DAY = 2
 
   def perform(item_id, days)
-    item = Item.find(item_id)
+    item = Item.find_by_uuid(item_id)
+
+    unless item
+      Rails.logger.warn "Could not find item with uuid #{item_id}"
+
+      return
+    end
 
     last_days_of_revisions = item.revisions
       .select(:creation_date)
