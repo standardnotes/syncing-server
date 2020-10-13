@@ -23,5 +23,7 @@ class DuplicateRevisionsJob < ApplicationJob
         ItemRevision.create(item_uuid: item_id, revision_uuid: revision_uuid)
       end
     end
+  rescue StandardError => e
+    Rails.logger.error "Could duplicate revisions for item #{item_id}: #{e.message}"
   end
 end
