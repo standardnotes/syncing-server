@@ -29,6 +29,8 @@ class CleanupRevisionsJob < ApplicationJob
       allowed_revisions_count = [[days - days_from_today, MAX_REVISIONS_PER_DAY].min, MIN_REVISIONS_PER_DAY].max
       cleanup_revisions_for_a_day(item, days_from_today, allowed_revisions_count)
     end
+  rescue StandardError => e
+    Rails.logger.error "Could not cleanup revisions for item #{item_id}: #{e.message}"
   end
 
   def cleanup_revisions_for_a_day(item, days_from_today, allowed_revisions_count)
