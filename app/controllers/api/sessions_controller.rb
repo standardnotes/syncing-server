@@ -3,7 +3,7 @@ class Api::SessionsController < Api::ApiController
   before_action :require_valid_session, except: [:refresh]
 
   def index
-    sessions = current_user.active_sessions
+    sessions = current_user.active_sessions.to_a.map(&:serializable_hash)
     sessions.each { |session| session[:current] = current_session.uuid == session['uuid'] }
 
     render json: sessions
@@ -29,7 +29,7 @@ class Api::SessionsController < Api::ApiController
       return
     end
 
-    session = current_user.sessions.where(uuid: params[:uuid]).first
+    session = current_user.sessions.find_by_uuid(params[:uuid])
 
     unless session
       render json: {
