@@ -4,6 +4,6 @@ class ExtensionSettingsController < ApplicationController
     settings.mute_emails = true
     settings.save
 
-    render plain: 'Emails successfully muted'
+    render plain: 'This email has been muted. To unmute, reinstall this extension.'
   end
 end
