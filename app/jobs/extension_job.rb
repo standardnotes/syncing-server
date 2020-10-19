@@ -61,6 +61,8 @@ class ExtensionJob < ApplicationJob
         settings.uuid
       ).deliver_now unless mute_emails
     end
+  rescue StandardError => e
+    Rails.logger.error "Could not perform extension job: #{e.message}"
   end
 
   def upload_tmp_file_to_s3(tmp_file_path)
