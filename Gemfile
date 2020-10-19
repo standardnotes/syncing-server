@@ -27,16 +27,6 @@ group :development, :test, :docker_development do
   gem 'rspec-rails'
 end
 
-group :development, :test do
-  # Deployment tools
-  gem 'capistrano'
-  gem 'capistrano-bundler'
-  gem 'capistrano-passenger', '>= 0.2.0'
-  gem 'capistrano-rails'
-  gem 'capistrano-rvm'
-  gem 'capistrano-shoryuken', github: 'mobitar/capistrano-shoryuken'
-end
-
 group :test do
   gem 'simplecov', require: false
   gem 'factory_bot_rails'
