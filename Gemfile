@@ -8,7 +8,7 @@ gem 'haml-rails'
 gem 'jwt'
 gem 'mysql2', '>= 0.3.13', '< 0.5'
 gem 'rack-cors', require: 'rack/cors'
-gem 'rails', '5.1.7'
+gem 'rails', '~> 5.2.4'
 gem 'rotp'
 gem 'rubocop', '~> 0.79.0', require: false
 gem 'rubocop-shopify', require: false
