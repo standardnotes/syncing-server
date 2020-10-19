@@ -39,3 +39,5 @@ gem "ddtrace", "~> 0.40"
 gem "lograge", "~> 0.11.2"
 
 gem "aws-sdk-s3", "~> 1.64"
+
+gem 'bootsnap', '~> 1.4'
