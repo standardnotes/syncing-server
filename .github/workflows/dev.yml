@@ -2,7 +2,7 @@ name: Dev
 
 on:
   push:
-    branches: [ develop, db_read_replica ]
+    branches: [ develop ]
 
 jobs:
   test:
