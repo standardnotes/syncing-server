@@ -16,8 +16,6 @@
 !/log/.keep
 /tmp
 
-/config/cap.yml
-
 /node_modules
 
 /.sass-cache
