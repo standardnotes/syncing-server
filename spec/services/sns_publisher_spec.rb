@@ -6,9 +6,12 @@ RSpec.describe SnsPublisher do
   end
 
   describe '#publish_mail_backup_attachment_too_big' do
+    before do
+      allow(ENV).to receive(:fetch)
+      allow(ENV).to receive(:[])
+    end
     context 'sns topic not configured' do
       before do
-        allow(ENV).to receive(:fetch)
         allow(ENV).to receive(:fetch).with('SNS_TOPIC_ARN', nil).and_return(nil)
       end
       it 'should not publish events' do
@@ -19,7 +22,6 @@ RSpec.describe SnsPublisher do
     end
     context 'sns topic configured' do
       before do
-        allow(ENV).to receive(:fetch)
         allow(ENV).to receive(:fetch).with('SNS_TOPIC_ARN', nil).and_return('test-arn')
       end
       it 'should publish events' do
