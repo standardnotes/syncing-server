@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'aws-sdk-sns'
 
 RSpec.describe SnsPublisher do
   subject do
