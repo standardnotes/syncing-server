@@ -1,5 +1,12 @@
 class ArchiveMailer < ApplicationMailer
+  attr_accessor :event_publisher
+
   default from: 'Standard Notes <backups@standardnotes.org>'
+
+  def initialize
+    super
+    @event_publisher = SnsPublisher.new
+  end
 
   def data_backup(user_id)
     user = User.find(user_id)
@@ -8,9 +15,22 @@ class ArchiveMailer < ApplicationMailer
       items: user.items.where(deleted: false),
       auth_params: user.key_params,
     }
+
+    json_data = JSON.pretty_generate(data.as_json({}))
+
+    if json_data.size > ENV['EMAIL_ATTACHMENT_MAX_SIZE']
+      Rails.logger.info "Backup email attachment is too big for user #{user.uuid}" \
+                        "(#{(json_data.size / 1.megabyte).round}MB) allowed" \
+                        ": #{(ENV['EMAIL_ATTACHMENT_MAX_SIZE'] / 1.megabyte).round}MB"
+
+      @event_publisher.publish_mail_backup_attachment_too_big(user.email, ENV['EMAIL_ATTACHMENT_MAX_SIZE'])
+
+      return
+    end
+
     attachments["SN-Data-#{date}.txt"] = {
       mime_type: 'application/json',
-      content: JSON.pretty_generate(data.as_json({})),
+      content: json_data,
     }
     @email = user.email
     mail(to: @email, subject: "Data Backup for #{date}")

@@ -45,3 +45,5 @@ gem 'bootsnap', '~> 1.4'
 gem "makara", "~> 0.4.1"
 
 gem "distribute_reads", "~> 0.3.3"
+
+gem "aws-sdk-sns", "~> 1.33"
