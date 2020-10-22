@@ -8,7 +8,7 @@ class ArchiveMailer < ApplicationMailer
     @event_publisher = SnsPublisher.new
   end
 
-  def data_backup(user_id)
+  def data_backup(user_id, extension_id)
     user = User.find(user_id)
     date = Date.today
     data = {
@@ -23,9 +23,16 @@ class ArchiveMailer < ApplicationMailer
                         "(#{(json_data.size / 1.megabyte).round}MB) allowed" \
                         ": #{(ENV['EMAIL_ATTACHMENT_MAX_SIZE'] / 1.megabyte).round}MB"
 
-      @event_publisher.publish_mail_backup_attachment_too_big(user.email, ENV['EMAIL_ATTACHMENT_MAX_SIZE'])
+      settings = ExtensionSetting.find_or_create_by(extension_id: extension_id)
 
-      return
+      return if settings.mute_emails
+
+      return @event_publisher.publish_mail_backup_attachment_too_big(
+        user.email,
+        settings.uuid,
+        json_data.size,
+        ENV['EMAIL_ATTACHMENT_MAX_SIZE']
+      )
     end
 
     attachments["SN-Data-#{date}.txt"] = {

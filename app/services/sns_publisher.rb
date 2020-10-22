@@ -13,7 +13,7 @@ class SnsPublisher
     @topic_arn = ENV.fetch('SNS_TOPIC_ARN', nil)
   end
 
-  def publish_mail_backup_attachment_too_big(email, allowed_size)
+  def publish_mail_backup_attachment_too_big(email, settings_id, attachment_size, allowed_size)
     unless @topic_arn
       Rails.logger.warn 'SNS topic arn has not been configured. Skipped publishing to SNS.'
 
@@ -23,7 +23,7 @@ class SnsPublisher
     begin
       sns_response = @sns_client.publish(
         topic_arn: @topic_arn,
-        message: compress_message(MAIL_BACKUP_ATTACHMENT_TOO_BIG, email, allowed_size),
+        message: compress_message(email, settings_id, attachment_size, allowed_size),
         message_attributes: {
           'compression' => {
             data_type: 'String',
@@ -42,9 +42,9 @@ class SnsPublisher
     end
   end
 
-  def compress_message(event, email, allowed_size)
+  def compress_message(email, settings_id, attachment_size, allowed_size)
     event = {
-      type: event,
+      type: MAIL_BACKUP_ATTACHMENT_TOO_BIG,
       meta: {
         correlation: {
           email: email,
@@ -56,7 +56,9 @@ class SnsPublisher
         version: '1',
       },
       payload: {
+        attachmentSize: attachment_size,
         allowedSize: allowed_size,
+        settingsId: settings_id,
       },
     }
 

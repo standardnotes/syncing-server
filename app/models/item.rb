@@ -59,7 +59,7 @@ class Item < ApplicationRecord
 
     if content['subtype'] == 'backup.email_archive'
       # email job
-      ArchiveMailer.data_backup(user_uuid).deliver_later
+      ArchiveMailer.data_backup(user_uuid, uuid).deliver_later
     elsif content['frequency'] == 'daily'
       # backup job
       return unless content['url']

@@ -24,7 +24,7 @@ RSpec.describe SnsPublisher do
       it 'should not publish events' do
         expect(stub_client).not_to receive(:publish)
 
-        subject.publish_mail_backup_attachment_too_big('test@test.com', 1.megabyte)
+        subject.publish_mail_backup_attachment_too_big('test@test.com', '1-2-3', 10.megabyte, 1.megabyte)
       end
     end
     context 'sns topic configured' do
@@ -34,7 +34,7 @@ RSpec.describe SnsPublisher do
       it 'should publish events' do
         expect(stub_client).to receive(:publish)
 
-        subject.publish_mail_backup_attachment_too_big('test@test.com', 1.megabyte)
+        subject.publish_mail_backup_attachment_too_big('test@test.com', '1-2-3', 10.megabyte, 1.megabyte)
       end
     end
   end
