@@ -10,7 +10,6 @@
 #   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
 #
 default: &default
-  adapter: mysql2
   encoding: utf8
   pool: <%= ENV['DB_POOL_SIZE'] %>
   wait_timeout: <%= ENV['DB_WAIT_TIMEOUT'] %>
@@ -20,6 +19,24 @@ default: &default
   host: <%= ENV['DB_HOST'] %>
   port: <%= ENV['DB_PORT'] %>
   reconnect: true
+  <% if ENV['DB_REPLICA_HOST'] %>
+  adapter: 'mysql2_makara'
+  makara:
+    id: mysql
+    blacklist_duration: 5
+    master_ttl: 5
+    master_strategy: round_robin
+    sticky: true
+    connections:
+      - role: master
+        host: <%= ENV['DB_HOST'] %>
+        name: primary
+      - role: slave
+        host: <%= ENV['DB_REPLICA_HOST'] %>
+        name: replica
+  <% else %>
+  adapter: mysql2
+  <% end %>
 
 development:
   <<: *default
