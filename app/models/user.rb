@@ -83,10 +83,6 @@ class User < ApplicationRecord
     end
   end
 
-  def perform_email_backup
-    ArchiveMailer.data_backup(uuid).deliver_later
-  end
-
   def disable_email_backups
     extensions = items.where(content_type: 'SF|Extension', deleted: false)
     extensions.each do |ext|

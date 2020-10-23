@@ -17,7 +17,7 @@ namespace :items do
 
           if content['subtype'] == 'backup.email_archive'
             if send_email
-              ArchiveMailer.data_backup(item.user.uuid).deliver_later
+              ArchiveMailer.data_backup(item.user.uuid, item.uuid).deliver_later
             end
             next
           end
