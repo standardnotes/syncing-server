@@ -176,12 +176,6 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe 'perform_email_backup' do
-    specify do
-      expect(subject.perform_email_backup).to_not be_nil
-    end
-  end
-
   describe 'disable_email_backups' do
     specify do
       data = { subtype: 'backup.email_archive' }
