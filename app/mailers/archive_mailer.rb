@@ -18,6 +18,9 @@ class ArchiveMailer < ApplicationMailer
 
     json_data = JSON.pretty_generate(data.as_json({}))
 
+    Rails.logger.info "Attachment data size: #{json_data.size}, " \
+                      "Maximum allowed size: #{ENV['EMAIL_ATTACHMENT_MAX_SIZE'].to_i}"
+
     if json_data.size > ENV['EMAIL_ATTACHMENT_MAX_SIZE'].to_i
       Rails.logger.info "Backup email attachment is too big for user #{user.uuid}" \
                         "(#{(json_data.size / 1.megabyte).round}MB) allowed" \
