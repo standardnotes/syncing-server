@@ -3,7 +3,7 @@ require 'aws-sdk-s3'
 class ExtensionJob < ApplicationJob
   distribute_reads(
     max_lag: ENV['DB_REPLICA_MAX_LAG'] ? ENV['DB_REPLICA_MAX_LAG'].to_i : nil,
-    lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true
+    lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] ? ActiveModel::Type::Boolean.new.cast(ENV['DB_REPLICA_LAG_FAILOVER']) : true
   )
 
   require 'net/http'
