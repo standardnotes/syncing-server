@@ -1,3 +1,5 @@
+require 'mysql2/reconnect_with_readonly'
+
 class ApplicationController < ActionController::API
   respond_to :json
 
