@@ -23,8 +23,10 @@ default: &default
   adapter: 'mysql2_makara'
   makara:
     id: mysql
-    blacklist_duration: 0
-    sticky: true
+    disable_blacklist: true
+    master_ttl: 5
+    master_strategy: round_robin
+    sticky: false
     connections:
       - role: master
         host: <%= ENV['DB_HOST'] %>

@@ -8,8 +8,6 @@ module SyncingServer
     config.autoload_once_paths += Dir["#{config.root}/lib/**/*"]
     config.active_record.primary_key = :uuid
 
-    Mysql2::ReconnectWithReadonly.logger = Logger.new(STDOUT)
-
     Shoryuken.logger.level = Logger::INFO
     config.active_job.queue_adapter = ENV.has_key?('ACTIVE_JOB_QUEUE_ADAPTER') ? ENV['ACTIVE_JOB_QUEUE_ADAPTER'].to_sym : :async
     config.action_mailer.deliver_later_queue_name = ENV['SQS_QUEUE'] || 'dev_queue'

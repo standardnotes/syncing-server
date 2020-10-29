@@ -47,5 +47,3 @@ gem "makara", "~> 0.4.1"
 gem "distribute_reads", "~> 0.3.3"
 
 gem "aws-sdk-sns", "~> 1.33"
-
-gem "mysql2-reconnect_with_readonly", "~> 0.2.0"
