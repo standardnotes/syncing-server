@@ -1,0 +1,25 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8
+  pool: <%= ENV['DB_POOL_SIZE'] %>
+  wait_timeout: <%= ENV['DB_WAIT_TIMEOUT'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  database: <%= ENV['DB_DATABASE'] %>
+  host: <%= ENV['DB_HOST'] %>
+  port: <%= ENV['DB_PORT'] %>
+  reconnect: true
+
+octopus:
+  replicated: true
+  fully_replicated: false
+  environments:
+    - production
+    - development
+  development:
+    slave_dev_1:
+      <<: *default
+  production:
+    slave1:
+      host: <%= ENV['DB_REPLICA_HOST'] || ENV['DB_HOST'] %>
+      <<: *default

@@ -42,10 +42,6 @@ gem "aws-sdk-s3", "~> 1.64"
 
 gem 'bootsnap', '~> 1.4'
 
-gem "makara", "~> 0.4.1"
-
-gem "distribute_reads", "~> 0.3.3"
-
 gem "aws-sdk-sns", "~> 1.33"
 
-gem "mysql2-reconnect_with_readonly", "~> 0.2.0"
+gem "ar-octopus", "~> 0.10.2"
