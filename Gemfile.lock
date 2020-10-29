@@ -78,8 +78,6 @@ GEM
       msgpack
     device_detector (1.0.5)
     diff-lcs (1.4.4)
-    distribute_reads (0.3.3)
-      makara (>= 0.3)
     docile (1.3.2)
     dogstatsd-ruby (4.8.1)
     dotenv (2.7.6)
@@ -128,8 +126,6 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.7.1)
       mini_mime (>= 0.1.1)
-    makara (0.4.1)
-      activerecord (>= 3.0.0)
     marcel (0.3.3)
       mimemagic (~> 0.3.2)
     method_source (1.0.0)
@@ -258,7 +254,6 @@ DEPENDENCIES
   byebug
   ddtrace (~> 0.40)
   device_detector
-  distribute_reads (~> 0.3.3)
   dogstatsd-ruby (~> 4.8)
   dotenv-rails
   factory_bot_rails
@@ -266,7 +261,6 @@ DEPENDENCIES
   jwt
   listen
   lograge (~> 0.11.2)
-  makara (~> 0.4.1)
   mysql2 (>= 0.3.13, < 0.5)
   puma
   rack-cors
