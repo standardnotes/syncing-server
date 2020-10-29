@@ -17,7 +17,7 @@ octopus:
     - production
     - development
   development:
-    slave_dev_1:
+    slave1:
       <<: *default
   production:
     slave1:
