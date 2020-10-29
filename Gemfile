@@ -43,3 +43,5 @@ gem "aws-sdk-s3", "~> 1.64"
 gem 'bootsnap', '~> 1.4'
 
 gem "aws-sdk-sns", "~> 1.33"
+
+gem "ar-octopus", "~> 0.10.2"

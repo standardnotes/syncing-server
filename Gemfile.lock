@@ -42,6 +42,9 @@ GEM
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+    ar-octopus (0.10.2)
+      activerecord (>= 4.2.0)
+      activesupport (>= 4.2.0)
     arel (9.0.0)
     ast (2.4.1)
     aws-eventstream (1.1.0)
@@ -246,6 +249,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ar-octopus (~> 0.10.2)
   aws-sdk-s3 (~> 1.64)
   aws-sdk-sns (~> 1.33)
   aws-sdk-sqs
