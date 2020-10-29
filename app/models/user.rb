@@ -43,7 +43,7 @@ class User < ApplicationRecord
       params[:pw_key_size] = pw_key_size
     end
 
-    params
+    params.sort.to_h
   end
 
   ##
