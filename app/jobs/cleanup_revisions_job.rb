@@ -80,12 +80,14 @@ class CleanupRevisionsJob < ApplicationJob
       end
 
       Revision
+        .using(:master)
         .where(item_uuid: item.uuid)
         .where(creation_date: date)
         .where.not(uuid: revisions_to_keep)
         .delete_all
 
       ItemRevision
+        .using(:master)
         .where(item_uuid: item.uuid)
         .where(revision_uuid: revisions_from_date.difference(revisions_to_keep))
         .delete_all
