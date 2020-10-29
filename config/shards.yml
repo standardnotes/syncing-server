@@ -21,5 +21,5 @@ octopus:
       <<: *default
   production:
     slave1:
-      host: <%= ENV['DB_REPLICA_HOST'] %>
+      host: <%= ENV['DB_REPLICA_HOST'] || ENV['DB_HOST'] %>
       <<: *default
