@@ -1,9 +1,6 @@
 class Api::RevisionsController < Api::ApiController
   def show
-    distribute_reads(
-      max_lag: ENV['DB_REPLICA_MAX_LAG'] ? ENV['DB_REPLICA_MAX_LAG'].to_i : nil,
-      lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true
-    ) do
+    distribute_reads(max_lag: ENV['DB_REPLICA_MAX_LAG'], lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true) do
       begin
         item = current_user.items.find(params[:item_id])
       rescue ActiveRecord::RecordNotFound
@@ -21,10 +18,7 @@ class Api::RevisionsController < Api::ApiController
   end
 
   def index
-    distribute_reads(
-      max_lag: ENV['DB_REPLICA_MAX_LAG'] ? ENV['DB_REPLICA_MAX_LAG'].to_i : nil,
-      lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true
-    ) do
+    distribute_reads(max_lag: ENV['DB_REPLICA_MAX_LAG'], lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true) do
       begin
         item = current_user.items.find(params[:item_id])
       rescue ActiveRecord::RecordNotFound

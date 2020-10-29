@@ -1,8 +1,5 @@
 class CleanupRevisionsJob < ApplicationJob
-  distribute_reads(
-    max_lag: ENV['DB_REPLICA_MAX_LAG'] ? ENV['DB_REPLICA_MAX_LAG'].to_i : nil,
-    lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true
-  )
+  distribute_reads(max_lag: ENV['DB_REPLICA_MAX_LAG'], lag_failover: ENV['DB_REPLICA_LAG_FAILOVER'] || true)
 
   queue_as ENV['SQS_QUEUE_LOW_PRIORITY'] || 'sn_main_low_priority'
 
