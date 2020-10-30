@@ -23,7 +23,8 @@ class ArchiveMailer < ApplicationMailer
                         "(#{(json_data.size / 1.megabyte).round}MB) allowed" \
                         ": #{(ENV['EMAIL_ATTACHMENT_MAX_SIZE'].to_i / 1.megabyte).round}MB"
 
-      settings = ExtensionSetting.find_or_create_by(extension_id: extension_id)
+      settings = ExtensionSetting.find_by_extension_id(extension_id)
+      settings = ExtensionSetting.create(extension_id: extension_id) if settings.nil?
 
       return if settings.mute_emails
 
