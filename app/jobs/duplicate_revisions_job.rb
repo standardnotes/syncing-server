@@ -21,11 +21,11 @@ class DuplicateRevisionsJob < ApplicationJob
           .pluck(:revision_uuid)
 
         original_item_revisions.each do |revision_uuid|
-          ItemRevision.create(item_uuid: item_id, revision_uuid: revision_uuid)
+          ItemRevision.using(:master).create(item_uuid: item_id, revision_uuid: revision_uuid)
         end
       end
     end
   rescue StandardError => e
-    Rails.logger.error "Could duplicate revisions for item #{item_id}: #{e.message}"
+    Rails.logger.error "Could not duplicate revisions for item #{item_id}: #{e.message}"
   end
 end
