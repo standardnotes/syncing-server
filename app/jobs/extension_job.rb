@@ -19,7 +19,7 @@ class ExtensionJob < ApplicationJob
       auth_params = user.key_params
 
       settings = ExtensionSetting.find_by_extension_id(extension_id)
-      settings = ExtensionSetting.create(extension_id: extension_id) if settings.nil?
+      settings = ExtensionSetting.using(:master).create(extension_id: extension_id) if settings.nil?
       mute_emails = force_mute || settings.mute_emails
 
       tmp_file = prepare_tmp_file(auth_params, items)
