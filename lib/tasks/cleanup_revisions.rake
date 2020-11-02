@@ -7,12 +7,14 @@ namespace :items do
   MIN_REVISIONS_PER_DAY = 2
 
   task cleanup_revisions: :environment do
+    revisions_retention_days = ENV['REVISIONS_RETENTION_DAYS'] ? ENV['REVISIONS_RETENTION_DAYS'].to_i : 30
+
     Octopus.using(:slave1) do
       Item.where('updated.at >= ?', Date.today.beginning_of_day).find_in_batches.with_index do |group, batch|
         Rails.logger.info "Cleaning up revisions for items. Batch ##{batch}"
 
         group.each do |item|
-          cleanup_item_revisions(item, days)
+          cleanup_item_revisions(item, revisions_retention_days)
         end
       end
     end
