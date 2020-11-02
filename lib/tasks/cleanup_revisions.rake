@@ -1,38 +1,40 @@
-class CleanupRevisionsJob < ApplicationJob
-  queue_as ENV['SQS_QUEUE_LOW_PRIORITY'] || 'sn_main_low_priority'
+# frozen_string_literal: true
+
+namespace :items do
+  desc 'Cleanup revisions'
 
   MAX_REVISIONS_PER_DAY = 30
   MIN_REVISIONS_PER_DAY = 2
 
-  def perform(item_id, days)
+  task cleanup_revisions: :environment do
     Octopus.using(:slave1) do
-      item = Item.find_by_uuid(item_id)
+      Item.where('updated.at >= ?', Date.today.beginning_of_day).find_in_batches.with_index do |group, batch|
+        Rails.logger.info "Cleaning up revisions for items. Batch ##{batch}"
 
-      unless item
-        Rails.logger.warn "Could not find item with uuid #{item_id}"
-
-        return
-      end
-
-      last_days_of_revisions = item.revisions
-        .select(:creation_date)
-        .order(creation_date: :desc)
-        .group(:creation_date)
-        .take(days)
-
-      days_to_process = []
-      last_days_of_revisions.each do |revision|
-        days_to_process.push(revision.creation_date)
-      end
-
-      days_to_process.each do |day|
-        days_from_today = (DateTime.now - day).to_i
-        allowed_revisions_count = [[days - days_from_today, MAX_REVISIONS_PER_DAY].min, MIN_REVISIONS_PER_DAY].max
-        cleanup_revisions_for_a_day(item, days_from_today, allowed_revisions_count)
+        group.each do |item|
+          cleanup_item_revisions(item, days)
+        end
       end
     end
-  rescue StandardError => e
-    Rails.logger.error "Could not cleanup revisions for item #{item_id}: #{e.message}"
+  end
+
+  def cleanup_item_revisions(item, days)
+    last_days_of_revisions = item.revisions
+      .select(:creation_date)
+      .order(creation_date: :desc)
+      .group(:creation_date)
+      .take(days)
+
+    days_to_process = []
+    last_days_of_revisions.each do |revision|
+      days_to_process.push(revision.creation_date)
+    end
+
+    days_to_process.each do |day|
+      days_from_today = (DateTime.now - day).to_i
+      allowed_revisions_count = [[days - days_from_today, MAX_REVISIONS_PER_DAY].min, MIN_REVISIONS_PER_DAY].max
+      cleanup_revisions_for_a_day(item, days_from_today, allowed_revisions_count)
+    end
   end
 
   def cleanup_revisions_for_a_day(item, days_from_today, allowed_revisions_count)
