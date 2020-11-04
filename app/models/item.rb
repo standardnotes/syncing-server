@@ -161,14 +161,16 @@ class Item < ApplicationRecord
         counter += 1
       end
 
-      revisions
+      Revision
         .using(:master)
+        .where(item_uuid: uuid)
         .where(creation_date: date)
         .where.not(uuid: revisions_to_keep)
         .delete_all
 
-      item_revisions
+      ItemRevision
         .using(:master)
+        .where(item_uuid: uuid)
         .where(revision_uuid: revisions_from_date.difference(revisions_to_keep))
         .delete_all
     end
