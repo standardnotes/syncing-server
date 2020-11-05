@@ -1,10 +1,8 @@
 require 'rails_helper'
 
-RSpec.describe CleanupRevisionsJob do
-  subject do
-    described_class.new
-  end
+Rails.application.load_tasks
 
+RSpec.describe 'items:cleanup_revisions' do
   let(:test_user) do
     create(:user, password: '123456')
   end
@@ -40,7 +38,7 @@ RSpec.describe CleanupRevisionsJob do
     end
 
     it 'should clean up revisions from last 30 days' do
-      subject.perform(test_item.uuid, 30)
+      run_task(task_name: 'items:cleanup_revisions')
 
       revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
       expect(revisions.length).to eq(466)
@@ -48,7 +46,7 @@ RSpec.describe CleanupRevisionsJob do
     end
 
     it 'should clean up revisions in a decaying fashion for last 30 days' do
-      subject.perform(test_item.uuid, 30)
+      run_task(task_name: 'items:cleanup_revisions')
 
       revisions = test_item
         .revisions
@@ -100,14 +98,14 @@ RSpec.describe CleanupRevisionsJob do
     end
 
     it 'should clean up revisions from last 30 days' do
-      subject.perform(test_item.uuid, 30)
+      run_task(task_name: 'items:cleanup_revisions')
 
       revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
       expect(revisions.length).to eq(50)
     end
 
     it 'should clean up revisions in a decaying fashion for last 30 days' do
-      subject.perform(test_item.uuid, 30)
+      run_task(task_name: 'items:cleanup_revisions')
 
       revisions = test_item.revisions.where(creation_date: 29.days.ago..Date::Infinity.new)
 
@@ -134,4 +132,14 @@ RSpec.describe CleanupRevisionsJob do
       end
     end
   end
+end
+
+def run_task(task_name:)
+  stdout = StringIO.new
+  $stdout = stdout
+  Rake::Task[task_name].invoke
+  $stdout = STDOUT
+  Rake.application[task_name].reenable
+
+  stdout.string
 end

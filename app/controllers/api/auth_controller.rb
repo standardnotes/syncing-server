@@ -255,7 +255,7 @@ class Api::AuthController < Api::ApiController
       identifier: email,
       pw_nonce: Digest::SHA2.hexdigest(email + ENV['PSEUDO_KEY_PARAMS_KEY']),
       version: '004',
-    }
+    }.sort.to_h
   end
 
   def sign_out

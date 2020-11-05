@@ -12,8 +12,6 @@ class User < ApplicationRecord
 
   SESSIONS_PROTOCOL_VERSION = 4
 
-  REVISIONS_RETENTION_DAYS = 30
-
   def serializable_hash(options = {})
     super(options.merge(only: ['email', 'uuid']))
   end
@@ -43,7 +41,7 @@ class User < ApplicationRecord
       params[:pw_key_size] = pw_key_size
     end
 
-    params
+    params.sort.to_h
   end
 
   ##
