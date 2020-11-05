@@ -7,7 +7,9 @@ namespace :items do
     revisions_retention_days = ENV['REVISIONS_RETENTION_DAYS'] ? ENV['REVISIONS_RETENTION_DAYS'].to_i : 30
 
     Octopus.using(:slave1) do
-      Item.where('updated_at >= ?', 1.hour.ago).find_in_batches.with_index do |group, batch|
+      period_start = 1.hour.ago
+      period_end = DateTime.now
+      Item.where('updated_at > ? AND updated_at < ?', period_start, period_end).find_in_batches.with_index do |group, batch|
         Rails.logger.info "Cleaning up revisions for items. Batch ##{batch}"
 
         group.each do |item|
