@@ -7,7 +7,7 @@ require File.expand_path('../config/application', __FILE__)
 
 if ENV['DATADOG_ENABLED'] == 'true'
   Datadog.configure do |c|
-    c.use :rake
+    c.use :rake, service_name: "syncing-server-rake"
   end
 end
 
