@@ -5,9 +5,10 @@ namespace :items do
 
   task cleanup_revisions: :environment do
     revisions_retention_days = ENV['REVISIONS_RETENTION_DAYS'] ? ENV['REVISIONS_RETENTION_DAYS'].to_i : 30
+    revisions_cleanup_frequency = ENV['REVISIONS_CLEANUP_FREQUENCY'] ? ENV['REVISIONS_CLEANUP_FREQUENCY'].to_i : 60
 
     Octopus.using(:slave1) do
-      period_start = 1.hour.ago
+      period_start = revisions_cleanup_frequency.minutes.ago
       period_end = DateTime.now
       Rails.logger.info "Cleaning up revisions from items updated between #{period_start} and #{period_end}"
       Item.where('updated_at > ? AND updated_at < ?', period_start, period_end).find_each do |item|
