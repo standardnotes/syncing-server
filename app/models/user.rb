@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  replicated_model
+
   validates :email, presence: true, uniqueness: true
   validates :encrypted_password, presence: true
 
