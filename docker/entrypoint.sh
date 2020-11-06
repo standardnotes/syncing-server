@@ -44,6 +44,11 @@ case "$COMMAND" in
     bundle exec rake "items:cleanup_revisions"
     ;;
 
+  'daily-revisions-cleanup' )
+    echo "Starting Daily Revisions Cleanup..."
+    bundle exec rake "items:daily_revisions_cleanup"
+    ;;
+
   * )
     echo "Unknown command"
     ;;
