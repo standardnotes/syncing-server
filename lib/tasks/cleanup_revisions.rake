@@ -12,7 +12,7 @@ namespace :items do
       period_end = DateTime.now
       Rails.logger.info "Cleaning up revisions from items updated between #{period_start} and #{period_end}"
       counter = 0
-      Item.where('updated_at > ? AND updated_at < ?', period_start, period_end).find_each do |item|
+      Item.where('updated_at >= ? AND updated_at =< ?', period_start, period_end).find_each do |item|
         begin
           item.cleanup_revisions(revisions_retention_days)
           counter += 1
