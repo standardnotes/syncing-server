@@ -7,9 +7,11 @@ namespace :items do
     revisions_retention_days = ENV['REVISIONS_RETENTION_DAYS'] ? ENV['REVISIONS_RETENTION_DAYS'].to_i : 30
 
     Octopus.using(:slave1) do
-      Rails.logger.info 'Cleaning up revisions for all items'
+      period_start = revisions_retention_days.days.ago
+      period_end = DateTime.now
+      Rails.logger.info "Daily cleanup for revisions from items updated between #{period_start} and #{period_end}"
       counter = 0
-      Item.find_each do |item|
+      Item.where('updated_at >= ? AND updated_at =< ?', period_start, period_end).find_each do |item|
         begin
           item.cleanup_revisions(revisions_retention_days)
           counter += 1
