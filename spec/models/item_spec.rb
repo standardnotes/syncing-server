@@ -50,6 +50,67 @@ RSpec.describe Item, type: :model do
     end
   end
 
+  describe 'save revision' do
+    before(:each) do
+      ActiveJob::Base.queue_adapter.enqueued_jobs = []
+    end
+
+    it 'should not save a revision when content type is not a note' do
+      subject.content_type = 'Test'
+      subject.save
+      expect(SaveRevisionJob).to_not have_been_enqueued
+    end
+
+    it 'should save a revision when none exist' do
+      subject.content_type = 'Note'
+      subject.save
+      expect(SaveRevisionJob).to have_been_enqueued
+    end
+
+    it 'should not save revision if one already exists in the given frequency' do
+      subject.content_type = 'Note'
+      subject.save
+
+      revision = Revision.new
+      revision.item_uuid = subject.uuid
+      revision.save
+
+      item_revision = ItemRevision.new
+      item_revision.item_uuid = subject.uuid
+      item_revision.revision_uuid = revision.uuid
+      item_revision.save
+
+      expect do
+        subject.content = 'Test'
+        subject.save
+      end.to_not change {
+        ActiveJob::Base.queue_adapter.enqueued_jobs.count
+      }
+    end
+
+    it 'should save a revision if one already exists out of the given frequency' do
+      subject.content_type = 'Note'
+      subject.save
+
+      revision = Revision.new
+      revision.item_uuid = subject.uuid
+      revision.created_at = 1.hour.ago
+      revision.save
+
+      item_revision = ItemRevision.new
+      item_revision.item_uuid = subject.uuid
+      item_revision.revision_uuid = revision.uuid
+      item_revision.save
+
+      expect do
+        subject.content = 'Test'
+        subject.save
+      end.to change {
+        ActiveJob::Base.queue_adapter.enqueued_jobs.count
+      }.by 1
+    end
+  end
+
   describe 'daily_backup_extension' do
     let(:valid_content) do
       data = { frequency: 'daily' }

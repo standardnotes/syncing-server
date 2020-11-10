@@ -79,6 +79,15 @@ class Item < ApplicationRecord
   def save_revision
     return if content_type != 'Note'
 
-    SaveRevisionJob.perform_later(uuid)
+    last_revision = revisions.last
+
+    return SaveRevisionJob.perform_later(uuid) unless last_revision
+
+    last_revision_time = last_revision.created_at
+
+    seconds_from_last_revision = Time.now - last_revision_time
+    revisions_frequency = ENV['REVISIONS_FREQUENCY'] ? ENV['REVISIONS_FREQUENCY'].to_i : 300
+
+    SaveRevisionJob.perform_later(uuid) unless seconds_from_last_revision <= revisions_frequency
   end
 end

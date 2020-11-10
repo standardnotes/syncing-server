@@ -24,39 +24,4 @@ RSpec.describe SaveRevisionJob do
 
     expect(revision.content).to eq('This is a test note.')
   end
-
-  it 'should not save two consecutive revisions for item' do
-    subject.perform(test_item.uuid)
-    subject.perform(test_item.uuid)
-
-    item_revisions = ItemRevision.where(item_uuid: test_item.uuid)
-
-    expect(item_revisions.length).to eq(1)
-
-    revision = Revision.find(item_revisions.first.revision_uuid)
-
-    expect(revision.content).to eq('This is a test note.')
-  end
-
-  it 'should save two revisions after frequency period' do
-    subject.perform(test_item.uuid)
-    subject.perform(test_item.uuid)
-
-    item_revisions = ItemRevision.where(item_uuid: test_item.uuid)
-
-    expect(item_revisions.length).to eq(1)
-
-    revision = Revision.find(item_revisions.first.revision_uuid)
-
-    expect(revision.content).to eq('This is a test note.')
-
-    revision.created_at = 1.hour.ago
-    revision.save
-
-    subject.perform(test_item.uuid)
-
-    item_revisions = ItemRevision.where(item_uuid: test_item.uuid)
-
-    expect(item_revisions.length).to eq(2)
-  end
 end
