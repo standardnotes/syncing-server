@@ -12,10 +12,12 @@ class Admin::AdminController < ApplicationController
   def delete_account
     email = params[:email]
     user = User.find_by_email email
-    if user
-      user.items.destroy_all
-      user.delete
-    end
+
+    return render json: { error: { message: 'User not found' } }, status: :not_found unless user
+
+    user.delete
+
+    AccountCleanupJob.perform_later(user.uuid)
 
     render json: {}, status: 200
   end
