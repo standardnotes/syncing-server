@@ -69,13 +69,9 @@ class Item < ApplicationRecord
   end
 
   def can_save_revision?
-    last_revision = revisions.last
+    return true unless updated_at_before_last_save
 
-    return true unless last_revision
-
-    last_revision_time = last_revision.created_at
-
-    seconds_from_last_revision = Time.now - last_revision_time
+    seconds_from_last_revision = ((Time.now - updated_at_before_last_save) / 1.second).round
     revisions_frequency = ENV['REVISIONS_FREQUENCY'] ? ENV['REVISIONS_FREQUENCY'].to_i : 300
 
     seconds_from_last_revision >= revisions_frequency
@@ -90,8 +86,21 @@ class Item < ApplicationRecord
   end
 
   def save_revision
-    return if content_type != 'Note'
+    return if content_type != 'Note' || !can_save_revision?
 
-    SaveRevisionJob.perform_later(uuid) if can_save_revision?
+    revision = Revision.new
+    revision.auth_hash = auth_hash
+    revision.content = content
+    revision.content_type = content_type
+    revision.creation_date = Date.today
+    revision.enc_item_key = enc_item_key
+    revision.item_uuid = uuid
+    revision.items_key_id = items_key_id
+    revision.save
+
+    item_revision = ItemRevision.new
+    item_revision.item_uuid = uuid
+    item_revision.revision_uuid = revision.uuid
+    item_revision.save
   end
 end

@@ -46,12 +46,13 @@ RSpec.describe DuplicateRevisionsJob do
     )
     original_item_revisions_before = ItemRevision.where(item_uuid: original_item.uuid)
 
-    expect(original_item_revisions_before.length).to eq(amount_of_revisions_to_generate)
+    original_item_expected_revisions = 1 + amount_of_revisions_to_generate
+    expect(original_item_revisions_before.length).to eq(original_item_expected_revisions)
 
     subject.perform(duplicate_item.uuid)
 
     duplicate_item_revisions_after = ItemRevision.where(item_uuid: duplicate_item.uuid)
 
-    expect(duplicate_item_revisions_after.length).to eq(amount_of_revisions_to_generate)
+    expect(duplicate_item_revisions_after.length).to eq(1 + original_item_expected_revisions)
   end
 end
