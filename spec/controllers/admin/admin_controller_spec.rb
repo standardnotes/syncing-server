@@ -8,6 +8,9 @@ RSpec.describe Admin::AdminController, type: :controller do
 
     it 'should throw unauthorized if not admin_key is not valid' do
       post :delete_account, params: { admin_key: 'something_else' }
+
+      expect(AccountCleanupJob).to_not have_been_enqueued
+
       expect(response).to have_http_status(:unauthorized)
       expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
       expect(JSON.parse(response.body)).to eq({})
@@ -23,6 +26,9 @@ RSpec.describe Admin::AdminController, type: :controller do
       test_registration = user_manager.register('test@testing.com', '123456', params)
 
       post :delete_account, params: { email: test_registration[:user][:email], admin_key: ENV['ADMIN_KEY'] }
+
+      expect(AccountCleanupJob).to have_been_enqueued
+
       expect(response).to have_http_status(:ok)
       expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
       expect(JSON.parse(response.body)).to eq({})
