@@ -6,7 +6,7 @@ class AccountCleanupJob < ApplicationJob
       Octopus.using(:master) do
         Revision.where(item_uuid: item.uuid).delete_all
         ItemRevision.where(item_uuid: item.uuid).delete_all
-        item.delete
+        Item.where(uuid: item.uuid).delete_all
       end
     end
 
