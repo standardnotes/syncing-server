@@ -50,6 +50,59 @@ RSpec.describe Item, type: :model do
     end
   end
 
+  describe 'save revision' do
+    it 'should not save a revision when content type is not a note' do
+      subject.content_type = 'Test'
+      subject.save
+
+      item_revisions = ItemRevision.where(item_uuid: subject.uuid)
+
+      expect(item_revisions.length).to eq(0)
+    end
+
+    it 'should save a revision when none exist' do
+      subject.content_type = 'Note'
+      subject.save
+
+      item_revisions = ItemRevision.where(item_uuid: subject.uuid)
+
+      expect(item_revisions.length).to eq(1)
+
+      revision = Revision.find(item_revisions.first.revision_uuid)
+
+      expect(revision).to_not eq(nil)
+    end
+
+    it 'should not save revision if one already exists in the given frequency' do
+      subject.content_type = 'Note'
+      subject.save
+
+      subject.content = 'test change'
+      subject.save
+
+      item_revisions = ItemRevision.where(item_uuid: subject.uuid)
+
+      expect(item_revisions.length).to eq(1)
+
+      revision = Revision.find(item_revisions.first.revision_uuid)
+
+      expect(revision).to_not eq(nil)
+    end
+
+    it 'should save a revision if one already exists out of the given frequency' do
+      subject.content_type = 'Note'
+      subject.updated_at = 1.hour.ago
+      subject.save
+
+      subject.content = 'test change'
+      subject.save
+
+      item_revisions = ItemRevision.where(item_uuid: subject.uuid)
+
+      expect(item_revisions.length).to eq(2)
+    end
+  end
+
   describe 'daily_backup_extension' do
     let(:valid_content) do
       data = { frequency: 'daily' }
