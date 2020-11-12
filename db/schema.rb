@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_30_072917) do
+ActiveRecord::Schema.define(version: 2020_11_12_082430) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "extension_id"
@@ -23,7 +23,6 @@ ActiveRecord::Schema.define(version: 2020_10_30_072917) do
   create_table "item_revisions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "item_uuid", limit: 36, null: false
     t.string "revision_uuid", limit: 36, null: false
-    t.index ["item_uuid", "revision_uuid"], name: "index_item_revisions_on_item_uuid_and_revision_uuid"
     t.index ["item_uuid"], name: "index_item_revisions_on_item_uuid"
     t.index ["revision_uuid"], name: "index_item_revisions_on_revision_uuid"
   end
@@ -60,7 +59,6 @@ ActiveRecord::Schema.define(version: 2020_10_30_072917) do
     t.datetime "updated_at", precision: 6
     t.index ["created_at"], name: "index_revisions_on_created_at"
     t.index ["creation_date"], name: "index_revisions_on_creation_date"
-    t.index ["item_uuid", "creation_date", "uuid"], name: "index_revisions_on_item_uuid_and_creation_date_and_uuid"
     t.index ["item_uuid"], name: "index_revisions_on_item_uuid"
   end
 
