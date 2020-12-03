@@ -1,3 +1,4 @@
+# DEPRECATED: Further development in https://github.com/standardnotes/syncing-server-js
 class Api::ApiController < ApplicationController
   attr_accessor :current_user
   attr_accessor :current_session
