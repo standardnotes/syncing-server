@@ -1,3 +1,4 @@
+# DEPRECATED: Further development in https://github.com/standardnotes/syncing-server-js
 class Api::RevisionsController < Api::ApiController
   def show
     begin
