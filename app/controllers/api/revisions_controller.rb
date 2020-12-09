@@ -1,6 +1,7 @@
-# DEPRECATED: Further development in https://github.com/standardnotes/syncing-server-js
 class Api::RevisionsController < Api::ApiController
   def show
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     begin
       item = current_user.items.find(params[:item_id])
     rescue ActiveRecord::RecordNotFound
@@ -17,6 +18,8 @@ class Api::RevisionsController < Api::ApiController
   end
 
   def index
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     begin
       item = current_user.items.find(params[:item_id])
     rescue ActiveRecord::RecordNotFound
