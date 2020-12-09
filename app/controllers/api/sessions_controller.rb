@@ -3,6 +3,8 @@ class Api::SessionsController < Api::ApiController
   before_action :require_valid_session, except: [:refresh]
 
   def index
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     sessions = current_user.active_sessions.to_a.map(&:serializable_hash)
     sessions.each { |session| session[:current] = current_session.uuid == session['uuid'] }
 
@@ -10,6 +12,8 @@ class Api::SessionsController < Api::ApiController
   end
 
   def delete
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     unless params[:uuid]
       render json: {
         error: {
@@ -46,11 +50,15 @@ class Api::SessionsController < Api::ApiController
   end
 
   def delete_all
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     current_user.sessions.where.not(uuid: current_session.uuid).destroy_all
     render json: {}, status: :no_content
   end
 
   def refresh
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     if !params[:access_token] || !params[:refresh_token]
       render json: {
         error: {
