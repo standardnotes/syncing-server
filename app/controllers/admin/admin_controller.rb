@@ -15,8 +15,6 @@ class Admin::AdminController < ApplicationController
 
     return render json: { error: { message: 'User not found' } }, status: :not_found unless user
 
-    user.delete
-
     AccountCleanupJob.perform_later(user.uuid)
 
     render json: {}, status: 200
