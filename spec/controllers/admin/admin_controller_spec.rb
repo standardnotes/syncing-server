@@ -16,7 +16,7 @@ RSpec.describe Admin::AdminController, type: :controller do
       expect(JSON.parse(response.body)).to eq({})
     end
 
-    it 'deletes the user if found' do
+    xit 'deletes the user if found' do
       user_manager = SyncEngine::V20190520::UserManager.new(User)
       params = ActionController::Parameters.new(
         pw_cost: 110_000,

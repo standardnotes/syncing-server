@@ -5,7 +5,7 @@ class User < ApplicationRecord
   validates :encrypted_password, presence: true
 
   has_many :items, -> { order 'created_at desc' }, foreign_key: 'user_uuid'
-  has_many :sessions, -> { order 'created_at desc' }, foreign_key: 'user_uuid'
+  has_many :sessions, -> { order 'created_at desc' }, foreign_key: 'user_uuid', dependent: :destroy
 
   # Allow kp_origination to also be called origination, as that is the value
   # coming back from the client
