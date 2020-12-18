@@ -7,6 +7,18 @@ Rails.application.configure do
   # and recreated between test runs. Don't rely on the data there!
   config.cache_classes = true
 
+  config.logger = ActiveSupport::Logger.new(
+    config.paths['log'].first,
+    1,
+    1 * 1024 * 1024
+  )
+
+  if ENV["RAILS_LOG_TO_STDOUT"].present?
+    config.logger = ActiveSupport::Logger.new(STDOUT)
+  end
+
+  config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'fatal').to_sym
+
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
   # preloads Rails for running tests, you may have to set it to true.
