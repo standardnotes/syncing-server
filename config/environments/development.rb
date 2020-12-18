@@ -21,6 +21,8 @@ Rails.application.configure do
     config.logger = ActiveSupport::Logger.new(STDOUT)
   end
 
+  config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'info').to_sym
+
   config.colorize_logging = false
   config.logger.formatter = StandardNotesFormatter.new
 

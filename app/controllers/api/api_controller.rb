@@ -40,6 +40,8 @@ class Api::ApiController < ApplicationController
     token = token_from_request_header
 
     if token.nil?
+      Rails.logger.debug 'No authentication token in the request header'
+
       render_invalid_auth_error if renders
       return
     end
@@ -47,6 +49,8 @@ class Api::ApiController < ApplicationController
     authentication = decode_token(token)
 
     if authentication.nil?
+      Rails.logger.debug 'Could not decode authentication token'
+
       render_invalid_auth_error if renders
       return
     end
@@ -54,19 +58,27 @@ class Api::ApiController < ApplicationController
     user = authentication[:user]
 
     if user.nil?
+      Rails.logger.debug 'No user in the decoded authentication token'
+
       render_invalid_auth_error if renders
       return
     end
 
     if authentication[:type] == 'jwt' && user.supports_sessions?
+      Rails.logger.debug 'Passed JWT authentication but user supports sessions'
+
       render_invalid_auth_error if renders
       return
     end
 
     if authentication[:type] == 'session_token'
       if authentication[:session].refresh_expired?
+        Rails.logger.debug 'Session refresh token expired'
+
         return render_invalid_auth_error if renders
       elsif authentication[:session].access_expired?
+        Rails.logger.debug 'Session access token expired'
+
         return render_expired_token_error if renders
       end
     elsif authentication[:type] == 'jwt'
@@ -75,6 +87,8 @@ class Api::ApiController < ApplicationController
       # Newer versions of our jwt include the user's hashed encrypted pw,
       # to check if the user has changed their pw and thus forbid them from access if they have an old jwt
       if !pw_hash || !ActiveSupport::SecurityUtils.secure_compare(pw_hash, encrypted_password_digest)
+        Rails.logger.debug 'User has an old JWT'
+
         render_invalid_auth_error if renders
         return
       end

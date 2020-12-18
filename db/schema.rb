@@ -84,8 +84,8 @@ ActiveRecord::Schema.define(version: 2020_11_12_082430) do
     t.integer "pw_key_size"
     t.string "pw_nonce"
     t.string "encrypted_password", default: "", null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "pw_salt"
     t.string "version"
     t.string "kp_origination"
@@ -94,7 +94,6 @@ ActiveRecord::Schema.define(version: 2020_11_12_082430) do
     t.datetime "locked_until"
     t.integer "num_failed_attempts"
     t.index ["email"], name: "index_users_on_email"
-    t.index ["uuid"], name: "index_users_on_uuid"
   end
 
 end

@@ -247,6 +247,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86_64-linux
 
 DEPENDENCIES
   ar-octopus (~> 0.10.2)
@@ -280,4 +281,4 @@ DEPENDENCIES
   whenever
 
 BUNDLED WITH
-   2.1.4
+   2.2.2
