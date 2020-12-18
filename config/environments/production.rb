@@ -13,6 +13,8 @@ Rails.application.configure do
     config.logger = ActiveSupport::Logger.new(STDOUT)
   end
 
+  config.log_level = ENV.fetch('RAILS_LOG_LEVEL', 'info').to_sym
+
   config.colorize_logging = false
   config.logger.formatter = StandardNotesFormatter.new
 
@@ -37,8 +39,6 @@ Rails.application.configure do
 
   config.assets.logger = false
   config.assets.quiet = true
-
-  config.log_level = :info
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
