@@ -15,13 +15,21 @@ module SyncEngine
     end
 
     def self.decode(token)
+      Rails.logger.debug "Decoding JWT token #{token} with secret key base"
+
       decoded_token = JWT.decode(token, secret_key_base, true, algorithm: 'HS256')[0]
       HashWithIndifferentAccess.new(decoded_token)
-    rescue StandardError
+    rescue StandardError => e
+      Rails.logger.debug "Could not decode JWT token with secret key base: #{e.message}"
+
       begin
+        Rails.logger.debug "Decoding JWT token #{token} with legacy secret key base"
+
         decoded_token = JWT.decode(token, legacy_secret_key_base, true, algorithm: 'HS256')[0]
         HashWithIndifferentAccess.new(decoded_token)
-      rescue StandardError
+      rescue StandardError => legacy_e
+        Rails.logger.debug "Could not decode JWT token with legacy secret key base: #{legacy_e.message}"
+
         nil
       end
     end

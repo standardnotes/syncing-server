@@ -121,7 +121,8 @@ class Api::ApiController < ApplicationController
   end
 
   def decode_token(token)
-    # Try JWT first
+    Rails.logger.debug "Attempting to decode authorization token #{token}"
+
     claims = begin
               SyncEngine::JwtHelper.decode(token)
              rescue
@@ -134,7 +135,8 @@ class Api::ApiController < ApplicationController
       claims: claims,
     } unless claims.nil?
 
-    # See if it's an access_token
+    Rails.logger.debug 'Attempting to retrieve a session by access token'
+
     session = Session.from_token(token)
 
     if session
