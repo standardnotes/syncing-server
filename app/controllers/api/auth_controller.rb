@@ -91,6 +91,8 @@ class Api::AuthController < Api::ApiController
   end
 
   def sign_in
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     unless verify_mfa
       return
     end
@@ -204,6 +206,8 @@ class Api::AuthController < Api::ApiController
   # Presently not used by clients, but used by tests.
   # Will be used by clients starting with client v4+
   def update
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     current_user.updated_with_user_agent = request.user_agent
     result = @user_manager.update(current_user, params)
     if result[:error]
@@ -216,6 +220,8 @@ class Api::AuthController < Api::ApiController
   # Returns the accounts key parameters (FKA auth_params).
   # If the account has MFA enabled, those parameters will be required.
   def auth_params
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     authenticate_user_with_options(false)
 
     # If the user is authenticated, we return additional parameters
@@ -259,6 +265,8 @@ class Api::AuthController < Api::ApiController
   end
 
   def sign_out
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     # Users with an expired token may still make a request to the sign out endpoint
     token = token_from_request_header
 
