@@ -50,3 +50,6 @@ dump.rdb
 
 # MySQL container data
 data/
+
+# Redis container data
+cache/
