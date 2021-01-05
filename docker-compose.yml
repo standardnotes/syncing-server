@@ -7,8 +7,7 @@ services:
     restart: unless-stopped
     environment:
       DB_HOST: db
-      REDIS_HOST: cache
-      REDIS_PORT: 6379
+      REDIS_URL: redis://cache:6379
     ports:
       - 3000:${EXPOSED_PORT}
     networks:
