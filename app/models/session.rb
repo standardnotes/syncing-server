@@ -66,7 +66,11 @@ class Session < ApplicationRecord
   end
 
   def self.get_ephemeral_session(session_id)
-    return if Redis.current.nil?
+    unless Redis.current.connected?
+      Rails.logger.warn "Skipped search for ephemeral session. Redis not connected."
+
+      return
+    end
 
     keys = Redis.current.scan_each(match: "session:#{session_id}:*").to_a.uniq
 
