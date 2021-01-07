@@ -338,8 +338,8 @@ RSpec.describe Api::ItemsController, type: :controller do
             post :sign_in, params: test_user_004_credentials
 
             session = Session.find_by_user_uuid(test_user_004.uuid)
-            archived_session = ArchivedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
-            archived_session.save
+            revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
+            revoked_session.save
             session.destroy
 
             @controller = Api::ItemsController.new

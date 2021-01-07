@@ -12,10 +12,10 @@
 
 ActiveRecord::Schema.define(version: 2021_01_07_122837) do
 
-  create_table "archived_sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "revoked_sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "user_uuid", null: false
     t.datetime "created_at", null: false
-    t.index ["user_uuid"], name: "index_archived_sessions_on_user_uuid"
+    t.index ["user_uuid"], name: "index_revoked_sessions_on_user_uuid"
   end
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

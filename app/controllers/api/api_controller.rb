@@ -55,8 +55,8 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    if authentication[:type] == 'archived'
-      Rails.logger.debug 'Session has been archived'
+    if authentication[:type] == 'revoked'
+      Rails.logger.debug 'Session has been revoked'
 
       render_revoked_session_error if renders
       return
@@ -163,11 +163,11 @@ class Api::ApiController < ApplicationController
       }
     end
 
-    archived_session = ArchivedSession.from_token(token)
-    if archived_session
+    revoked_session = RevokedSession.from_token(token)
+    if revoked_session
       return {
-        type: 'archived',
-        archived_session: archived_session,
+        type: 'revoked',
+        revoked_session: revoked_session,
       }
     end
   end
