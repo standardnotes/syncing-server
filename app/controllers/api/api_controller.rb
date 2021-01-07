@@ -55,6 +55,13 @@ class Api::ApiController < ApplicationController
       return
     end
 
+    if authentication[:type] == 'revoked'
+      Rails.logger.debug 'Session has been revoked'
+
+      render_revoked_session_error if renders
+      return
+    end
+
     user = authentication[:user]
 
     if user.nil?
@@ -111,6 +118,15 @@ class Api::ApiController < ApplicationController
     }, status: :unauthorized
   end
 
+  def render_revoked_session_error
+    render json: {
+      error: {
+        tag: 'revoked-session',
+        message: 'Your session has been revoked.',
+      },
+    }, status: :unauthorized
+  end
+
   def render_expired_token_error
     render json: {
       error: {
@@ -144,6 +160,14 @@ class Api::ApiController < ApplicationController
         type: 'session_token',
         user: session.user,
         session: session,
+      }
+    end
+
+    revoked_session = RevokedSession.from_token(token)
+    if revoked_session
+      return {
+        type: 'revoked',
+        revoked_session: revoked_session,
       }
     end
   end

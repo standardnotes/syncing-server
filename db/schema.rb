@@ -10,7 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_12_082430) do
+ActiveRecord::Schema.define(version: 2021_01_07_122837) do
+
+  create_table "revoked_sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "user_uuid", null: false
+    t.datetime "created_at", null: false
+    t.index ["user_uuid"], name: "index_revoked_sessions_on_user_uuid"
+  end
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "extension_id"
