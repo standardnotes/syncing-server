@@ -58,12 +58,12 @@ Before you start make sure you have a `.env` file copied from the sample `.env.s
 
 If your intention is not contributing but just running the app we recommend using our official image from Docker hub like this:
 ```
-docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server:stable
+docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server
 ```
 
 Or if you want to use the `develop` branch that is in a work-in-progress state please use:
 ```
-docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server:latest
+docker run -d -p 3000:3000 --env-file=your-env-file standardnotes/syncing-server:dev
 ```
 
 You can then access the server via the Desktop application by setting the Sync Server Domain (Under Advanced Options) to `http://localhost:3000`
