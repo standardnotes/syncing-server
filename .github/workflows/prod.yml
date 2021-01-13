@@ -51,7 +51,7 @@ jobs:
     - name: Publish to Registry
       run: |
         docker buildx build --push \
-          --tag standardnotes/syncing-server:stable \
+          --tag standardnotes/syncing-server:latest \
           --tag standardnotes/syncing-server:${{ github.sha }} \
           --platform linux/amd64,linux/arm64 .
 
