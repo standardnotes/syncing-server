@@ -27,12 +27,55 @@ class Session < ApplicationRecord
 
   def self.from_token(request_token)
     _version, session_id, access_token = Session.deconstruct_token(request_token)
-    session = Session.find_by_uuid(session_id)
+
+    Rails.logger.debug "Retrieving session #{session_id} from token"
+
+    ephemeral_session = get_ephemeral_session(session_id)
+
+    unless ephemeral_session.nil?
+      Rails.logger.debug "Retrieved an ephemeral session from cache: #{ephemeral_session}"
+
+      session = Session.from_ephemeral_session(ephemeral_session)
+    end
+
+    session = Session.find_by_uuid(session_id) if session.nil?
+
     if session && !access_token.nil?
       return session if ActiveSupport::SecurityUtils.secure_compare(
         session.hashed_access_token,
         Session.hash_string(access_token)
       )
+    end
+  end
+
+  def self.from_ephemeral_session(ephemeral_session)
+    parsed_ephemeral_session = JSON.parse(ephemeral_session)
+
+    Session.new(
+      uuid: parsed_ephemeral_session['uuid'],
+      user_uuid: parsed_ephemeral_session['userUuid'],
+      api_version: parsed_ephemeral_session['apiVersion'],
+      user_agent: parsed_ephemeral_session['userAgent'],
+      hashed_access_token: parsed_ephemeral_session['hashedAccessToken'],
+      hashed_refresh_token: parsed_ephemeral_session['hashedRefreshToken'],
+      access_expiration: Date.parse(parsed_ephemeral_session['accessExpiration']),
+      refresh_expiration: Date.parse(parsed_ephemeral_session['refreshExpiration']),
+      created_at: Date.parse(parsed_ephemeral_session['createdAt']),
+      updated_at: Date.parse(parsed_ephemeral_session['updatedAt'])
+    )
+  end
+
+  def self.get_ephemeral_session(session_id)
+    unless ENV['REDIS_URL'].present?
+      Rails.logger.warn 'Skipped search for ephemeral session. Redis not connected.'
+
+      return
+    end
+
+    keys = Redis.current.scan_each(match: "session:#{session_id}:*").to_a.uniq
+
+    if keys.length.positive?
+      Redis.current.get(keys.first)
     end
   end
 

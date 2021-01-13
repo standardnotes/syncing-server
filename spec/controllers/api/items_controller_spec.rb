@@ -7,6 +7,10 @@ RSpec.describe Api::ItemsController, type: :controller do
     build(:user, password: test_password)
   end
 
+  let(:test_user_004) do
+    build(:user, password: test_password, version: '004')
+  end
+
   before(:each) do
     test_user.save
 
@@ -17,6 +21,10 @@ RSpec.describe Api::ItemsController, type: :controller do
 
   let(:test_user_003_credentials) do
     { email: test_user.email, password: test_password }
+  end
+
+  let(:test_user_004_credentials) do
+    { email: test_user_004.email, password: test_password, api: '20200115' }
   end
 
   let(:test_items) do
@@ -321,6 +329,39 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             expect(saved_item[:auth_hash]).to be_nil
             expect(actual_item[:auth_hash]).to be_nil
+          end
+        end
+
+        context 'and syncing items with a revoked session' do
+          it 'should respond with revoked session response' do
+            @controller = Api::AuthController.new
+            post :sign_in, params: test_user_004_credentials
+
+            session = Session.find_by_user_uuid(test_user_004.uuid)
+            revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
+            revoked_session.save
+            session.destroy
+
+            @controller = Api::ItemsController.new
+            request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['session']['access_token']}"
+
+            new_item = create(:item, :with_items_key_id, user_uuid: test_user.uuid)
+            expect(new_item.items_key_id).to_not be_nil
+
+            items_param = [new_item].to_a.map(&:serializable_hash)
+            items_param[0].delete('items_key_id')
+
+            post :sync, params: { limit: 5, api: '20200115', items: items_param }
+
+            expect(response).to have_http_status(:unauthorized)
+            expect(response.headers['Content-Type']).to eq('application/json; charset=utf-8')
+
+            parsed_response_body = JSON.parse(response.body)
+
+            expect(parsed_response_body).to_not be_nil
+            expect(parsed_response_body['error']).to_not be_nil
+            expect(parsed_response_body['error']['message']).to eq('Your session has been revoked.')
+            expect(parsed_response_body['error']['tag']).to eq('revoked-session')
           end
         end
       end

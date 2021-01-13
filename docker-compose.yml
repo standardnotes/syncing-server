@@ -7,6 +7,7 @@ services:
     restart: unless-stopped
     environment:
       DB_HOST: db
+      REDIS_URL: redis://cache:6379
     ports:
       - 3000:${EXPOSED_PORT}
     networks:
@@ -16,8 +17,7 @@ services:
       syncing_server: {}
     volumes:
       - .:/syncing-server
-    links:
-      - db
+
   db:
     image: mysql:5.6
     environment:
@@ -33,6 +33,17 @@ services:
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_general_ci
     volumes:
       - ./data:/var/lib/mysql
+    networks:
+      - syncing_server
+
+  cache:
+    image: redis:6.0-alpine
+    volumes:
+      - ./cache:/data
+    expose:
+      - 6379
+    ports:
+      - 6379
     networks:
       - syncing_server
 
