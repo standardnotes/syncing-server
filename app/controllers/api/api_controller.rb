@@ -165,6 +165,9 @@ class Api::ApiController < ApplicationController
 
     revoked_session = RevokedSession.from_token(token)
     if revoked_session
+      revoked_session.received = true
+      revoked_session.save
+
       return {
         type: 'revoked',
         revoked_session: revoked_session,

@@ -10,13 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_07_122837) do
-
-  create_table "revoked_sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "user_uuid", null: false
-    t.datetime "created_at", null: false
-    t.index ["user_uuid"], name: "index_revoked_sessions_on_user_uuid"
-  end
+ActiveRecord::Schema.define(version: 2021_01_15_151952) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "extension_id"
@@ -66,6 +60,13 @@ ActiveRecord::Schema.define(version: 2021_01_07_122837) do
     t.index ["created_at"], name: "index_revisions_on_created_at"
     t.index ["creation_date"], name: "index_revisions_on_creation_date"
     t.index ["item_uuid"], name: "index_revisions_on_item_uuid"
+  end
+
+  create_table "revoked_sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "user_uuid", null: false
+    t.datetime "created_at", null: false
+    t.boolean "received", default: false, null: false
+    t.index ["user_uuid"], name: "index_revoked_sessions_on_user_uuid"
   end
 
   create_table "sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
