@@ -58,10 +58,10 @@ class Session < ApplicationRecord
       user_agent: parsed_ephemeral_session['userAgent'],
       hashed_access_token: parsed_ephemeral_session['hashedAccessToken'],
       hashed_refresh_token: parsed_ephemeral_session['hashedRefreshToken'],
-      access_expiration: Date.parse(parsed_ephemeral_session['accessExpiration']),
-      refresh_expiration: Date.parse(parsed_ephemeral_session['refreshExpiration']),
-      created_at: Date.parse(parsed_ephemeral_session['createdAt']),
-      updated_at: Date.parse(parsed_ephemeral_session['updatedAt'])
+      access_expiration: Time.parse(parsed_ephemeral_session['accessExpiration']),
+      refresh_expiration: Time.parse(parsed_ephemeral_session['refreshExpiration']),
+      created_at: Time.parse(parsed_ephemeral_session['createdAt']),
+      updated_at: Time.parse(parsed_ephemeral_session['updatedAt'])
     )
   end
 
