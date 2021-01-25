@@ -113,6 +113,8 @@ class Api::AuthController < Api::ApiController
   end
 
   def register
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     if !params[:email] || !params[:password]
       render json: {
         error: {
@@ -143,6 +145,8 @@ class Api::AuthController < Api::ApiController
   end
 
   def change_pw
+    Rails.logger.warn 'DEPRECATED: further development in https://github.com/standardnotes/syncing-server-js'
+
     unless params[:current_password]
       render json: {
         error: {
