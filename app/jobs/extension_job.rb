@@ -47,6 +47,7 @@ class ExtensionJob < ApplicationJob
         return
       end
 
+      response = nil
       sent = false
       begin
         response = http.request(req)
@@ -57,6 +58,10 @@ class ExtensionJob < ApplicationJob
       end
 
       unless sent
+        if response
+          Rails.logger.error "Response code was #{response.code}. Body sample: #{response.body[0, 100]}"
+        end
+
         UserMailer.failed_backup(
           user_id,
           extension_id,
