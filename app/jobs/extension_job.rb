@@ -59,7 +59,7 @@ class ExtensionJob < ApplicationJob
 
       unless sent
         if response
-          Rails.logger.error "Response code was #{response.code}. Body sample: #{response.body[0, 100]}"
+          Rails.logger.error "Response code was #{response.code}. Body sample: #{response.body[0, 100]}. URL sent: #{url}"
         end
 
         UserMailer.failed_backup(
