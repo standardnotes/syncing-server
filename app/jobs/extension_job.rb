@@ -41,6 +41,8 @@ class ExtensionJob < ApplicationJob
       }.to_json
 
       begin
+        Rails.logger.info "Extensions Server url #{url}"
+
         uri = URI.parse(url)
         http = Net::HTTP.new(uri.host, uri.port)
         req = Net::HTTP::Post.new(uri.request_uri, 'Content-Type' => 'application/json')
