@@ -5,6 +5,10 @@ class ExtensionJob < ApplicationJob
   require 'uri'
 
   def perform(user_id, url, extension_id, item_ids = [], force_mute = false)
+    if ENV['INTERNAL_DNS_REROUTE_ENABLED'] == 'true'
+      url.sub! 'https://extensions.standardnotes.org', ENV['EXTENSIONS_SERVER']
+    end
+
     Octopus.using(:slave1) do
       user = User.find_by_uuid(user_id)
 
@@ -37,6 +41,8 @@ class ExtensionJob < ApplicationJob
       }.to_json
 
       begin
+        Rails.logger.info "Extensions Server url #{url}"
+
         uri = URI.parse(url)
         http = Net::HTTP.new(uri.host, uri.port)
         req = Net::HTTP::Post.new(uri.request_uri, 'Content-Type' => 'application/json')
