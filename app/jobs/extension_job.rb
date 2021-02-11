@@ -6,7 +6,7 @@ class ExtensionJob < ApplicationJob
 
   def perform(user_id, url, extension_id, item_ids = [], force_mute = false)
     if ENV['INTERNAL_DNS_REROUTE_ENABLED'] == 'true'
-      url = url.sub! 'https://extensions.standardnotes.org', ENV['EXTENSIONS_SERVER']
+      url.sub! 'https://extensions.standardnotes.org', ENV['EXTENSIONS_SERVER']
     end
 
     Octopus.using(:slave1) do
