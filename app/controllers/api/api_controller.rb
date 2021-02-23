@@ -33,7 +33,40 @@ class Api::ApiController < ApplicationController
   private
 
   def authenticate_user
+    begin
+      authenticated_via_proxy = authenticate_auth_service_proxy
+    rescue StandardError => e
+      Rails.logger.debug "Could not decode Auth token: #{e.message}"
+
+      render_invalid_auth_error
+
+      return
+    end
+
+    return if authenticated_via_proxy
+
+    Rails.logger.debug 'Attempting authorization from Authorization Header.'
+
     authenticate_user_with_options(true)
+  end
+
+  def authenticate_auth_service_proxy
+    return unless request.headers['X-Auth-Token'].present?
+
+    Rails.logger.debug 'X-Auth-Token present in the request. Attempting authorization from JWT.'
+
+    decoded_token = JWT.decode(request.headers['X-Auth-Token'], ENV['AUTH_JWT_SECRET'], true, algorithm: 'HS256')[0]
+
+    self.current_user = User.find_by_uuid(decoded_token['user']['uuid'])
+    if (decoded_token['session'])
+      session = Session.find_by_uuid(decoded_token['session']['uuid'])
+      unless session
+        revoked_session = RevokedSession.find_by_uuid(decoded_token['session']['uuid'])
+        render_revoked_session_error if revoked_session
+      end
+    end
+
+    true
   end
 
   def authenticate_user_with_options(renders = true)
