@@ -693,6 +693,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             post :sign_in, params: test_user_004_credentials
 
             sessions = Session.where(user_uuid: test_user_004.uuid)
+            last_session_id = sessions.last.uuid
             sessions.each do |session|
               revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
               revoked_session.save
@@ -706,7 +707,7 @@ RSpec.describe Api::ItemsController, type: :controller do
                 email: test_user.email
               },
               session: {
-                uuid: session.uuid
+                uuid: last_session_id
               }
             }, ENV['AUTH_JWT_SECRET'], 'HS256')
 
