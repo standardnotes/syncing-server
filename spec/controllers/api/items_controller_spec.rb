@@ -593,10 +593,12 @@ RSpec.describe Api::ItemsController, type: :controller do
             @controller = Api::AuthController.new
             post :sign_in, params: test_user_004_credentials
 
-            session = Session.find_by_user_uuid(test_user_004.uuid)
-            revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
-            revoked_session.save
-            session.destroy
+            sessions = Session.where(user_uuid: test_user_004.uuid)
+            sessions.each do |session|
+              revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
+              revoked_session.save
+              session.destroy
+            end
 
             @controller = Api::ItemsController.new
             request.headers['Authorization'] = "bearer #{JSON.parse(response.body)['session']['access_token']}"
@@ -690,10 +692,12 @@ RSpec.describe Api::ItemsController, type: :controller do
             @controller = Api::AuthController.new
             post :sign_in, params: test_user_004_credentials
 
-            session = Session.find_by_user_uuid(test_user_004.uuid)
-            revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
-            revoked_session.save
-            session.delete
+            sessions = Session.where(user_uuid: test_user_004.uuid)
+            sessions.each do |session|
+              revoked_session = RevokedSession.new(uuid: session.uuid, user_uuid: session.user_uuid)
+              revoked_session.save
+              session.destroy
+            end
 
             @controller = Api::ItemsController.new
             request.headers['X-Auth-Token'] = JWT.encode({

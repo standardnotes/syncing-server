@@ -34,7 +34,7 @@ class Api::ApiController < ApplicationController
 
   def authenticate_user
     begin
-      authenticate_auth_service_proxy
+      authenticated_via_proxy = authenticate_auth_service_proxy
     rescue StandardError => e
       Rails.logger.debug "Could not decode Auth token: #{e.message}"
 
@@ -43,7 +43,7 @@ class Api::ApiController < ApplicationController
       return
     end
 
-    return if current_user.present?
+    return if authenticated_via_proxy
 
     Rails.logger.debug 'Attempting authorization from Authorization Header.'
 
@@ -65,6 +65,8 @@ class Api::ApiController < ApplicationController
         render_revoked_session_error if revoked_session
       end
     end
+
+    true
   end
 
   def authenticate_user_with_options(renders = true)
