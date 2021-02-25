@@ -47,6 +47,18 @@ ActiveRecord::Schema.define(version: 2021_01_15_151952) do
     t.index ["user_uuid"], name: "index_items_on_user_uuid"
   end
 
+  create_table "migrations", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.bigint "timestamp", null: false
+    t.string "name", null: false
+  end
+
+  create_table "permissions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["name"], name: "index_permissions_on_name", unique: true
+  end
+
   create_table "revisions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "item_uuid"
     t.text "content", limit: 16777215
@@ -69,6 +81,20 @@ ActiveRecord::Schema.define(version: 2021_01_15_151952) do
     t.index ["user_uuid"], name: "index_revoked_sessions_on_user_uuid"
   end
 
+  create_table "role_permissions", primary_key: ["permission_uuid", "role_uuid"], options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "permission_uuid", limit: 36, null: false
+    t.string "role_uuid", limit: 36, null: false
+    t.index ["permission_uuid"], name: "IDX_f985b194ff27dde81fb470c192"
+    t.index ["role_uuid"], name: "IDX_7be6db7b59fb622e6c16ba124c"
+  end
+
+  create_table "roles", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.index ["name"], name: "index_roles_on_name", unique: true
+  end
+
   create_table "sessions", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "user_uuid"
     t.text "user_agent"
@@ -81,6 +107,13 @@ ActiveRecord::Schema.define(version: 2021_01_15_151952) do
     t.datetime "updated_at", null: false
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
     t.index ["user_uuid"], name: "index_sessions_on_user_uuid"
+  end
+
+  create_table "user_roles", primary_key: ["role_uuid", "user_uuid"], options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.string "role_uuid", limit: 36, null: false
+    t.string "user_uuid", limit: 36, null: false
+    t.index ["role_uuid"], name: "IDX_0ea82c7b2302d7af0f8b789d79"
+    t.index ["user_uuid"], name: "IDX_2ebc2e1e2cb1d730d018893dae"
   end
 
   create_table "users", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -103,4 +136,9 @@ ActiveRecord::Schema.define(version: 2021_01_15_151952) do
     t.index ["email"], name: "index_users_on_email"
   end
 
+  add_foreign_key "revoked_sessions", "users", column: "user_uuid", primary_key: "uuid", name: "FK_b357d1397b82bcda5e6cc9b0062", on_delete: :cascade
+  add_foreign_key "role_permissions", "permissions", column: "permission_uuid", primary_key: "uuid", name: "FK_f985b194ff27dde81fb470c1920", on_delete: :cascade
+  add_foreign_key "role_permissions", "roles", column: "role_uuid", primary_key: "uuid", name: "FK_7be6db7b59fb622e6c16ba124c8", on_delete: :cascade
+  add_foreign_key "user_roles", "roles", column: "role_uuid", primary_key: "uuid", name: "FK_0ea82c7b2302d7af0f8b789d797", on_delete: :cascade
+  add_foreign_key "user_roles", "users", column: "user_uuid", primary_key: "uuid", name: "FK_2ebc2e1e2cb1d730d018893daef", on_delete: :cascade
 end

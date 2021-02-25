@@ -1,8 +1,44 @@
 version: '3.8'
 services:
-  app:
+  api-gateway:
+    image: standardnotes/api-gateway
+    env_file: docker/api-gateway.env
+    environment:
+      PORT: 3000
+    entrypoint: ["./wait-for.sh", "syncing-server", "3000", "./wait-for.sh", "syncing-server-js", "3000", "./docker/entrypoint.sh", "start-web"]
+    ports:
+      - 3000
+    networks:
+      syncing_server: {}
+
+  auth:
+    image: standardnotes/auth
+    entrypoint: ["./wait-for.sh", "syncing-server-js", "3000", "./docker/entrypoint.sh", "start-worker"]
+    expose:
+      - 3000
+    env_file: docker/auth.env
+    networks:
+      syncing_server: {}
+
+  syncing-server-js:
+    image: standardnotes/syncing-server-js
+    entrypoint: ["./wait-for.sh", "syncing-server", "3000", "./docker/entrypoint.sh", "start-web"]
+    expose:
+      - 3000
+    env_file: docker/syncing-server-js.env
+    networks:
+      syncing_server: {}
+
+  syncing-server-js-worker:
+    image: standardnotes/syncing-server-js
+    entrypoint: ["./wait-for.sh", "syncing-server-js", "3000", "./docker/entrypoint.sh", "start-worker"]
+    env_file: docker/syncing-server-js.env
+    networks:
+      syncing_server: {}
+
+  syncing-server:
     build: .
-    command: start-local
+    entrypoint: ["./wait-for.sh", "db", "3306", "./wait-for.sh", "cache", "6379", "./docker/entrypoint.sh", "start-local"]
     env_file: .env
     restart: unless-stopped
     environment:
