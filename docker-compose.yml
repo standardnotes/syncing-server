@@ -7,15 +7,13 @@ services:
       PORT: 3000
     entrypoint: ["./wait-for.sh", "syncing-server", "3000", "./wait-for.sh", "syncing-server-js", "3000", "./docker/entrypoint.sh", "start-web"]
     ports:
-      - 3000
+      - 3000:${EXPOSED_PORT}
     networks:
       syncing_server: {}
 
   auth:
     image: standardnotes/auth
     entrypoint: ["./wait-for.sh", "syncing-server-js", "3000", "./docker/entrypoint.sh", "start-worker"]
-    expose:
-      - 3000
     env_file: docker/auth.env
     networks:
       syncing_server: {}
@@ -23,8 +21,6 @@ services:
   syncing-server-js:
     image: standardnotes/syncing-server-js
     entrypoint: ["./wait-for.sh", "syncing-server", "3000", "./docker/entrypoint.sh", "start-web"]
-    expose:
-      - 3000
     env_file: docker/syncing-server-js.env
     networks:
       syncing_server: {}
@@ -44,8 +40,6 @@ services:
     environment:
       DB_HOST: db
       REDIS_URL: redis://cache:6379
-    ports:
-      - 3000:${EXPOSED_PORT}
     networks:
       standardnotes_proxy:
         aliases:
@@ -61,8 +55,6 @@ services:
       MYSQL_USER: '${DB_USERNAME}'
       MYSQL_PASSWORD: '${DB_PASSWORD}'
       MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-    expose:
-      - 3306
     ports:
       - 3306
     restart: unless-stopped
@@ -76,8 +68,6 @@ services:
     image: redis:6.0-alpine
     volumes:
       - ./cache:/data
-    expose:
-      - 6379
     ports:
       - 6379
     networks:
