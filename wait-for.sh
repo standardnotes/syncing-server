@@ -9,7 +9,7 @@ shift
 cmd="$@"
 
 while ! nc -vz $host $port; do
-  >&2 echo "$host:$port is unavailable - sleeping"
+  >&2 echo "$host:$port is unavailable yet - waiting for it to start"
   sleep 1
 done
 
