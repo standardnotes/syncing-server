@@ -15,6 +15,8 @@ RUN if [ "$optimize_for_raspberry_pi" = true ] ; then sed -i 's/bcrypt (3.1.16)/
 
 RUN gem install bundler && bundle install
 
+COPY . /syncing-server
+
 ENTRYPOINT [ "docker/entrypoint.sh" ]
 
 CMD [ "start-web" ]
