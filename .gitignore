@@ -22,6 +22,9 @@
 
 # Ignore ENV variables config
 .env
+auth.env
+api-gateway.env
+syncing-server-js.env
 .ssh
 
 dump.rdb
@@ -53,3 +56,6 @@ data/
 
 # Redis container data
 cache/
+
+# Local gems
+vendor
