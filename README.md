@@ -60,6 +60,13 @@ You can check the status of running services by typing:
 ./server.sh status
 ```
 
+### Cleanup Data
+
+Please use this step with caution. In order to remove all your data and start with a fresh environment please type:
+```
+./server.sh cleanup
+```
+
 ### Tests
 
 The `syncing-server` uses [RSpec](http://rspec.info) for tests.
