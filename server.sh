@@ -49,6 +49,24 @@ case "$COMMAND" in
     docker-compose kill
     echo "Services stopped"
     ;;
+  'cleanup' )
+    echo "WARNING: This will permanently delete all of you data! Are you sure?"
+    read -p "Continue (y/n)?" choice
+    case "$choice" in
+      y|Y )
+        docker-compose kill && docker-compose rm -fv
+        rm -rf data/*
+        echo "Cleanup performed. You can start your server with a clean environment."
+        ;;
+      n|N )
+        echo "Cleanup aborted"
+        exit 0
+        ;;
+      * )
+        echo "Invalid option supplied. Aborted cleanup."
+        ;;
+    esac
+    ;;
   * )
     echo "Unknown command"
     ;;
