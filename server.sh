@@ -9,6 +9,7 @@ if [ "$?" -ne "0" ]; then
 fi
 
 checkConfigFiles() {
+  if [ ! -f ".env" ]; then echo "Could not find syncing-server environment file. Please run the './server.sh setup' command and try again." && exit 1; fi
   if [ ! -f "docker/api-gateway.env" ]; then echo "Could not find api-gateway environment file. Please run the './server.sh setup' command and try again." && exit 1; fi
   if [ ! -f "docker/auth.env" ]; then echo "Could not find auth environment file. Please run the './server.sh setup' command and try again." && exit 1; fi
   if [ ! -f "docker/syncing-server-js.env" ]; then echo "Could not find syncing-server-js environment file. Please run the './server.sh setup' command and try again." && exit 1; fi
@@ -19,10 +20,11 @@ COMMAND=$1 && shift 1
 case "$COMMAND" in
   'setup' )
     echo "Initializing default configuration"
+    if [ ! -f ".env" ]; then cp .env.sample .env; fi
     if [ ! -f "docker/api-gateway.env" ]; then cp docker/api-gateway.env.sample docker/api-gateway.env; fi
     if [ ! -f "docker/auth.env" ]; then cp docker/auth.env.sample docker/auth.env; fi
     if [ ! -f "docker/syncing-server-js.env" ]; then cp docker/syncing-server-js.env.sample docker/syncing-server-js.env; fi
-    echo "Default configuration files created as docker/*.env files. Feel free to modify values if needed."
+    echo "Default configuration files created as .env and docker/*.env files. Feel free to modify values if needed."
     ;;
   'start' )
     checkConfigFiles
