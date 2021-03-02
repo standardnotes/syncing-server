@@ -3,6 +3,8 @@ class RegistrationJob < ApplicationJob
   require 'uri'
 
   def perform(user_email, created_at_string)
+    return unless ENV["USER_MANAGEMENT_SERVER"].present?
+
     uri = URI.parse("#{ENV['USER_MANAGEMENT_SERVER']}/admin/events/registration")
     http = Net::HTTP.new(uri.host, uri.port)
     req = Net::HTTP::Post.new(uri.request_uri, 'Content-Type' => 'application/json')
