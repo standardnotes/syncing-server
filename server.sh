@@ -40,9 +40,13 @@ case "$COMMAND" in
     docker-compose logs -f
     ;;
   'update' )
+    echo "Stopping all services."
+    docker-compose kill
     echo "Downloading latest images of Standard Notes services."
     docker-compose pull
-    echo "Images up to date"
+    echo "Images up to date. Starting all services."
+    docker-compose up -d
+    echo "Infrastructure started. Give it a moment to warm up. If you wish please run the './server.sh logs' command to see details."
     ;;
   'stop' )
     echo "Stopping all service"
