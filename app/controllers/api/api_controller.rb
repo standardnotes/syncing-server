@@ -51,7 +51,7 @@ class Api::ApiController < ApplicationController
   end
 
   def authenticate_auth_service_proxy
-    return unless request.headers['X-Auth-Token'].present?
+    return unless request.headers['X-Auth-Token'].present? && ENV['AUTH_JWT_SECRET'].present?
 
     Rails.logger.debug 'X-Auth-Token present in the request. Attempting authorization from JWT.'
 
