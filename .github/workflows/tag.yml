@@ -1,0 +1,59 @@
+name: Tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: "changeme123"
+          MYSQL_DATABASE: "standard_notes_db"
+          MYSQL_USER: "std_notes_user"
+          MYSQL_PASSWORD: "changeme123"
+        ports:
+        - 3306:3306
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.6.5
+    - name: Copy default configuration
+      run: cp .env.sample .env
+    - name: Install dependencies
+      run: bundle install
+    - name: Setup database
+      run: bundle exec rails db:create db:migrate
+    - name: Run tests
+      run: bundle exec rspec
+
+  publish:
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+    - name: Install Docker buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    - name: Publish to Registry
+      run: |
+        docker buildx build --push \
+          --tag standardnotes/syncing-server:${{ steps.get_version.outputs.version }} \
+          --platform linux/amd64,linux/arm64 .
