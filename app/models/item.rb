@@ -5,6 +5,7 @@ class Item < ApplicationRecord
 
   after_commit :save_revision
   after_create :duplicate_revisions
+  before_save :update_timestamps
 
   def serializable_hash(options = {})
     allowed_options = [
@@ -44,6 +45,11 @@ class Item < ApplicationRecord
     self.enc_item_key = nil if has_attribute?(:enc_item_key)
     self.auth_hash = nil if has_attribute?(:auth_hash)
     save
+  end
+
+  def update_timestamps
+    self.created_at_timestamp = Time.new.to_f * 1_000_000 unless self.created_at_timestamp
+    self.updated_at_timestamp = Time.new.to_f * 1_000_000
   end
 
   def daily_backup_extension?

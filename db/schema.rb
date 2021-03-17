@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_17_134106) do
+ActiveRecord::Schema.define(version: 2021_03_17_143819) do
 
   create_table "extension_settings", primary_key: "uuid", id: :string, limit: 36, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "extension_id"
@@ -39,13 +39,15 @@ ActiveRecord::Schema.define(version: 2021_03_17_134106) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "last_user_agent"
-    t.integer "created_at_timestamp"
-    t.integer "updated_at_timestamp"
+    t.bigint "created_at_timestamp"
+    t.bigint "updated_at_timestamp"
     t.index ["content_type"], name: "index_items_on_content_type"
     t.index ["deleted"], name: "index_items_on_deleted"
     t.index ["updated_at"], name: "index_items_on_updated_at"
+    t.index ["updated_at_timestamp"], name: "updated_at_timestamp"
     t.index ["user_uuid", "content_type"], name: "index_items_on_user_uuid_and_content_type"
     t.index ["user_uuid", "updated_at", "created_at"], name: "index_items_on_user_uuid_and_updated_at_and_created_at"
+    t.index ["user_uuid", "updated_at_timestamp", "created_at_timestamp"], name: "user_uuid_and_updated_at_timestamp_and_created_at_timestamp"
     t.index ["user_uuid"], name: "index_items_on_user_uuid"
   end
 

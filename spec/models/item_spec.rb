@@ -103,6 +103,30 @@ RSpec.describe Item, type: :model do
     end
   end
 
+  describe 'microsecond timestamps' do
+    it 'should store microseconds timestamps as an integers' do
+      subject.content_type = 'Note'
+      subject.save
+
+      expect(subject.created_at_timestamp.to_s.length).to eq(16)
+      expect(subject.created_at_timestamp.to_s.length).to eq(16)
+    end
+
+    it 'should update microseconds timestamps only on updated_at' do
+      subject.content_type = 'Note'
+      subject.save
+
+      initial_created_at = subject.created_at_timestamp.clone
+      initial_updated_at = subject.updated_at_timestamp.clone
+
+      subject.content_type = 'Note2'
+      subject.save
+
+      expect(initial_created_at).to eq(subject.created_at_timestamp)
+      expect(initial_updated_at).not_to eq(subject.updated_at_timestamp)
+    end
+  end
+
   describe 'daily_backup_extension' do
     let(:valid_content) do
       data = { frequency: 'daily' }
