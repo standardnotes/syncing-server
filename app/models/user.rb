@@ -96,9 +96,7 @@ class User < ApplicationRecord
   end
 
   def compute_data_signature
-    # In local benchmarks, .select performs better than .pluck
-    # JS clients only support millisecond precision, so we format to that precision
-    # and not microsecond precision.
+    # in my testing, .select performs better than .pluck
     dates = items.where(deleted: false).where.not(content_type: nil)
       .select(:updated_at).map { |item| item.updated_at.to_datetime.strftime('%Q') }
 
