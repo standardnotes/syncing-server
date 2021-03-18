@@ -48,8 +48,9 @@ class Item < ApplicationRecord
   end
 
   def update_timestamps
-    self.created_at_timestamp = Time.new.to_f * 1_000_000 unless self.created_at_timestamp
-    self.updated_at_timestamp = Time.new.to_f * 1_000_000
+    timestamp = Time.new.to_f * 1_000_000
+    self.created_at_timestamp = timestamp unless self.created_at_timestamp
+    self.updated_at_timestamp = timestamp
   end
 
   def daily_backup_extension?
