@@ -21,7 +21,10 @@ class Item < ApplicationRecord
       'updated_at',
     ]
 
-    super(options.merge(only: allowed_options))
+    super(options.merge(only: allowed_options)).merge({
+      "created_at" => created_at&.iso8601(6),
+      "updated_at" => updated_at&.iso8601(6),
+    })
   end
 
   def decoded_content
