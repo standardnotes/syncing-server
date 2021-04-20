@@ -82,9 +82,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             expect(retrieved_items.count).to be_equal(note_items.count)
 
             retrieved_items = serialize_to_hash(retrieved_items)
-            note_items = note_items.to_a.map(&:serializable_hash)
-
-            note_items = serialize_to_hash(note_items)
+            note_items = serialize_to_hash(note_items.to_a.map(&:serializable_hash))
             expect(retrieved_items).to match_array(note_items)
           end
         end
@@ -101,6 +99,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             items_param = test_items.limit(5).to_a.map(&:serializable_hash)
             items_param[0]['content'] = 'This is the new content.'
             items_param[1]['content'] = 'And this too.'
+            items_param = items_param.as_json
 
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
@@ -120,7 +119,6 @@ RSpec.describe Api::ItemsController, type: :controller do
             expect(saved_items.count).to be_equal(items_param.count)
 
             saved_items = serialize_to_hash(saved_items)
-
             items_param = serialize_to_hash(items_param)
             expect(saved_items).to match_array(items_param)
           end
@@ -137,6 +135,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             # Serializing the items into an array of hashes
             items_param = test_items.limit(3).to_a.map(&:serializable_hash)
             items_param[0]['deleted'] = true
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
@@ -192,6 +191,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             new_item = [new_item].to_a.map(&:serializable_hash)[0]
             items_param.push(new_item)
+            items_param = items_param.as_json
 
             sync_token = Base64.encode64('2:' + DateTime.now.to_f.to_s)
             post :sync, params: { sync_token: sync_token, limit: 5, api: '20190520', items: items_param }
@@ -239,6 +239,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
@@ -265,6 +266,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
@@ -337,6 +339,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             items_param = test_items.limit(5).to_a.map(&:serializable_hash)
             items_param[0]['content'] = 'This is the new content.'
             items_param[1]['content'] = 'And this too.'
+            items_param = items_param.as_json
 
             post :sync, params: { sync_token: '', cursor_token: '', limit: 5, api: '20190520', items: items_param }
 
@@ -378,6 +381,7 @@ RSpec.describe Api::ItemsController, type: :controller do
             # Serializing the items into an array of hashes
             items_param = test_items.limit(3).to_a.map(&:serializable_hash)
             items_param[0]['deleted'] = true
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
@@ -438,6 +442,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             new_item = [new_item].to_a.map(&:serializable_hash)[0]
             items_param.push(new_item)
+            items_param = items_param.as_json
 
             sync_token = Base64.encode64('2:' + DateTime.now.to_f.to_s)
             post :sync, params: { sync_token: sync_token, limit: 5, api: '20190520', items: items_param }
@@ -490,6 +495,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
@@ -521,6 +527,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20190520', items: items_param }
 
@@ -549,6 +556,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
@@ -575,6 +583,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
@@ -608,6 +617,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
@@ -643,6 +653,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
@@ -674,6 +685,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
@@ -716,6 +728,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, api: '20200115', items: items_param }
 
@@ -768,6 +781,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('items_key_id')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, items: items_param }
 
@@ -794,6 +808,7 @@ RSpec.describe Api::ItemsController, type: :controller do
 
             items_param = [new_item].to_a.map(&:serializable_hash)
             items_param[0].delete('auth_hash')
+            items_param = items_param.as_json
 
             post :sync, params: { limit: 5, items: items_param }
 

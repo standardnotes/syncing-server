@@ -25,7 +25,7 @@ module SyncEngine
         end
 
         # add 1 microsecond to avoid returning same object in subsequent sync
-        last_updated = (last_updated.to_time + 1 / 100000.0).to_datetime.utc
+        last_updated = (last_updated.to_time + (1 / 1_000_000.0)).to_datetime.utc
         sync_token = sync_token_from_datetime(last_updated)
 
         {
