@@ -16,7 +16,7 @@ module SyncEngine
         end
 
         # add 1 microsecond to avoid returning same object in subsequent sync
-        last_updated = (last_updated.to_time + 1 / 1_000_000.0).to_datetime.utc
+        last_updated = (last_updated.to_time + 1 / 100000.0).to_datetime.utc
         sync_token = sync_token_from_datetime(last_updated)
 
         {
@@ -28,12 +28,9 @@ module SyncEngine
         }
       end
 
-      # Do not create conflicts for differences that are MIN_CONFLICT_INTERVAL_MICROSECONDS apart,
-      # instead just saving directly and overwriting server value.
-      # JavaScript only supports timestamps in milliseconds (3 decimal places), whereas we save timestamps
-      # in microseconds (6 decimal places). Any changes made <= 1 millisecond apart will not be treated as a conflict.
-      MIN_CONFLICT_INTERVAL_MICROSECONDS = 1_000
-      MICROSECONDS_IN_SEC = 1_000_000
+      # Ignore differences that are at most this many seconds apart
+      # Anything over this threshold will be conflicted.
+      MIN_CONFLICT_INTERVAL = 1.0
 
       def _sync_save(item_hashes, request, retrieved_items)
         unless item_hashes
@@ -56,19 +53,25 @@ module SyncEngine
           end
 
           if item
-            # We want to check if the incoming updated_at value is equal to the item's current updated_at value.
-            # If they differ, it means the client is attempting to save an item which doesn't have the correct server value.
-            # We conflict if the difference in dates is greater than the 1 unit of precision (MIN_CONFLICT_INTERVAL_MICROSECONDS)
+            # We want to check if this updated_at value is equal to the item's current updated_at value.
+            # If they differ, it means the client is attempting to save an item which hasn't been updated.
+            # In this case, if the incoming_item.updated_at < server_item.updated_at, always conflict.
+            # We don't want old items overriding newer ones.
+            # incoming_item.updated_at > server_item.updated_at would seem to be impossible,
+            # as only servers are responsible for setting updated_at.
+            # But assuming a rogue client has gotten away with it,
+            # we should also conflict in this case if the difference between the dates is greater
+            # than MIN_CONFLICT_INTERVAL seconds.
 
             our_updated_at = item.updated_at
-            difference_microseconds = (incoming_updated_at.to_f - our_updated_at.to_f) * MICROSECONDS_IN_SEC
+            difference = incoming_updated_at.to_f - our_updated_at.to_f
 
-            save_incoming = if difference_microseconds < 0
+            save_incoming = if difference < 0
               # incoming is less than ours. This implies stale data. Don't save if greater than interval
-              difference_microseconds.abs < MIN_CONFLICT_INTERVAL_MICROSECONDS
-            elsif difference_microseconds > 0
+              difference.abs < MIN_CONFLICT_INTERVAL
+            elsif difference > 0
               # incoming is greater than ours. Should never be the case. If so though, don't save.
-              difference_microseconds.abs < MIN_CONFLICT_INTERVAL_MICROSECONDS
+              difference.abs < MIN_CONFLICT_INTERVAL
             else
               # incoming is equal to ours (which is desired, healthy behavior), continue with saving.
               true
