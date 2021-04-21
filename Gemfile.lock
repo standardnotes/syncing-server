@@ -137,6 +137,7 @@ GEM
     minitest (5.14.4)
     msgpack (1.4.2)
     mysql2 (0.4.10)
+    newrelic_rpm (6.15.0)
     nio4r (2.5.7)
     nokogiri (1.11.2)
       mini_portile2 (~> 2.5.0)
@@ -273,6 +274,7 @@ DEPENDENCIES
   listen
   lograge (~> 0.11.2)
   mysql2 (>= 0.3.13, < 0.5)
+  newrelic_rpm (~> 6.15)
   puma
   rack-cors
   rails (= 5.2.5)
