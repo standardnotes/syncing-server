@@ -32,9 +32,9 @@ group :test do
   gem 'factory_bot_rails'
 end
 
-gem "dogstatsd-ruby", "~> 4.8"
+gem "dogstatsd-ruby", "5.0.1"
 
-gem "ddtrace", "~> 0.40"
+gem "ddtrace", "0.48.0"
 
 gem "lograge", "~> 0.11.2"
 
