@@ -49,3 +49,5 @@ gem "ar-octopus", "~> 0.10.2"
 gem "redis", "~> 4.2"
 
 gem "newrelic_rpm", "~> 6.15"
+
+gem "rack-timeout", "~> 0.6.0"
