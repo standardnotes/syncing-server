@@ -47,3 +47,5 @@ gem "aws-sdk-sns", "~> 1.33"
 gem "ar-octopus", "~> 0.10.2"
 
 gem "redis", "~> 4.2"
+
+gem "newrelic_rpm", "~> 6.15"
