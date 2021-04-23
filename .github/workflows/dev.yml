@@ -55,68 +55,8 @@ jobs:
           --tag standardnotes/syncing-server:${{ github.sha }} \
           --platform linux/amd64,linux/arm64 .
 
-  deploy-web:
-    needs: publish
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition syncing-server-dev --query taskDefinition > task-definition.json
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition.json
-        container-name: syncing-server-dev
-        image: "standardnotes/syncing-server:${{ github.sha }}"
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: syncing-server-dev
-        cluster: dev
-        wait-for-service-stability: true
-
-  deploy-worker:
-    needs: publish
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition syncing-server-worker-dev --query taskDefinition > worker-task-definition.json
-    - name: Fill in the new image worker ID in the Amazon ECS task definition
-      id: worker-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: worker-task-definition.json
-        container-name: syncing-server-worker-dev
-        image: "standardnotes/syncing-server:${{ github.sha }}"
-    - name: Deploy Amazon ECS worker task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.worker-task-def.outputs.task-definition }}
-        service: syncing-server-worker-dev
-        cluster: dev
-        wait-for-service-stability: true
-
   notify_slack:
-    needs: [ deploy-worker, deploy-web ]
+    needs: [ publish ]
 
     runs-on: ubuntu-latest
 
@@ -126,4 +66,4 @@ jobs:
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       with:
-        args: '{ \"channel\": \"${{ secrets.SLACK_NOTIFICATION_CHANNEL }}\", \"blocks\": [{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Successfully deployed <https://syncing-server-dev.standardnotes.org|[DEV] Syncing Server>\"}}, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Changes: <https://github.com/standardnotes/syncing-server/commit/${{ github.sha }}|${{ github.sha }}>\"}, \"accessory\": {\"type\": \"image\", \"image_url\": \"https://website-dev.standardnotes.org/assets/icon.png\", \"alt_text\": \"Standard Notes\"}}, { \"type\": \"section\", \"fields\": [{\"type\": \"mrkdwn\", \"text\": \"<https://github.com/standardnotes/syncing-server/actions/runs/${{ github.run_id }}|Build details>\"}]}]}'
+        args: '{ \"channel\": \"${{ secrets.SLACK_NOTIFICATION_CHANNEL }}\", \"blocks\": [{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Successfully published <https://syncing-server-dev.standardnotes.org|[DEV] Syncing Server>\"}}, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Changes: <https://github.com/standardnotes/syncing-server/commit/${{ github.sha }}|${{ github.sha }}>\"}, \"accessory\": {\"type\": \"image\", \"image_url\": \"https://website-dev.standardnotes.org/assets/icon.png\", \"alt_text\": \"Standard Notes\"}}, { \"type\": \"section\", \"fields\": [{\"type\": \"mrkdwn\", \"text\": \"<https://github.com/standardnotes/syncing-server/actions/runs/${{ github.run_id }}|Build details>\"}]}]}'
