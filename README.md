@@ -1,5 +1,7 @@
 # Standard Notes Syncing Server
 
+#### Please note: We will be transitioning the codebase from Ruby and Ruby on Rails to TypeScript and JavaScript. After that is complete, the setup guide below will be upated accordingly. 
+
 You can run your own Standard Notes server and use it with any Standard Notes app. This allows you to have 100% control of your data. This server is built with Ruby on Rails and can be deployed in minutes.
 
 **Requirements**
