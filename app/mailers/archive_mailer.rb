@@ -39,6 +39,7 @@ class ArchiveMailer < ApplicationMailer
     attachments["SN-Data-#{date}.txt"] = {
       mime_type: 'application/json',
       content: json_data,
+      encoding: 'base64',
     }
     @email = user.email
     mail(to: @email, subject: "Data Backup for #{date}")

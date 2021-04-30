@@ -82,6 +82,11 @@ module SyncingServer
       :enable_starttls_auto => true # detects and uses STARTTLS
     }
 
+    config.smime = {
+      :certfilename => File.join('config/smime_certificates', ENV['SMIME_CERTIFICATE_FILENAME']),
+      :keyfilename => File.join('config/smime_certificates', ENV['SMIME_KEY_FILENAME'])
+    }
+
     # Custom configuration
     config.x.auth = config_for(:sn_auth).symbolize_keys
     config.x.session = config_for(:sn_session).symbolize_keys

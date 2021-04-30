@@ -114,6 +114,7 @@ GEM
       ruby_parser (~> 3.5)
     i18n (1.8.9)
       concurrent-ruby (~> 1.0)
+    ipaddr (1.2.2)
     jaro_winkler (1.5.4)
     jmespath (1.4.0)
     jwt (2.2.2)
@@ -144,6 +145,8 @@ GEM
       racc (~> 1.4)
     nokogiri (1.11.2-x86_64-linux)
       racc (~> 1.4)
+    openssl (2.1.2)
+      ipaddr
     parallel (1.20.1)
     parser (3.0.0.0)
       ast (~> 2.4.1)
@@ -276,6 +279,7 @@ DEPENDENCIES
   lograge (~> 0.11.2)
   mysql2 (>= 0.3.13, < 0.5)
   newrelic_rpm (~> 6.15)
+  openssl
   puma
   rack-cors
   rack-timeout (~> 0.6.0)
@@ -292,4 +296,4 @@ DEPENDENCIES
   whenever
 
 BUNDLED WITH
-   2.2.15
+   2.2.16
