@@ -1,7 +1,7 @@
 class ArchiveMailer < ApplicationMailer
   attr_accessor :event_publisher
 
-  default from: 'Standard Notes <backups@standardnotes.org>'
+  default from: "Standard Notes <#{ENV['EMAIL_FROM_ADDRESS']}>"
 
   def initialize
     super
