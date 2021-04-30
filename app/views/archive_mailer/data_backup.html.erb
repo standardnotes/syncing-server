@@ -7,6 +7,16 @@
 <p>
   <strong>Please note:</strong>
   <ol>
+    <% unless Rails.configuration.smime[:certfilename].empty? %>
+      <li>
+        This email is cryptographically signed using S/MIME. You should expect all future emails
+        to also be signed, and to originate from this email address. If you receive an email
+        that isn't signed, or that comes from a different address, it's likely to be malicious.
+        For information about how to validate the S/MIME signature, see the help page on the
+        Standard Notes website FAQ.
+      </li>
+
+    <% end %>
     <li>
       We will never send anything other than a <code>txt</code> file
       as part of your daily backups. To protect yourself against phishing attacks, never open
