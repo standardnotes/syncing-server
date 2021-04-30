@@ -83,8 +83,8 @@ module SyncingServer
     }
 
     config.smime = {
-      :certfilename => File.join('config/smime_certificates', ENV['SMIME_CERTIFICATE_FILENAME']),
-      :keyfilename => File.join('config/smime_certificates', ENV['SMIME_KEY_FILENAME'])
+      :certfilename => ENV['SMIME_CERTIFICATE_FILENAME'] || '',
+      :keyfilename => ENV['SMIME_KEY_FILENAME'] || '',
     }
 
     # Custom configuration

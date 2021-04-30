@@ -28,11 +28,11 @@ class SmimeInterceptor
     end
 
     def certificate
-      @certificate ||= X509::Certificate.new(File.read(Rails.configuration.smime[:certfilename]))
+      @certificate ||= X509::Certificate.new(File.read(File.join('config/smime_certificates', Rails.configuration.smime[:certfilename])))
     end
 
     def private_key
-      @private_key ||= PKey::RSA.new(File.read(Rails.configuration.smime[:keyfilename]))
+      @private_key ||= PKey::RSA.new(File.read(File.join('config/smime_certificates', Rails.configuration.smime[:keyfilename])))
     end
   end
 end
