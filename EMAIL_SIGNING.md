@@ -28,4 +28,4 @@ If you don't want a CA signed certificate, you can create your own self-signed c
 ### Installation
 Once you have your certificate and its key, you need to put them into the `config/smime_certificates` directory. Then you simply add their filenames to the `SMIME_CERTIFICATE_FILENAME` and `SMIME_KEY_FILENAME` variables in the `.env` file. The server will automatically enable signing for all sent emails. Make sure that `EMAIL_FROM_ADDRESS` has been configured to match the email address of the S/MIME certificate, or else the email signatures won't validate.
 
-    Note: Some SMTP relays (such as SendGrid) tamper with the message body to inject tracking images or change the charset, thereby invalidating the signature. Make sure that the SMTP server you're using will relay messages unmodified.
+> Note: Some SMTP relays (such as SendGrid) tamper with the message body to inject tracking images or change the charset, thereby invalidating the signature. Make sure that the SMTP server you're using will relay messages unmodified.
