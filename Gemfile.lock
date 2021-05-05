@@ -80,7 +80,6 @@ GEM
     device_detector (1.0.5)
     diff-lcs (1.4.4)
     docile (1.3.5)
-    dogstatsd-ruby (5.0.1)
     dotenv (2.7.6)
     dotenv-rails (2.7.6)
       dotenv (= 2.7.6)
@@ -263,7 +262,6 @@ DEPENDENCIES
   bootsnap (~> 1.4)
   byebug
   device_detector
-  dogstatsd-ruby (= 5.0.1)
   dotenv-rails
   factory_bot_rails
   haml-rails

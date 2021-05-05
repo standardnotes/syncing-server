@@ -32,7 +32,6 @@ group :test do
   gem 'factory_bot_rails'
 end
 
-gem "dogstatsd-ruby", "5.0.1"
 
 
 gem "lograge", "~> 0.11.2"
