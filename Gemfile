@@ -34,7 +34,6 @@ end
 
 gem "dogstatsd-ruby", "5.0.1"
 
-gem "ddtrace", "0.48.0"
 
 gem "lograge", "~> 0.11.2"
 
