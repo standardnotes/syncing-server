@@ -1,6 +1,6 @@
 # ⛔️ Deprecation Notice
 
-This codebase is deprecated in favor of our [new Node.js server](https://github.com/standardnotes/syncing-server-js).
+This codebase is deprecated in favor of our [new Node.js server](https://github.com/standardnotes/syncing-server-js). For self-hosting, use [standardnotes/standalone](https://github.com/standardnotes/standalone).
 
 ## Standard Notes Syncing Server
 
